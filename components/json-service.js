@@ -137,11 +137,13 @@ JSONStreamConverter.prototype = {
                          "  </body>\n" +
                          "</html>\n"
 
-    var sis = Components.classes["@mozilla.org/io/string-input-stream;1"].createInstance(Components.interfaces.nsIStringInputStream)
-    sis.setData(targetDocument, targetDocument.length)
+    var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Components.interfaces.nsIScriptableUnicodeConverter)
+    converter.charset = "UTF-8"
+    var ist = converter.convertToInputStream(targetDocument)
+    var len = ist.available()
 
     // Pass the data to the main content listener
-    this.listener.onDataAvailable(this.channel, aContext, sis, 0, targetDocument.length)
+    this.listener.onDataAvailable(this.channel, aContext, ist, 0, len)
     this.listener.onStopRequest(this.channel, aContext, aStatusCode)
   },
 
