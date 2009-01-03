@@ -92,7 +92,11 @@ JSONStreamConverter.prototype = {
     var prettyPrinted = "";
     try {
       var jsonData = this.JSON.parse(this.data);
-      prettyPrinted = this.JSON.stringify(jsonData, null, 4);
+      var prettyPrintedStr = this.JSON.stringify(jsonData, null, 2);
+      var prettyPrintedLines = prettyPrintedStr.split("\n");
+      for (i = 0; i < prettyPrintedLines.length; i++)
+	prettyPrintedLines[i] = "<span class='nocode' unselectable='on'>" + (i + 1) + "</span> " + prettyPrintedLines[i];
+      prettyPrinted = prettyPrintedLines.join("\n");
     }
     catch(e) {
       prettyPrinted = e;
@@ -101,13 +105,13 @@ JSONStreamConverter.prototype = {
       "  <head>\n" +
       "    <title>"+ this.uri + "</title>\n" +
       "    <style type='text/css'>\n" +
-      "      .str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{padding:2px;border:0px solid #888}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre {" +
+      "      .nocode{user-select:none;-moz-user-select:none;color:#888}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{padding:2px;border:0px solid #888}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre {" +
       " white-space: pre-wrap;       /* css-3 */" +
       " white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */" +
       " white-space: -pre-wrap;      /* Opera 4-6 */" +
       " white-space: -o-pre-wrap;    /* Opera 7 */" +
       " word-wrap: break-word;       /* Internet Explorer 5.5+ */" +
-      "}\n" +
+    "}\n" +
       "    </style>\n" +
       "    <script type='text/javascript'><!--\n" +
       'function _pr_isIE6(){var F=navigator&&navigator.userAgent&&/\\bMSIE 6\\./.test(navigator.userAgent);_pr_isIE6=function(){return F};return F}var aa="break continue do else for if return while ",ba="auto case char const default double enum extern float goto int long register short signed sizeof static struct switch typedef union unsigned void volatile ",ca="catch class delete false import new operator private protected public this throw true try ",da="alignof align_union asm axiom bool concept concept_map const_cast constexpr decltype dynamic_cast explicit export friend inline late_check mutable namespace nullptr reinterpret_cast static_assert static_cast template typeid typename typeof using virtual wchar_t where ",' +
