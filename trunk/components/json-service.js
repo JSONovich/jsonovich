@@ -101,18 +101,13 @@ JSONStreamConverter.prototype = {
     catch(e) {
       prettyPrinted = e;
     }
-    var targetDocument = "<html>\n" +
+    var htmlDocument = "<html>\n" +
       "  <head>\n" +
       "    <title>"+ this.uri + "</title>\n" +
       "    <style type='text/css'>\n" +
-      "      .nocode{user-select:none;-moz-user-select:none;color:#888}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{padding:2px;border:0px solid #888}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre {" +
-      " white-space: pre-wrap;       /* css-3 */" +
-      " white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */" +
-      " white-space: -pre-wrap;      /* Opera 4-6 */" +
-      " white-space: -o-pre-wrap;    /* Opera 7 */" +
-      " word-wrap: break-word;       /* Internet Explorer 5.5+ */" +
-    "}\n" +
+      "      .nocode{user-select:none;-moz-user-select:none;color:#888}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{padding:2px;border:0px solid #888}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre{white-space: pre-wrap; /* css-3 */ white-space: -moz-pre-wrap; /* Mozilla, since 1999 */white-space: -pre-wrap;  /* Opera 4-6 */ white-space: -o-pre-wrap;    /* Opera 7 */ word-wrap: break-word; /* Internet Explorer 5.5+ */}\n" +
       "    </style>\n" +
+      "<!-- Following code is licensed under Apache 2.0, available from http://code.google.com/p/google-code-prettify/ --> \n" +
       "    <script type='text/javascript'><!--\n" +
       'function _pr_isIE6(){var F=navigator&&navigator.userAgent&&/\\bMSIE 6\\./.test(navigator.userAgent);_pr_isIE6=function(){return F};return F}var aa="break continue do else for if return while ",ba="auto case char const default double enum extern float goto int long register short signed sizeof static struct switch typedef union unsigned void volatile ",ca="catch class delete false import new operator private protected public this throw true try ",da="alignof align_union asm axiom bool concept concept_map const_cast constexpr decltype dynamic_cast explicit export friend inline late_check mutable namespace nullptr reinterpret_cast static_assert static_cast template typeid typename typeof using virtual wchar_t where ",' +
       'ea="boolean byte extends final finally implements import instanceof null native package strictfp super synchronized throws transient ",fa="as base by checked decimal delegate descending event fixed foreach from group implicit in interface internal into is lock object out override orderby params readonly ref sbyte sealed stackalloc string select uint ulong unchecked unsafe ushort var ",ga="debugger eval export function get null set undefined var with Infinity NaN ",ha="caller delete die do dump elsif eval exit foreach for goto if import last local my next no our print package redo require sub undef unless until use wantarray while BEGIN END ",' +
@@ -152,7 +147,7 @@ JSONStreamConverter.prototype = {
     var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
                       .createInstance(Ci.nsIScriptableUnicodeConverter);
     converter.charset = "UTF-8";
-    var stream = converter.convertToInputStream(targetDocument);
+    var stream = converter.convertToInputStream(htmlDocument);
     var len = stream.available();
 
     // Pass the data to the main content listener
