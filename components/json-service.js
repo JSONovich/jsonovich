@@ -41,13 +41,27 @@ JSONStreamConverter.prototype = {
   _logger: null,
   _initialized: false,
 
+  encodeHTML: function (aHtmlSource) {
+    return aHtmlSource.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  },
+
+  padWithSpaces: function (aInteger, aTotalSpaces) {
+    var intStr = aInteger.toString();
+    var intLength = intStr.length;
+    var spacesToAdd = aTotalSpaces - intLength;
+    while (spacesToAdd-- > 0) {
+      intStr = " " + intStr;
+    }
+    return intStr;
+  },
+
   init: function () {
     if (this._initialized) {
       return;
     }
     this._initialized = true;
     this._logger = Cc["@mozilla.org/consoleservice;1"]
-                    .getService(Ci.nsIConsoleService);
+                     .getService(Ci.nsIConsoleService);
     this._logger.logStringMessage("JSONStreamConverter initialized");
 
     if (typeof(JSON) === "undefined") {
@@ -65,9 +79,9 @@ JSONStreamConverter.prototype = {
 
   QueryInterface: function (aIid) {
     if (aIid.equals(Ci.nsISupports) ||
-      aIid.equals(Ci.nsIStreamConverter) ||
-      aIid.equals(Ci.nsIStreamListener) ||
-      aIid.equals(Ci.nsIRequestObserver)) {
+        aIid.equals(Ci.nsIStreamConverter) ||
+        aIid.equals(Ci.nsIStreamListener) ||
+        aIid.equals(Ci.nsIRequestObserver)) {
       return this;
     }
     throw Cr.NS_ERROR_NO_INTERFACE;
@@ -90,13 +104,15 @@ JSONStreamConverter.prototype = {
   // nsIRequest::onStopRequest
   onStopRequest: function (aReq, aCtx, aStatus) {
     var prettyPrinted = "";
+    var lineNumbers = "";
     try {
       var jsonData = this.JSON.parse(this.data);
-      var prettyPrintedStr = this.JSON.stringify(jsonData, null, 2);
-      var prettyPrintedLines = prettyPrintedStr.split("\n");
-      for (i = 0; i < prettyPrintedLines.length; i++)
-	prettyPrintedLines[i] = "<span class='nocode' unselectable='on'>" + (i + 1) + "</span> " + prettyPrintedLines[i];
-      prettyPrinted = prettyPrintedLines.join("\n");
+      prettyPrinted = this.JSON.stringify(jsonData, null, 2);
+      var numLines = prettyPrinted.split("\n").length;
+      var digits = numLines.toString().length;
+      for (i=0; i < numLines; i++) {
+        lineNumbers += this.padWithSpaces(i+1, digits) + "\n";
+      }
     }
     catch(e) {
       prettyPrinted = e;
@@ -105,9 +121,9 @@ JSONStreamConverter.prototype = {
       "  <head>\n" +
       "    <title>"+ this.uri + "</title>\n" +
       "    <style type='text/css'>\n" +
-      "      .nocode{user-select:none;-moz-user-select:none;color:#888}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{padding:2px;border:0px solid #888}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre{white-space: pre-wrap; /* css-3 */ white-space: -moz-pre-wrap; /* Mozilla, since 1999 */white-space: -pre-wrap;  /* Opera 4-6 */ white-space: -o-pre-wrap;    /* Opera 7 */ word-wrap: break-word; /* Internet Explorer 5.5+ */}\n" +
+      "      body{margin:0px;padding:0px;}.nocode{color:#888;margin:0px;-moz-user-select:none}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre{/*white-space: pre-wrap;white-space: -moz-pre-wrap;*/}#numbers{float:left;padding:0px;margin:0px;}#code{padding-left:2px;}\n" +
       "    </style>\n" +
-      "<!-- Following code is licensed under Apache 2.0, available from http://code.google.com/p/google-code-prettify/ --> \n" +
+      "    <!-- Following code is licensed under Apache 2.0, available from http://code.google.com/p/google-code-prettify/ --> \n" +
       "    <script type='text/javascript'><!--\n" +
       'function _pr_isIE6(){var F=navigator&&navigator.userAgent&&/\\bMSIE 6\\./.test(navigator.userAgent);_pr_isIE6=function(){return F};return F}var aa="break continue do else for if return while ",ba="auto case char const default double enum extern float goto int long register short signed sizeof static struct switch typedef union unsigned void volatile ",ca="catch class delete false import new operator private protected public this throw true try ",da="alignof align_union asm axiom bool concept concept_map const_cast constexpr decltype dynamic_cast explicit export friend inline late_check mutable namespace nullptr reinterpret_cast static_assert static_cast template typeid typename typeof using virtual wchar_t where ",' +
       'ea="boolean byte extends final finally implements import instanceof null native package strictfp super synchronized throws transient ",fa="as base by checked decimal delegate descending event fixed foreach from group implicit in interface internal into is lock object out override orderby params readonly ref sbyte sealed stackalloc string select uint ulong unchecked unsafe ushort var ",ga="debugger eval export function get null set undefined var with Infinity NaN ",ha="caller delete die do dump elsif eval exit foreach for goto if import last local my next no our print package redo require sub undef unless until use wantarray while BEGIN END ",' +
@@ -138,9 +154,16 @@ JSONStreamConverter.prototype = {
       "    </script>\n" +
       "  </head>\n" +
       "  <body onload='prettyPrint()'>\n" +
-      "    <pre class='prettyprint lang-js'>\n" +
-      prettyPrinted +
-      "    </pre>\n" +
+      "    <div id='numbers'>\n" +
+      "      <pre class='nocode'>\n" +
+      lineNumbers +
+      "      </pre>\n" +
+      "    </div>\n" +
+      "    <div id='code'>\n" +
+      "      <pre class='prettyprint lang-js'>\n" +
+      this.encodeHTML(prettyPrinted) +
+      "      </pre>\n" +
+      "    </div>\n" +
       "  </body>\n" +
       "</html>\n";
 
