@@ -49,7 +49,7 @@ JSONStreamConverter.prototype = {
     var intStr = aInteger.toString();
     var intLength = intStr.length;
     var spacesToAdd = aTotalSpaces - intLength;
-    while (spacesToAdd-- > 0) {
+    while (spacesToAdd-- >= 0) {
       intStr = " " + intStr;
     }
     return intStr;
@@ -108,10 +108,11 @@ JSONStreamConverter.prototype = {
     try {
       var jsonData = this.JSON.parse(this.data);
       prettyPrinted = this.JSON.stringify(jsonData, null, 2);
+      prettyPrinted = this.encodeHTML(prettyPrinted);
       var numLines = prettyPrinted.split("\n").length;
       var digits = numLines.toString().length;
       for (i=0; i < numLines; i++) {
-        lineNumbers += this.padWithSpaces(i+1, digits) + "\n";
+        lineNumbers += this.padWithSpaces(i+1, digits) + "  \n";
       }
     }
     catch(e) {
@@ -161,7 +162,7 @@ JSONStreamConverter.prototype = {
       "    </div>\n" +
       "    <div id='code'>\n" +
       "      <pre class='prettyprint lang-js'>\n" +
-      this.encodeHTML(prettyPrinted) +
+      prettyPrinted +
       "      </pre>\n" +
       "    </div>\n" +
       "  </body>\n" +
