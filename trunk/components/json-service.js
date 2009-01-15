@@ -42,7 +42,7 @@ JSONStreamConverter.prototype = {
   _initialized: false,
 
   encodeHTML: function (aHtmlSource) {
-    return aHtmlSource.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return aHtmlSource.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');
   },
 
   padWithSpaces: function (aInteger, aTotalSpaces) {
@@ -122,7 +122,7 @@ JSONStreamConverter.prototype = {
       "  <head>\n" +
       "    <title>"+ this.uri + "</title>\n" +
       "    <style type='text/css'>\n" +
-      "      body{margin:0px;padding:0px;}.nocode{color:#888;margin:0px;-moz-user-select:none}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre{/*white-space: pre-wrap;white-space: -moz-pre-wrap;*/}#numbers{float:left;padding:0px;margin:0px;}#code{padding-left:2px;}\n" +
+      "      body{margin:0px;padding:0px;}.nocode{color:#888;margin:0px;-moz-user-select:none;user-select:none;}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre{/*white-space: pre-wrap;white-space: -moz-pre-wrap;*/}#numbers{float:left;padding:0px;margin:0px;}#code{padding-left:2px;}\n" +
       "    </style>\n" +
       "    <!-- Following code is licensed under Apache 2.0, available from http://code.google.com/p/google-code-prettify/ --> \n" +
       "    <script type='text/javascript'><!--\n" +
@@ -153,8 +153,22 @@ JSONStreamConverter.prototype = {
       'Ga)}}}}}if(h<d.length)setTimeout(f,250);else if(b)b()}f()}window.PR_normalizedHtml=L;window.prettyPrintOne=Fa;window.prettyPrint=ud;window.PR={createSimpleLexer:E,registerLangHandler:t,sourceDecorator:u,PR_ATTRIB_NAME:X,PR_ATTRIB_VALUE:R,PR_COMMENT:O,PR_DECLARATION:Xb,PR_KEYWORD:fc,PR_LITERAL:Z,PR_NOCODE:Vb,PR_PLAIN:J,PR_PUNCTUATION:S,PR_SOURCE:P,PR_STRING:Y,PR_TAG:Q,PR_TYPE:gc}})();\n' +
       "    // -->\n" +
       "    </script>\n" +
+      "    <script type='text/javascript'><!--\n" +
+      "      function dontCopyLineNumbers() {\n" +
+      "        try {\n" +
+      "          var body = document.getElementById('body');\n" +
+      "          var numbers = document.getElementById('numbers');\n" +
+      "          var code = document.getElementById('code');\n" +
+      "          body.removeChild(numbers);\n" +
+      "          window.setTimeout(function reinsertNumbers() { body.insertBefore(numbers, code); }, 1000);\n" +
+      "        }\n" +
+      "        catch(e) {}\n" +
+      "        return true;\n" +
+      "      }\n" +
+      "    // -->\n" +
+      "    </script>\n" +
       "  </head>\n" +
-      "  <body onload='prettyPrint()'>\n" +
+      "  <body id='body' onload='prettyPrint()' oncopy='dontCopyLineNumbers()'>\n" +
       "    <div id='numbers'>\n" +
       "      <pre class='nocode'>\n" +
       lineNumbers +
