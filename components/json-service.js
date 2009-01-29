@@ -215,8 +215,11 @@ JSONStreamConverter.prototype = {
 
 var JSONBrowserModule = {
   cid: Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a66}"),
-  conversion1: "?from=application/json&to=*/*",
-  conversion2: "?from=text/x-json&to=*/*",
+  conversions: [
+    "?from=application/json&to=*/*",
+    "?from=text/x-json&to=*/*",
+    "?from=application/sparql-results+json&to=*/*"
+  ],
   contractID: "@mozilla.org/streamconv;1",
   name: "JSON pretty-printer",
 
@@ -238,12 +241,11 @@ var JSONBrowserModule = {
 
   registerSelf: function (aCompMgr, aFileSpec, aLocation, aType) {
     aCompMgr = aCompMgr.QueryInterface(Ci.nsIComponentRegistrar);
-    aCompMgr.registerFactoryLocation(this.cid, this.name,
-            this.contractID + this.conversion1,
-            aFileSpec, aLocation, aType);
-    aCompMgr.registerFactoryLocation(this.cid, this.name,
-            this.contractID + this.conversion2,
-            aFileSpec, aLocation, aType);
+    for (conv in this.conversions) {
+      aCompMgr.registerFactoryLocation(this.cid, this.name,
+	this.contractID + this.conversions[conv],
+        aFileSpec, aLocation, aType);
+    }
   },
 
   unregisterSelf: function (aCompMgr, aFileSpec, aLocation) {
