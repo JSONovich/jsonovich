@@ -3,7 +3,7 @@
      xmlns="http://www.mozilla.org/2004/em-rdf#">
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>jsonovich@lackoftalent.org</id>
-    <version>0.9</version>
+    <version>0.9.1</version>
     <type>2</type>
     <targetApplication>
       <rdf:Description>
