@@ -116,7 +116,7 @@ JSONStreamConverter.prototype = {
       }
     }
     catch(e) {
-      prettyPrinted = e;
+      prettyPrinted = e + "\n\nJSON input:\n" + this.data;
     }
     var htmlDocument = "<html>\n" +
       "  <head>\n" +
