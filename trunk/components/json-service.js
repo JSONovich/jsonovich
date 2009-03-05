@@ -64,6 +64,9 @@ JSONStreamConverter.prototype = {
                      .getService(Ci.nsIConsoleService);
     this._logger.logStringMessage("JSONStreamConverter initialized");
 
+    /* ffx-3.1.s JSON.stringify() does not seem to be indenting properly,
+     * so just load the included module
+
     if (typeof(JSON) === "undefined") {
       // JSON.parse and JSON.stringify are included in Firefox 3.1
       try {
@@ -74,7 +77,16 @@ JSONStreamConverter.prototype = {
         throw "Could not find JSON module";
       }
     }
-    this.JSON = JSON;
+
+    */
+    try {
+      Cu.import("resource://jsonovich/json2.js");
+    }
+    catch(e) {
+      Cu.reportError(e);
+      throw "Could not find JSON2 module";
+    }
+    this.JSON = JSON2;
   },
 
   QueryInterface: function (aIid) {
