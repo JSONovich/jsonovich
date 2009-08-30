@@ -1,1 +1,3 @@
-resource	jsonovich	modules/
+resource	jsonovich				modules/
+content     	jsonovich    				chrome/content/
+overlay 	chrome://browser/content/browser.xul  	chrome://jsonovich/content/jsonovich.xul
