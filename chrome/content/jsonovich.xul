@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<overlay id="jsonovich" 
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script type="application/x-javascript" src="prefs.js"/>
+  <script type="application/x-javascript"><![CDATA[
+
+    var jsonovich_init = function () {
+      var prefManager = Cc["@mozilla.org/preferences-service;1"]
+                          .getService(Ci.nsIPrefBranch);
+      var acceptHeader = prefManager.getCharPref("network.http.accept.default");
+      if (acceptHeader.indexOf("application/json") == -1) {
+          acceptHeader += ",application/json;q=0.95";
+          prefManager.setCharPref("network.http.accept.default", acceptHeader);
+      }
+      prefManager.setBoolPref("extensions.jsonovich.setheader", true);
+    }
+    window.addEventListener("load", jsonovich_init, false);
+
+  ]]></script>
+</overlay>
+
+
