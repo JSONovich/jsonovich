@@ -21,7 +21,7 @@ var UninstallObserver = {
 			    .getService(Ci.nsIPrefBranch);
 	var acceptHeader = prefManager.getCharPref("network.http.accept.default");
 	if (acceptHeader.indexOf("application/json") != -1) {
-	  acceptHeader = acceptHeader.replace(/,application\/json;q=0\.95/, "");
+	  acceptHeader = acceptHeader.replace(/,application\/json/, "");
 	  prefManager.setCharPref("network.http.accept.default", acceptHeader);
 	}
 	prefManager.setBoolPref("extensions.jsonovich.installed", false);
@@ -50,7 +50,7 @@ var jsonovich_init = function () {
 		      .getService(Ci.nsIPrefBranch);
   var acceptHeader = prefManager.getCharPref("network.http.accept.default");
   if (acceptHeader.indexOf("application/json") == -1) {
-    acceptHeader += ",application/json;q=0.95";
+    acceptHeader += ",application/json";
     prefManager.setCharPref("network.http.accept.default", acceptHeader);
   }
   prefManager.setBoolPref("extensions.jsonovich.installed", true);
