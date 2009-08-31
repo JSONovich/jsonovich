@@ -40,6 +40,7 @@ function JSONStreamConverter() {
 JSONStreamConverter.prototype = {
   _logger: null,
   _initialized: false,
+  _debug: false,
 
   encodeHTML: function (aHtmlSource) {
     return aHtmlSource.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');
@@ -60,9 +61,12 @@ JSONStreamConverter.prototype = {
       return;
     }
     this._initialized = true;
+    // twiddle this for more/less verbose console output
+    this._debug = false;
     this._logger = Cc["@mozilla.org/consoleservice;1"]
                      .getService(Ci.nsIConsoleService);
-    this._logger.logStringMessage("JSONStreamConverter initialized");
+    if (this._debug)
+      this._logger.logStringMessage("JSONStreamConverter initialized");
 
     /* ffx-3.1.s JSON.stringify() does not seem to be indenting properly,
      * so just load the included module
@@ -102,15 +106,19 @@ JSONStreamConverter.prototype = {
   // nsIRequest::onStartRequest
   onStartRequest: function (aReq, aCtx) {
     this.init();
-    this._logger.logStringMessage("Entered onStartRequest");
+    if (this._debug)
+      this._logger.logStringMessage("Entered onStartRequest");
     this.data = "";
     this.uri = aReq.QueryInterface(Ci.nsIChannel).URI.spec;
     this.channel = aReq;
-    this._logger.logStringMessage(this.channel.contentType);
+    if (this._debug)
+      this._logger.logStringMessage(this.channel.contentType);
     this.channel.contentType = "text/html";
-    this._logger.logStringMessage(this.channel.contentType);
+    if (this._debug)
+      this._logger.logStringMessage(this.channel.contentType);
     this.listener.onStartRequest(this.channel, aCtx);
-    this._logger.logStringMessage("Exiting onStartRequest");
+    if (this._debug)
+      this._logger.logStringMessage("Exiting onStartRequest");
   },
 
   // nsIRequest::onStopRequest
@@ -207,12 +215,14 @@ JSONStreamConverter.prototype = {
 
   // nsIStreamListener methods
   onDataAvailable: function (aReq, aCtx, aStream, aOffset, aCount) {
-    this._logger.logStringMessage("Entered onDataAvailable");
+    if (this._debug)
+      this._logger.logStringMessage("Entered onDataAvailable");
     var sis = Cc["@mozilla.org/scriptableinputstream;1"].createInstance();
     sis = sis.QueryInterface(Ci.nsIScriptableInputStream);
     sis.init(aStream);
     this.data += sis.read(aCount);
-    this._logger.logStringMessage("Exiting onDataAvailable");
+    if (this._debug)
+      this._logger.logStringMessage("Exiting onDataAvailable");
   },
 
   asyncConvertData: function (aFromType, aToType, aListener, aCtx) {
@@ -225,7 +235,7 @@ JSONStreamConverter.prototype = {
   }
 };
 
-var JSONBrowserModule = {
+var JSONovichModule = {
   cid: Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a66}"),
   conversions: [
     "?from=application/json&to=*/*",
@@ -233,7 +243,7 @@ var JSONBrowserModule = {
     "?from=application/sparql-results+json&to=*/*"
   ],
   contractID: "@mozilla.org/streamconv;1",
-  name: "JSON pretty-printer",
+  name: "JSONovich",
 
   // This factory attribute returns an anonymous class
   factory: {
@@ -282,5 +292,5 @@ var JSONBrowserModule = {
 
 /* entrypoint */
 function NSGetModule(aCompMgr, aFileSpec) {
-  return JSONBrowserModule;
+  return JSONovichModule;
 };
