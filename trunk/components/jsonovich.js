@@ -109,6 +109,7 @@ JSONStreamConverter.prototype = {
     if (this._debug)
       this._logger.logStringMessage("Entered onStartRequest");
     this.data = "";
+    this.rawdata = "";
     this.uri = aReq.QueryInterface(Ci.nsIChannel).URI.spec;
     this.channel = aReq;
     if (this._debug)
@@ -128,7 +129,11 @@ JSONStreamConverter.prototype = {
     try {
       var jsonData = this.JSON.parse(this.data);
       prettyPrinted = this.JSON.stringify(jsonData, null, 2);
+      if (this._debug)
+	this._logger.logStringMessage("1" + prettyPrinted);
       prettyPrinted = this.encodeHTML(prettyPrinted);
+      if (this._debug)
+	this._logger.logStringMessage("2" + prettyPrinted);
       var numLines = prettyPrinted.split("\n").length;
       var digits = numLines.toString().length;
       for (i=0; i < numLines; i++) {
@@ -220,7 +225,12 @@ JSONStreamConverter.prototype = {
     var sis = Cc["@mozilla.org/scriptableinputstream;1"].createInstance();
     sis = sis.QueryInterface(Ci.nsIScriptableInputStream);
     sis.init(aStream);
-    this.data += sis.read(aCount);
+    this.rawdata += sis.read(aCount);
+    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+		      .createInstance(Ci.nsIScriptableUnicodeConverter);
+    converter.charset = "UTF-8";
+    sis.close();
+    this.data = converter.ConvertToUnicode(this.rawdata);
     if (this._debug)
       this._logger.logStringMessage("Exiting onDataAvailable");
   },
