@@ -3,7 +3,7 @@
 	 xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>jsonovich@lackoftalent.org</id>
-    <version>1.1</version>
+    <version>1.2</version>
     <type>2</type>
     <targetApplication>
       <rdf:Description>
