@@ -250,7 +250,9 @@ var JSONovichModule = {
   conversions: [
     "?from=application/json&to=*/*",
     "?from=text/x-json&to=*/*",
-    "?from=application/sparql-results+json&to=*/*"
+    "?from=application/sparql-results+json&to=*/*",
+    "?from=application/rdf+json&to=*/*",
+    "?from=application/*+json&to=*/*"
   ],
   contractID: "@mozilla.org/streamconv;1",
   name: "JSONovich",
