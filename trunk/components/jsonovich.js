@@ -134,11 +134,40 @@ JSONStreamConverter.prototype = {
       prettyPrinted = this.encodeHTML(prettyPrinted);
       if (this._debug)
 	this._logger.logStringMessage("2" + prettyPrinted);
-      var numLines = prettyPrinted.split("\n").length;
+      var lines = prettyPrinted.split("\n");
+      var numLines = lines.length;
       var digits = numLines.toString().length;
+      var pp = '';
       for (i=0; i < numLines; i++) {
-        lineNumbers += this.padWithSpaces(i+1, digits) + "  \n";
+
+        var isopen = false;
+        var isclose = false;
+
+        if (lines[i].match(/[\{\[]$/)) {
+          isopen = true;
+        } else if (lines[i].match(/[\]\}]\,?$/)) {
+          isclose = true;
+        }
+
+        if (isopen && i > 0) {
+          lineNumbers += '<div class="collapser" id="num-' + i + '"> <span class="toggle" id="toggle-' + i + '" onclick="do_collapse(' + i + ');">-</span>';
+          pp += '<div class="collapser" id="line-' + i + '">';
+        } else {
+          lineNumbers += '  ';
+        }
+
+        lineNumbers += this.padWithSpaces(i+1, digits) + " ";
+        pp += lines[i];
+
+        if (isclose && i < numLines) {
+          lineNumbers += "</div>";
+          pp += "</div>";
+        } else {
+          lineNumbers += "\n";
+          pp += "\n";
+        }
       }
+      prettyPrinted = pp;
     }
     catch(e) {
       prettyPrinted = e + "\n\nJSON input:\n" + this.data;
@@ -147,7 +176,7 @@ JSONStreamConverter.prototype = {
       "  <head>\n" +
       "    <title>"+ this.uri + "</title>\n" +
       "    <style type='text/css'>\n" +
-      "      body{margin:0px;padding:0px;}.nocode{color:#888;margin:0px;-moz-user-select:none;user-select:none;}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre{/*white-space: pre-wrap;white-space: -moz-pre-wrap;*/}#numbers{float:left;padding:0px;margin:0px;}#code{padding-left:2px;}\n" +
+      "      body{margin:0px;padding:0px;}.nocode{color:#888;margin:0px;-moz-user-select:none;user-select:none;}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre{/*white-space: pre-wrap;white-space: -moz-pre-wrap;*/}#numbers{float:left;padding:0px;margin:0px;}#code{padding-left:2px;}div.collapser{display:block;overflow:hidden;margin:0;border:0;padding:0;}span.toggle{cursor:row-resize;background-color:#ff9;}\n" +
       "    </style>\n" +
       "    <!-- Following code is licensed under Apache 2.0, available from http://code.google.com/p/google-code-prettify/ --> \n" +
       "    <script type='text/javascript'><!--\n" +
@@ -176,6 +205,24 @@ JSONStreamConverter.prototype = {
       'document.getElementsByTagName(Mc),document.getElementsByTagName(Nc)],d=[];for(var g=0;g<c.length;++g)for(var e=0;e<c[g].length;++e)d.push(c[g][e]);c=null;var h=0;function f(){var i=(new Date).getTime()+250;for(;h<d.length&&(new Date).getTime()<i;h++){var j=d[h];if(j.className&&j.className.indexOf(Oc)>=0){var m=j.className.match(/\\blang-(\\w+)\\b/);if(m)m=m[1];var o=false;for(var k=j.parentNode;k;k=k.parentNode)if((k.tagName===Lc||k.tagName===Mc||k.tagName===Nc)&&k.className&&k.className.indexOf(Oc)>=' +
       '0){o=true;break}if(!o){var p=fd(j);p=p.replace(/(?:\\r\\n?|\\n)$/,I);var l=Fa(p,m);if(!Da(j))j.innerHTML=l;else{var n=document.createElement(H);for(var q=0;q<j.attributes.length;++q){var r=j.attributes[q];if(r.specified){var B=r.name.toLowerCase();if(B===Pc)n.className=r.value;else n.setAttribute(r.name,r.value)}}n.innerHTML=l;j.parentNode.replaceChild(n,j);j=n}if(a&&j.tagName===H){var M=j.getElementsByTagName(Qc);for(var x=M.length;--x>=0;){var Ga=M[x];Ga.parentNode.replaceChild(document.createTextNode(Rc),' +
       'Ga)}}}}}if(h<d.length)setTimeout(f,250);else if(b)b()}f()}window.PR_normalizedHtml=L;window.prettyPrintOne=Fa;window.prettyPrint=ud;window.PR={createSimpleLexer:E,registerLangHandler:t,sourceDecorator:u,PR_ATTRIB_NAME:X,PR_ATTRIB_VALUE:R,PR_COMMENT:O,PR_DECLARATION:Xb,PR_KEYWORD:fc,PR_LITERAL:Z,PR_NOCODE:Vb,PR_PLAIN:J,PR_PUNCTUATION:S,PR_SOURCE:P,PR_STRING:Y,PR_TAG:Q,PR_TYPE:gc}})();\n' +
+      '    function do_collapse(i) {' +
+      '      var t = document.getElementById("toggle-" + i);' +
+      '      var n = document.getElementById("num-" + i);' +
+      '      var l = document.getElementById("line-" + i);' +
+      '      if ("-" == t.innerHTML) {' +
+      '        n.style.height = "14px";' +
+      '        n.style.backgroundColor = "#ff9";' +
+      '        l.style.height = n.style.height;' +
+      '        l.style.backgroundColor = n.style.backgroundColor;' +
+      '        t.innerHTML = "+";' +
+      '      } else {' +
+      '        n.style.height = null;' +
+      '        n.style.backgroundColor = null;' +
+      '        l.style.height = n.style.height;' +
+      '        l.style.backgroundColor = n.style.backgroundColor;' +
+      '        t.innerHTML = "-";' +
+      '      }' +
+      '    }' +
       "    // -->\n" +
       "    </script>\n" +
       "    <script type='text/javascript'><!--\n" +
