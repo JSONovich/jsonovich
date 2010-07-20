@@ -145,7 +145,7 @@ JSONStreamConverter.prototype = {
 
         if (lines[i].match(/[\{\[]$/)) {
           isopen = true;
-        } else if (lines[i].match(/[\]\}]\,?$/)) {
+	} else if (lines[i].match(/(?:^|(?![\{\[]).)[\]\}]\,?$/)) {
           isclose = true;
         }
 
