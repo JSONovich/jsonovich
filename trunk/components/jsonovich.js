@@ -176,7 +176,7 @@ JSONStreamConverter.prototype = {
       "  <head>\n" +
       "    <title>"+ this.uri + "</title>\n" +
       "    <style type='text/css'>\n" +
-      "      body{margin:0px;padding:0px;}.nocode{color:#888;margin:0px;-moz-user-select:none;user-select:none;}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre{/*white-space: pre-wrap;white-space: -moz-pre-wrap;*/}#numbers{float:left;padding:0px;margin:0px;}#code{padding-left:2px;}div.collapser{display:block;overflow:hidden;margin:0;border:0;padding:0;}span.toggle{cursor:row-resize;background-color:#ff9;}\n" +
+      "      body{margin:0px;padding:0px;}.nocode{color:#888;margin:0px;-moz-user-select:none;user-select:none;}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre{/*white-space: pre-wrap;white-space: -moz-pre-wrap;*/}#numbers{float:left;padding:0px;margin:0px;}#code{padding-left:2px;}div.collapser{display:block;margin:0;border:0;padding:0;}span.toggle{cursor:row-resize;background-color:#ff9;}\n" +
       "    </style>\n" +
       "    <!-- Following code is licensed under Apache 2.0, available from http://code.google.com/p/google-code-prettify/ --> \n" +
       "    <script type='text/javascript'><!--\n" +
@@ -296,6 +296,7 @@ var JSONovichModule = {
   cid: Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a66}"),
   conversions: [
     "?from=application/json&to=*/*",
+    "?from=application/jsonrequest&to=*/*",
     "?from=text/x-json&to=*/*",
     "?from=application/sparql-results+json&to=*/*",
     "?from=application/rdf+json&to=*/*",
