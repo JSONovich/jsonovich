@@ -180,7 +180,7 @@ JSONStreamConverter.prototype = {
       "  <head>\n" +
       "    <title>"+ this.uri + "</title>\n" +
       "    <style type='text/css'>\n" +
-      "      body{margin:0px;padding:0px;}.nocode{color:#888;margin:0px;-moz-user-select:none;user-select:none;}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre{/*white-space: pre-wrap;white-space: -moz-pre-wrap;*/}#numbers{float:left;padding:0px;margin:0px;}#code{padding-left:2px;}div.collapser{display:block;margin:0;border:0;padding:0;}span.toggle{cursor:row-resize;background-color:#ff9;}\n" +
+      "      body{margin:0px;padding:0px;}.nocode{color:#888;margin:0px;-moz-user-select:none;user-select:none;}.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun{color:#660}.pln{color:#000}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec{color:#606}pre.prettyprint{}@media print{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun{color:#440}.pln{color:#000}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre{/*white-space: pre-wrap;white-space: -moz-pre-wrap;*/}#numbers{float:left;padding:0px;margin:0px;}#code{padding-left:2px;}.collapser{margin:0;border:0;padding:0;}div.collapsed{overflow:hidden;height:1em;background-color:#ff9;}span.toggle{cursor:row-resize;background-color:#ff9;}\n" +
       "    </style>\n" +
       "    <!-- Following code is licensed under Apache 2.0, available from http://code.google.com/p/google-code-prettify/ --> \n" +
       "    <script type='text/javascript'><!--\n" +
@@ -214,16 +214,12 @@ JSONStreamConverter.prototype = {
       '      var n = document.getElementById("num-" + i);' +
       '      var l = document.getElementById("line-" + i);' +
       '      if ("-" == t.innerHTML) {' +
-      '        n.style.height = "14px";' +
-      '        n.style.backgroundColor = "#ff9";' +
-      '        l.style.height = n.style.height;' +
-      '        l.style.backgroundColor = n.style.backgroundColor;' +
+      '        n.className += " collapsed";' +
+      '        l.className += " collapsed";' +
       '        t.innerHTML = "+";' +
       '      } else {' +
-      '        n.style.height = null;' +
-      '        n.style.backgroundColor = null;' +
-      '        l.style.height = n.style.height;' +
-      '        l.style.backgroundColor = n.style.backgroundColor;' +
+      '        n.className = n.className.replace(/ collapsed\\b/,"");' +
+      '        l.className = l.className.replace(/ collapsed\\b/,"");' +
       '        t.innerHTML = "-";' +
       '      }' +
       '    }' +
