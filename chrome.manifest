@@ -1,3 +1,10 @@
-resource	jsonovich				modules/
-content     	jsonovich    				chrome/content/
-overlay 	chrome://browser/content/browser.xul  	chrome://jsonovich/content/jsonovich.xul
+resource jsonovich modules/
+content jsonovich chrome/content/
+overlay chrome://browser/content/browser.xul chrome://jsonovich/content/jsonovich.xul
+component {dcc31be0-c861-11dd-ad8b-0800200c9a66} components/jsonovich.js
+contract @mozilla.org/streamconv;1?from=application/json&to=*/* {dcc31be0-c861-11dd-ad8b-0800200c9a66}
+contract @mozilla.org/streamconv;1?from=application/jsonrequest&to=*/* {dcc31be0-c861-11dd-ad8b-0800200c9a66}
+contract @mozilla.org/streamconv;1?from=text/x-json&to=*/* {dcc31be0-c861-11dd-ad8b-0800200c9a66}
+contract @mozilla.org/streamconv;1?from=application/sparql-results+json&to=*/* {dcc31be0-c861-11dd-ad8b-0800200c9a66}
+contract @mozilla.org/streamconv;1?from=application/rdf+json&to=*/* {dcc31be0-c861-11dd-ad8b-0800200c9a66}
+contract @mozilla.org/streamconv;1?from=application/*+json&to=*/* {dcc31be0-c861-11dd-ad8b-0800200c9a66}
