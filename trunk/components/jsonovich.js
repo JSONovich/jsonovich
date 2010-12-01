@@ -229,22 +229,8 @@ JSONStreamConverter.prototype = {
       '    }' +
       "    // -->\n" +
       "    </script>\n" +
-      "    <script type='text/javascript'><!--\n" +
-      "      function dontCopyLineNumbers() {\n" +
-      "        try {\n" +
-      "          var body = document.getElementById('body');\n" +
-      "          var numbers = document.getElementById('numbers');\n" +
-      "          var code = document.getElementById('code');\n" +
-      "          body.removeChild(numbers);\n" +
-      "          window.setTimeout(function reinsertNumbers() { body.insertBefore(numbers, code); }, 1000);\n" +
-      "        }\n" +
-      "        catch(e) {}\n" +
-      "        return true;\n" +
-      "      }\n" +
-      "    // -->\n" +
-      "    </script>\n" +
       "  </head>\n" +
-      "  <body id='body' onload='prettyPrint()' oncopy='dontCopyLineNumbers()'>\n" +
+      "  <body onload='prettyPrint()'>\n" +
       "    <div id='numbers'>\n" +
       "      <pre class='nocode'>\n" +
       lineNumbers +
