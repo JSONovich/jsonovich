@@ -22,6 +22,9 @@
  * pretty printing
  * The further modified code is Copyright (C) 2008 Michael J. Giarlo.
  *
+ * Changes by William Elwood:
+ *  - 2010-09: Support for XPCOM registration differences in Gecko 2 (Firefox 4)
+ *
  * This file contains the content handler for converting content of types
  * application/json and text/x-json (JSONStreamConverter)
  */
@@ -32,6 +35,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 const Cu = Components.utils;
+const COMPONENT_ID = Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a66}");
 
 function JSONStreamConverter() {
   this.wrappedJSObject = this;
@@ -292,65 +296,62 @@ JSONStreamConverter.prototype = {
   }
 };
 
-var JSONovichModule = {
-  cid: Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a66}"),
-  conversions: [
-    "?from=application/json&to=*/*",
-    "?from=application/jsonrequest&to=*/*",
-    "?from=text/x-json&to=*/*",
-    "?from=application/sparql-results+json&to=*/*",
-    "?from=application/rdf+json&to=*/*",
-    "?from=application/*+json&to=*/*"
-  ],
-  contractID: "@mozilla.org/streamconv;1",
-  name: "JSONovich",
-
-  // This factory attribute returns an anonymous class
-  factory: {
-    createInstance: function (aOuter, aIid) {
-      if (aOuter != null) {
-        throw Cr.NS_ERROR_NO_AGGREGATION;
-      }
-      if (aIid.equals(Ci.nsISupports) ||
-        aIid.equals(Ci.nsIStreamConverter) ||
-        aIid.equals(Ci.nsIStreamListener) ||
-        aIid.equals(Ci.nsIRequestObserver)) {
-        return new JSONStreamConverter();
-      }
-      throw Cr.NS_ERROR_NO_INTERFACE;
+// This factory returns an anonymous class
+var JSONovichFactory = {
+  // nsIFactory::createInstance
+  createInstance: function (aOuter, aIid) {
+    if (aOuter != null) {
+      throw Cr.NS_ERROR_NO_AGGREGATION;
     }
-  },
-
-  registerSelf: function (aCompMgr, aFileSpec, aLocation, aType) {
-    aCompMgr = aCompMgr.QueryInterface(Ci.nsIComponentRegistrar);
-    for (conv in this.conversions) {
-      aCompMgr.registerFactoryLocation(this.cid, this.name,
-	this.contractID + this.conversions[conv],
-        aFileSpec, aLocation, aType);
-    }
-  },
-
-  unregisterSelf: function (aCompMgr, aFileSpec, aLocation) {
-    aCompMgr = aCompMgr.QueryInterface(Ci.nsIComponentRegistrar);
-    aCompMgr.unregisterFactoryLocation(this.cid, aLocation);
-  },
-
-  getClassObject: function (aCompMgr, aCid, aIid) {
-    if (aCid.equals(this.cid)) {
-      return this.factory;
-    }
-    if (!aIid.equals(Ci.nsIFactory)) {
-      throw Cr.NS_ERROR_NOT_IMPLEMENTED;
-    }
-    throw Cr.NS_ERROR_NO_INTERFACE;
-  },
-
-  canUnload: function (aCompMgr) {
-    return true;
+    return (new JSONStreamConverter()).QueryInterface(aIid);
   }
 };
 
-/* entrypoint */
+/* Gecko <2 entrypoint */
 function NSGetModule(aCompMgr, aFileSpec) {
-  return JSONovichModule;
-};
+  return {
+    conversions: [
+      "?from=application/json&to=*/*",
+      "?from=application/jsonrequest&to=*/*",
+      "?from=text/x-json&to=*/*",
+      "?from=application/sparql-results+json&to=*/*",
+      "?from=application/rdf+json&to=*/*",
+      "?from=application/*+json&to=*/*"
+    ],
+    contractID: "@mozilla.org/streamconv;1",
+    name: "JSONovich",
+
+    registerSelf: function (aCompMgr, aFileSpec, aLocation, aType) {
+      aCompMgr = aCompMgr.QueryInterface(Ci.nsIComponentRegistrar);
+      for (conv in this.conversions) {
+        aCompMgr.registerFactoryLocation(COMPONENT_ID, this.name,
+    this.contractID + this.conversions[conv],
+          aFileSpec, aLocation, aType);
+      }
+    },
+
+    unregisterSelf: function (aCompMgr, aFileSpec, aLocation) {
+      aCompMgr = aCompMgr.QueryInterface(Ci.nsIComponentRegistrar);
+      aCompMgr.unregisterFactoryLocation(COMPONENT_ID, aLocation);
+    },
+
+    getClassObject: function (aCompMgr, aCid, aIid) {
+      if (aCid.equals(COMPONENT_ID)) {
+        return JSONovichFactory;
+      }
+      if (!aIid.equals(Ci.nsIFactory)) {
+        throw Cr.NS_ERROR_NOT_IMPLEMENTED;
+      }
+      throw Cr.NS_ERROR_NO_INTERFACE;
+    },
+
+    canUnload: function (aCompMgr) {
+      return true;
+    }
+  };
+}
+
+/* Gecko 2+ entrypoint */
+function NSGetFactory(compMgr, fileSpec) {
+  return JSONovichFactory;
+}
