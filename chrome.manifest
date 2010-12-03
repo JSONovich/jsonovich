@@ -1,4 +1,3 @@
-resource jsonovich modules/
 content jsonovich chrome/content/
 overlay chrome://browser/content/browser.xul chrome://jsonovich/content/jsonovich.xul
 component {dcc31be0-c861-11dd-ad8b-0800200c9a66} components/jsonovich.js
