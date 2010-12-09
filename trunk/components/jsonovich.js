@@ -41,27 +41,28 @@ const Cr = Components.results;
 const Cu = Components.utils;
 const COMPONENT_ID = Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a66}");
 
-function formatJSON(json) {
-  let lines = [], lineBreaks = {
-    "after array open": true,
-    "before array items separator": false,
-    "after array items separator": true,
-    "after array items last": true,
-    "after array close": true,
-    "after object open": true,
-    "before object properties separator": false,
-    "after object properties separator": true,
-    "after object properties last": true,
-    "after object close": true,
-    "end": true
-  }, indent = 0,
+// TODO: separate from Firefox specific code
+let JSONovich = function() {
+  let lineBreaks = {
+/**/    "before block": false, // default formatting
+    "before items": true,
+    "before separator": false,
+    "after separator": true,
+    "after items": true,
+    "after block": false
+/*/    "before block": true, // alternative formatting, similar to suggestion from Rijk van Haaften
+    "before items": false,
+    "before separator": true,
+    "after separator": false,
+    "after items": true,
+    "after block": false
+/**/  },
   str_true = 'true', str_false = 'false',
-  str_null = 'null', str_indent = '&nbsp;&nbsp;', sep_array_items = ',',
+  str_null = 'null', str_indent = '  ', sep_array_items = ',',
   sep_object_properties = ',', sep_object_property_kv = ': ',
   delim_open_array = '[', delim_close_array = ']',
   delim_open_object = '{', delim_close_object = '}',
-  delim_string = '"', debug = false, starts = debug ? [] : null,
-  logger = debug ? Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService) : null,
+  delim_string = '"',
   // From Google code-prettify:
   // Define regexps here so that the interpreter doesn't have to create an
   // object each time the function containing them is called.
@@ -73,115 +74,195 @@ function formatJSON(json) {
     return aHtmlSource.replace(r_amp, '&amp;').replace(r_lt, '&lt;').replace(r_gt, '&gt;').replace(r_quot, '&quot;');
   },
 
-  generateElement = function(cssClass, content) {
-    let block = '<span';
-    if(cssClass) {
-      block += ' class="' + cssClass + '"';
+  foldStart = function(data) {
+    if(data.lines.length > 1) { // root object not collapsible
+      data.currentLine.fold = ++data.numFolds;
+      data.folds.unshift(data.currentLine.fold);
     }
-    block += '>' + content + '</span>';
-    return block;
   },
 
-  generateLine = function(event, content) {
-    if(lineBreaks[event] && content.length) {
-      let l = '<span class="line ' + (lines.length % 2 == 0 ? 'even' : 'odd') + '"><span class="gutter"></span><code>';
-      if(indent > 0) {
-        for(let i = indent; i > 0; i--) {
-          l += str_indent;
-        }
-      }
-      lines.push(l + content + '</code></span>');
-      return '';
-    }
-    return content;
-  },
-
-  formatArray = function(arr, line) {
-    line += generateElement("array delimiter open", delim_open_array);
+  formatArray = function(data, arr) {
+    new Line(data, "before block");
+    data.currentLine.addDelimiter(new Element(delim_open_array, "array delimiter open"));
     if(arr.length) {
-      line = generateLine("after array open", line);
-      indent++;
+      foldStart(data);
+      new Line(data, "before items");
+      data.currentLine.indentInc(data);
       for(let i in Iterator(arr, true)) {
         if(i > 0) {
-          line = generateLine("before array items separator", line);
-          line += generateElement("array separator", sep_array_items);
-          line = generateLine("after array items separator", line);
+          new Line(data, "before separator");
+          data.currentLine.addDelimiter(new Element(sep_array_items, "array separator"));
+          new Line(data, "after separator");
         }
-        line = formatRecursively(arr[i], line);
+        formatRecursively(data, arr[i]);
       }
-      line = generateLine("after array items last", line);
-      indent--;
+      new Line(data, "after items");
+      data.currentLine.indentDec(data);
+      data.folds.shift();
     }
-    return line + generateElement("array delimiter close", delim_close_array);
+    data.currentLine.addDelimiter(new Element(delim_close_array, "array delimiter close"));
+    new Line(data, "after block");
   },
 
-  formatObject = function(obj, line) {
-    line += generateElement("object delimiter open", delim_open_object);
-    var membs = [];
-    for(let memb in Iterator(obj, true)) {
-      membs.push(memb);
-    }
-    if(membs.length) {
-      line = generateLine("after object open", line);
-      indent++;
-      for(let i = 0; i < membs.length; i++) {
-        if(i > 0) {
-          line = generateLine("before object properties separator", line);
-          line += generateElement("object separator", sep_object_properties);
-          line = generateLine("after object properties separator", line);
+  formatObject = function(data, obj) {
+    let it = Iterator(obj, true);
+    new Line(data, "before block");
+    data.currentLine.addDelimiter(new Element(delim_open_object, "object delimiter open"));
+    try {
+      let memb = it.next();
+      foldStart(data);
+      new Line(data, "before items");
+      data.currentLine.indentInc(data);
+      try {
+        for(;;) {
+          data.currentLine.addElement(new Element(memb, "key"));
+          data.currentLine.addElement(new Element(sep_object_property_kv, "object property separator"));
+          formatRecursively(data, obj[memb]);
+          memb = it.next();
+          new Line(data, "before separator");
+          data.currentLine.addDelimiter(new Element(sep_object_properties, "object separator"));
+          new Line(data, "after separator");
         }
-        line += generateElement("key", membs[i]);
-        line += generateElement("object property separator", sep_object_property_kv);
-        line = formatRecursively(obj[membs[i]], line);
+      } catch(e) {
+        if(!(e instanceof StopIteration)) {
+          throw e;
+        }
       }
-      line = generateLine("after object properties last", line);
-      indent--;
+      new Line(data, "after items");
+      data.currentLine.indentDec(data);
+      data.folds.shift();
+    } catch(e) {
+      if(!(e instanceof StopIteration)) {
+        throw e;
+      }
     }
-    return line + generateElement("object delimiter close", delim_close_object);
+    data.currentLine.addDelimiter(new Element(delim_close_object, "object delimiter close"));
+    new Line(data, "after block");
   },
 
-  formatRecursively = function(thing, line) {
+  formatRecursively = function(data, thing) {
     if(thing == null) {
-      return line + generateElement("null", str_null);
+      data.currentLine.addElement(new Element(str_null, "null"));
     } else {
       switch(typeof thing) {
         case "number":
-          return line + generateElement("number", thing);
+          data.currentLine.addElement(new Element(thing, "number"));
+          break;
         case "boolean":
-          return line + generateElement("boolean " + (thing ? "true" : "false"), thing ? str_true : str_false);
+          data.currentLine.addElement(new Element(thing ? str_true : str_false,
+            "boolean " + (thing ? "true" : "false")));
+          break;
         case "string":
-          return line + generateElement("string", generateElement("delimiter", delim_string)
-           + generateElement("content", encodeHTML(thing))
-           + generateElement("delimiter", delim_string));
+          data.currentLine.addElement(new Element([
+            new Element(delim_string, "delimiter"),
+            new Element(encodeHTML(thing), "content"),
+            new Element(delim_string, "delimiter")
+            ], "string"));
+          break;
         case "object":
           if(thing.constructor == Array) {
-            if (debug)
-              starts.push(new Date().getTime());
-            let tmp = formatArray(thing, line);
-            if (debug)
-              logger.logStringMessage("formatJSON: formatted lvl " + indent + " array in " + (new Date().getTime() - starts.pop()) + "ms");
-            return tmp;
+            formatArray(data, thing);
           } else {
-            if (debug)
-              starts.push(new Date().getTime());
-            let tmp = formatObject(thing, line);
-            if (debug)
-              logger.logStringMessage("formatJSON: formatted lvl " + indent + " object in " + (new Date().getTime() - starts.pop()) + "ms");
-            return tmp;
+            formatObject(data, thing);
           }
+          break;
         default:
-          return line + generateElement("unknown", thing);
+          data.currentLine.addElement(new Element(thing, "unknown"));
+          break;
       }
     }
   };
 
-  if (debug)
-    starts.push(new Date().getTime());
-  generateLine("end", formatRecursively(json, ''));
-  if (debug)
-    logger.logStringMessage("formatJSON: formatted JSON in " + (new Date().getTime() - starts.pop()) + "ms");
-  return '<pre class="json">\n' + lines.join('\n') + '</pre>\n';
-}
+  // formatting tokens
+  function Element(content, css) {
+    this.content = content;
+    this.length = content.length;
+    this.css = css;
+  }
+  Element.prototype = {
+    toString: function() {
+      let content = this.content, block = "<span";
+      if(this.css) {
+        block += ' class="' + this.css + '"';
+      }
+      return block + ">" + ((typeof content == "object" && content.constructor == Array)
+        ? content.join("") : content) + "</span>";
+    }
+  };
+
+  function Line(data, event) {
+    if(!data.currentLine || (lineBreaks[event] && (data.currentLine.content.length || event.indexOf("before") !== -1 || event.indexOf("after") !== -1 || event.indexOf("separator") !== -1))) {
+      data.currentLine = this;
+      data.lines.push(this);
+      this.folds = data.folds.length // in FF4, empty data attributes are equivalent to not having the attribute
+        ? '" data-fold' + data.folds.join('="1" data-fold') + '="1"' : "";
+      this.indent = data.numIndent;
+      this.indentContent = [];
+      this.content = [];
+    }
+  }
+  Line.prototype = {
+    addDelimiter: function(d) {
+      if(this.content.length) {
+        this.content.push(d);
+      } else {
+        this.indentContent.push(d);
+      }
+    },
+    addElement: function(e) {
+      this.content.push(e);
+    },
+    indentInc: function(data) {
+      data.numIndent++;
+      this.indent++;
+    },
+    indentDec: function(data) {
+      data.numIndent--;
+      this.indent--;
+    },
+    toString: function() {
+      let content = this.content, indentContent = this.indentContent,
+      gutter = '<span class="line' + this.folds, prefix = "";
+      if(!content.length && indentContent.length && (!this.indent || ((lineBreaks["before items"] || indentContent[0].css.indexOf("open") === -1) && (lineBreaks["before separator"] || indentContent[0].css.indexOf("separator") === -1)))) {
+        content = indentContent;
+        indentContent = [];
+      }
+      if(this.fold) {
+        gutter += '" data-fold="' + this.fold;
+      }
+      if(this.indent) {
+        for(let i = this.indent, j = indentContent.length - this.indent, d; i > 0; i--, j++) {
+          d = indentContent[j];
+          if(d) {
+            prefix += d + str_indent.substr(d.length);
+          } else {
+            prefix += str_indent;
+          }
+        }
+      }
+      return gutter
+        + '"><span class="fold gutter"></span><span class="number gutter"></span><code>'
+        + (prefix
+        + content.join("")).trimRight()
+        + "</code></span>";
+    }
+  };
+
+  return {
+    encodeHTML: encodeHTML,
+    formatJSON: function(json) {
+      let data = {
+        numFolds: 0,
+        numIndent: 0,
+        folds: [],
+        lines: []
+      };
+      new Line(data);
+      formatRecursively(data, json);
+      return '<pre class="json">' + data.lines.join("\n") + "</pre>";
+    }
+  }
+}();
 
 function JSONStreamConverter() {
   this.wrappedJSObject = this;
@@ -236,67 +317,101 @@ JSONStreamConverter.prototype = {
 
   // nsIRequest::onStopRequest
   onStopRequest: function (aReq, aCtx, aStatus) {
-    var prettyPrinted = "";
+    let prettyPrinted = "";
     try {
       let jsonData = JSON.parse(this.data);
-      prettyPrinted = formatJSON(jsonData);
+      prettyPrinted = JSONovich.formatJSON(jsonData);
     } catch(e) {
-      prettyPrinted = '<div class="error">' + e + "\n\nJSON input:\n" + this.data + '</div>\n';
+      this._logger.logStringMessage(e);
+      prettyPrinted = JSONovich.encodeHTML(this.data);
     }
-    var htmlDocument = "<!DOCTYPE html>\n" +
+    // TODO: move the in-line style&script to external files for proper syntax highlighting and less \n+ cruft
+    let htmlDocument = "<!DOCTYPE html>\n" +
       "<html>\n" +
       "  <head>\n" +
-      "    <title>"+ this.uri + "</title>\n" +
-      "    <style type='text/css'>\n" +
+      "    <title>" + this.uri + "</title>\n" +
+      '    <style type="text/css">\n' +
       "      body,.json{margin:0;padding:0;}\n" +
       "      .json{font-family:monospace;white-space:pre-wrap;color:#666;display:table;counter-reset:line;}\n" +
-      "      .json>.line{display:table-row;counter-increment:line;}\n" +
-      "      .json>.line.even{background-color:#fafaff;}\n" +
-      "      .json>.line.odd{background-color:#fafffa;}\n" +
-      "      .json>.line:hover>.gutter{background-color:#eeeebb;}\n" +
-      "      .json>.line:hover>code{background-color:#ffffcc;}\n" +
-      "      .json>.line>.gutter,.json>.line>code{margin:0;padding:0;display:table-cell;}\n" +
-      "      .json>.line>.gutter{text-align:right;background-color:#eee;margin:0;}\n" +
-      "      .json>.line>.gutter:before{content:counter(line);}\n" +
-      "      .json>.line>code{text-align:left;}\n" +
-      "      .json>.line>code .string>.content{color:#080;}\n" +
-      "      .json>.line>code .key{color:#008;}\n" +
-      "      .json>.line>code .boolean{color:#066;}\n" +
-      "      .json>.line>code .number{color:#066;}\n" +
-      "      .json>.line>code .null{color:#066;}\n" +
-      "      .json>.line>code .delimiter{color:#660;}\n" +
-      "      .json>.line>code .separator{color:#660;}\n" +
+      "      .json .line{display:table-row;counter-increment:line;}\n" +
+      "      .json .line:nth-of-type(even){background-color:#fafaff;}\n" +
+      "      .json .line:nth-of-type(odd){background-color:#fafffa;}\n" +
+      "      .json .line:hover>.gutter{background-color:#eeeebb;}\n" +
+      "      .json .line:hover>code{background-color:#ffffcc;}\n" +
+      "      .json .gutter,.json code{margin:0;padding:0;display:table-cell;}\n" +
+      "      .json .gutter{text-align:right;background-color:#eee;}\n" +
+      "      .json .foldable{cursor:vertical-text;}\n" +
+      "      .json .foldable.toggled{cursor:row-resize;background-color:#fa7;}\n" +
+      "      .json .foldable.toggled>.gutter{background-color:#ea8;}\n" +
+      "      .json .foldable.toggled>code{background-color:#fb9;}\n" +
+      "      .json .foldable.toggled:hover>.gutter{background-color:#ecb;}\n" +
+      "      .json .foldable.toggled:hover>code{background-color:#fdc;}\n" +
+      "      .json .folded.line{visibility:collapse;}\n" +
+      "      .json .foldable .fold.gutter:before{content:'-';}\n" +
+      "      .json .foldable.toggled .fold.gutter:before{content:'+';}\n" +
+      "      .json .foldable.toggled code:first-of-type:after{content:' \\2026 ';}\n" +
+      "      .json .number.gutter:before{content:counter(line);}\n" +
+      "      .json code{text-align:left;}\n" +
+      "      .json code .string>.content{color:#080;}\n" +
+      "      .json code .key{color:#008;}\n" +
+      "      .json code .boolean{color:#066;}\n" +
+      "      .json code .number{color:#066;}\n" +
+      "      .json code .null{color:#066;}\n" +
+      "      .json code .delimiter{color:#660;}\n" +
+      "      .json code .separator{color:#660;}\n" +
       "      @media print{\n" +
-      "      .json>.line>code .string>.content{color:#060;}\n" +
-      "      .json>.line>code .key{color:#006;font-weight:bold;}\n" +
-      "      .json>.line>code .boolean{color:#044;}\n" +
-      "      .json>.line>code .number{color:#044;}\n" +
-      "      .json>.line>code .null{color:#044;}\n" +
-      "      .json>.line>code .delimiter{color:#440;}\n" +
-      "      .json>.line>code .separator{color:#440;}\n" +
+      "      .json code .string>.content{color:#060;}\n" +
+      "      .json code .key{color:#006;font-weight:bold;}\n" +
+      "      .json code .boolean{color:#044;}\n" +
+      "      .json code .number{color:#044;}\n" +
+      "      .json code .null{color:#044;}\n" +
+      "      .json code .delimiter{color:#440;}\n" +
+      "      .json code .separator{color:#440;}\n" +
       "      }\n" +
-/*      "      .collapser{margin:0;border:0;padding:0;}div.collapsed{overflow:hidden;height:1em;background-color:#ff9;}span.toggle{cursor:row-resize;background-color:#ff9;}\n" +
-*/      "    </style>\n" +
-/*      '    <script type="text/javascript"><!--\n' +
-      '    function do_collapse(i) {' +
-      '      var t = document.getElementById("toggle-" + i);' +
-      '      var n = document.getElementById("num-" + i);' +
-      '      var l = document.getElementById("line-" + i);' +
-      '      if ("-" == t.innerHTML) {' +
-      '        n.className += " collapsed";' +
-      '        l.className += " collapsed";' +
-      '        t.innerHTML = "+";' +
-      '      } else {' +
-      '        n.className = n.className.replace(/ collapsed\\b/,"");' +
-      '        l.className = l.className.replace(/ collapsed\\b/,"");' +
-      '        t.innerHTML = "-";' +
-      '      }' +
-      '    }' +
-      "    // -->\n" +
+      "    </style>\n" +
+      '    <script type="application/javascript;version=1.8">\n\
+document.addEventListener("DOMContentLoaded", function() {\n\
+  let r_folded = / folded\\b/, r_toggled = / toggled\\b/;\n\
+  Array.prototype.map.call(document.querySelectorAll(".json [data-fold]"), makeFoldable);\n\
+\n\
+  function makeFoldable(fold) {\n\
+    fold.className += " foldable";\n\
+    fold.addEventListener("click", toggleFold, false);\n\
+  }\n\
+\n\
+  function toggleFold() {\n\
+    let fold = this.getAttribute("data-fold"),\n\
+    folded = this.hasAttribute("data-folded"),\n\
+    foldLines = this.parentNode.querySelectorAll("[data-fold" + fold + "]"),\n\
+    foldStart = this.querySelector("code");\n\
+    toggle(this, "toggled", r_toggled);\n\
+    Array.prototype.map.call(foldLines, helper);\n\
+    if(folded) {\n\
+      this.removeAttribute("data-folded");\n\
+      //foldStart.removeChild(foldStart.lastChild);\n\
+    } else {\n\
+      this.setAttribute("data-folded", "1");\n\
+      //let end = document.createTextNode(" \2026 " + foldLines.item(foldLines.length-1).textContent.trim());\n\
+      //foldStart.appendChild(end);\n\
+    }\n\
+\n\
+    function helper(line) {\n\
+      toggle(line, "folded", r_folded);\n\
+    }\n\
+\n\
+    function toggle(element, style, regex) {\n\
+      if(folded) {\n\
+        element.className = element.className.replace(regex, "");\n\
+      } else {\n\
+        element.className += " " + style;\n\
+      }\n\
+    }\n\
+  }\n\
+}, false);\n' +
       "    </script>\n" +
-*/      "  </head>\n" +
+      "  </head>\n" +
       "  <body>\n" +
-//      "    <noscript>You need JavaScript on to expand/collapse nodes.</noscript>\n" +
+     "    <noscript>You need JavaScript on to expand/collapse nodes.</noscript>\n" +
       prettyPrinted +
       "  </body>\n" +
       "</html>\n";
