@@ -159,7 +159,7 @@ JSON2HTML = function() {
             ], "string"));
           break;
         case "object":
-          if(thing.constructor == Array) {
+          if(Object.prototype.toString.call(thing) === '[object Array]') {
             formatArray(data, thing);
           } else {
             formatObject(data, thing);
