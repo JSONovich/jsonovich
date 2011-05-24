@@ -3,23 +3,31 @@
 	 xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>jsonovich@lackoftalent.org</id>
+    <name>JSONovich</name>
     <version>1.8a1</version>
     <type>2</type>
-    <name>JSONovich</name>
-    <description>Pretty-prints and colorizes JSON content.</description>
-    <creator>Michael J. Giarlo</creator>
-    <homepageURL>http://lackoftalent.org/michael/blog/json-in-firefox/</homepageURL>
-
-    <!-- Gecko 2 support -->
-    <contributor>William Elwood</contributor>
     <bootstrap>true</bootstrap>
+
+    <description>Pretty-prints and colorizes JSON content.</description>
+    <homepageURL>http://lackoftalent.org/michael/blog/json-in-firefox/</homepageURL>
+    <creator>Michael J. Giarlo</creator>
+    <developer>Will Elwood</developer>
 
     <!-- Firefox -->
     <targetApplication>
       <rdf:Description>
         <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
         <minVersion>3.5</minVersion>
-        <maxVersion>4.0</maxVersion>
+        <maxVersion>5.*</maxVersion>
+      </rdf:Description>
+    </targetApplication>
+
+    <!-- Seamonkey -->
+    <targetApplication>
+      <rdf:Description>
+        <id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</id>
+        <minVersion>2.0</minVersion>
+        <maxVersion>2.*</maxVersion>
       </rdf:Description>
     </targetApplication>
   </rdf:Description>
