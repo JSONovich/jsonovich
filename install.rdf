@@ -3,7 +3,7 @@
 	 xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>jsonovich@lackoftalent.org</id>
-    <version>1.7.1</version>
+    <version>1.8a1</version>
     <type>2</type>
     <name>JSONovich</name>
     <description>Pretty-prints and colorizes JSON content.</description>
@@ -12,6 +12,7 @@
 
     <!-- Gecko 2 support -->
     <contributor>William Elwood</contributor>
+    <bootstrap>true</bootstrap>
 
     <!-- Firefox -->
     <targetApplication>
