@@ -53,7 +53,7 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 const ADDON_NAME = 'JSONovich';
 const ADDON_LNAME = 'jsonovich';
 const DEBUG = false;
-let rootPath = null;
+let getResourceURI = null;
 let global = this;
 
 if(!XPCOMUtils.defineLazyGetter) { // emulate XPCOMUtils.defineLazyGetter (introduced in Gecko 1.9.2/FF3.6)
@@ -94,10 +94,7 @@ JSONovichBootstrap.prototype = {
     observe: function(aSubject, aTopic, aData) {
         switch(aTopic) {
             case "profile-after-change": // startup
-                let helper = rootPath.clone();
-                helper.append('modules');
-                helper.append('helper-gecko.js');
-                Services.scriptloader.loadSubScript(Services.io.newFileURI(helper).spec, global);
+                Services.scriptloader.loadSubScript(getResourceURI('modules/helper-gecko.js').spec, global);
                 break;
             default:
                 throw Components.Exception("Unknown topic: " + aTopic);
@@ -106,6 +103,22 @@ JSONovichBootstrap.prototype = {
 };
 
 function NSGetModule(compMgr, fileSpec) { // legacy Gecko entrypoint
-  rootPath = fileSpec.parent.parent;
-  return XPCOMUtils.generateModule([JSONovichBootstrap]);
+    let rootPath = fileSpec.parent.parent;
+
+    // emulate more Gecko 2, based mostly on buildJarURI and AddonWrapper.getResourceURI in http://mxr.mozilla.org/mozilla-central/source/toolkit/mozapps/extensions/XPIProvider.jsm
+    getResourceURI = function getResourceURI(aPath) {
+        let bundle = rootPath.clone();
+        if(aPath) {
+            if(bundle.isDirectory()) {
+                aPath.split("/").forEach(function(aPart) {
+                    bundle.append(aPart);
+                });
+            } else {
+                return Services.io.newURI("jar:" + bundle.spec + "!/" + aPath, null, null);
+            }
+        }
+        return Services.io.newFileURI(bundle);
+    }
+
+    return XPCOMUtils.generateModule([JSONovichBootstrap]);
 }
