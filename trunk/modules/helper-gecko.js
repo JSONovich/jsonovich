@@ -62,21 +62,16 @@ function require(path) {
     }
 
     if(!registry[path]) {
-        let scope = {
-            exports: {}
-        }; // Load the module into a local scope
+        let scope = {}; // Load the module into a local scope
         Services.scriptloader.loadSubScript(getResourceURI('modules/' + path + '.js').spec, scope);
 
-        let module = {}; // Construct the module for return
-        if(scope.exports.length) { // Support CommonJS style
+        let module = scope; // Construct the module for return
+        if(scope.exports) { // Support CommonJS style
             module = scope.exports;
         } else if(scope.EXPORTED_SYMBOLS && scope.EXPORTED_SYMBOLS.length) { // Support existing .jsm style
             for(let i = 0; i < scope.EXPORTED_SYMBOLS.length; i++) {
                 module[scope.EXPORTED_SYMBOLS[i]] = scope[scope.EXPORTED_SYMBOLS[i]];
             }
-        } else {
-            delete scope.exports;
-            module = scope;
         }
 
         registry[path] = module; // Save the loaded module for repeated require()s
