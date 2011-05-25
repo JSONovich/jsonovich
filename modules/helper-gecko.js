@@ -38,18 +38,19 @@
  *
  * Changelog:
  * [2011-05] - Added require and log functions and closure for initialisation.
- */
-
-/**
- * Because this is a simple loader, path is always resolved to:
- *   'resource://' + lower-case-addon-name + '-modules/' + path + '.js'
- * Consequently, appropriate resource aliases should be defined before use.
- * There is also no support for circular dependencies - don't use them...
  *
  * NOTES:
  * - Assumes 'Services.scriptloader' has already been set up by the relevant
  *   bootstrap script (importing or emulating Services.jsm)
  * - Assumes the ADDON_LNAME constant is defined by the relevant bootstrap script
+ * - Assumes the getResourceURI function is defined by the relevant bootstrap script
+ */
+
+/**
+ * Because this is a simple loader, path is always resolved to:
+ *   'modules/' + path + '.js'
+ * relative to this addon's installation root.
+ * There is also no support for circular dependencies - don't use them...
  *
  * @param path <string>  Path to desired module.
  * @return <object>      The loaded module.
@@ -64,7 +65,7 @@ function require(path) {
         let scope = {
             exports: {}
         }; // Load the module into a local scope
-        Services.scriptloader.loadSubScript('resource://' + ADDON_LNAME + '-modules/' + path + '.js', scope);
+        Services.scriptloader.loadSubScript(getResourceURI('modules/' + path + '.js').spec, scope);
 
         let module = {}; // Construct the module for return
         if(scope.exports.length) { // Support CommonJS style
@@ -99,11 +100,7 @@ function log(msg) {
             proto.setSubstitution(alias, null);
         });
     }
-    let modulePath = rootPath.clone(), contentPath = rootPath.clone();
-    modulePath.append('modules');
-    contentPath.append('resources');
-    setResourceAlias(ADDON_LNAME + '-modules', Services.io.newFileURI(modulePath));
-    setResourceAlias(ADDON_LNAME, Services.io.newFileURI(contentPath));
+    setResourceAlias(ADDON_LNAME, getResourceURI('resources/')); // trailing slash required inside XPI
 
     require('jsonStreamConverter');
 })();

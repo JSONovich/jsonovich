@@ -51,15 +51,17 @@ Cu.import("resource://gre/modules/AddonManager.jsm");
 const ADDON_NAME = 'JSONovich';
 const ADDON_LNAME = 'jsonovich';
 const DEBUG = true;
-let rootPath = null;
+let getResourceURI = null;
 let global = this;
 
 function startup(data, reason) {
-    rootPath = data.installPath;
     AddonManager.getAddonByID(data.id, function(addon) {
+        getResourceURI = function getResourceURI(path) {
+            return addon.getResourceURI(path);
+        }
         /* don't use Cu.import for anything we want to be reloadable without restart
          * (saves messing with the ugly workaround of changing directories and URLs...) */
-        Services.scriptloader.loadSubScript(addon.getResourceURI('modules/helper-gecko.js').spec, global);
+        Services.scriptloader.loadSubScript(getResourceURI('modules/helper-gecko.js').spec, global);
     });
 }
 
