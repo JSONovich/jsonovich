@@ -48,19 +48,8 @@ var streamConvData = {
     ]
 };
 
-function log(msg) {
-    if(bootstrapData.debug) {
-        Services.console.logStringMessage(msg);
-    }
-}
-
-var JSON2HTML = null;
-
 function JSONStreamConverter() {
-    if(JSON2HTML == null) {
-        // require('modules/json2html.js');
-        Services.scriptloader.loadSubScript('resource://' + bootstrapData.lname + '-modules/json2html.js', global);
-    }
+    this.JSON2HTML = require('json2html').JSON2HTML;
     log("JSONStreamConverter initialized");
 }
 JSONStreamConverter.prototype = {
@@ -96,10 +85,10 @@ JSONStreamConverter.prototype = {
         let prettyPrinted = "";
         try {
             let jsonData = JSON.parse(this.data);
-            prettyPrinted = JSON2HTML.formatJSON(jsonData);
+            prettyPrinted = this.JSON2HTML.formatJSON(jsonData);
         } catch(e) {
             log(e);
-            prettyPrinted = JSON2HTML.encodeHTML(this.data);
+            prettyPrinted = this.JSON2HTML.encodeHTML(this.data);
         }
         let htmlDocument = "<!DOCTYPE html>\n" +
         "<html>\n" +
@@ -165,12 +154,15 @@ var JSONovichFactory = {
 // dynamically register converters
 let aCompMgr = Cm.QueryInterface(Ci.nsIComponentRegistrar);
 let aFactory = JSONovichFactory;
-for(let conv in streamConvData.conversions) {
-    aCompMgr.registerFactory(streamConvData.cid, streamConvData.name,
-        '@mozilla.org/streamconv;1?from=' + streamConvData.conversions[conv] + '&to=*/*',
-        aFactory);
-    aFactory = null; // set null after 1st pass to avoid factory exists warning...
+try {
+    for(let conv in streamConvData.conversions) {
+        aCompMgr.registerFactory(streamConvData.cid, streamConvData.name,
+            '@mozilla.org/streamconv;1?from=' + streamConvData.conversions[conv] + '&to=*/*',
+            aFactory);
+        aFactory = null; // set null after 1st pass to avoid factory exists warning...
+    }
+} finally {
+    require('unload').unload(function() {
+        aCompMgr.unregisterFactory(streamConvData.cid, JSONovichFactory);
+    });
 }
-unload(function() {
-    aCompMgr.unregisterFactory(streamConvData.cid, JSONovichFactory);
-});

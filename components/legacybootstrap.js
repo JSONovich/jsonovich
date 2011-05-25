@@ -50,19 +50,14 @@ const Cr = Components.results;
 const Cu = Components.utils;
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
+const ADDON_NAME = 'JSONovich';
+const ADDON_LNAME = 'jsonovich';
+const DEBUG = false;
+let rootPath = null;
+let global = this;
+
 if(!XPCOMUtils.defineLazyGetter) { // emulate XPCOMUtils.defineLazyGetter (introduced in Gecko 1.9.2/FF3.6)
-    // modified from http://hg.mozilla.org/mozilla-central/diff/f2ebd467b1cd/js/src/xpconnect/loader/XPCOMUtils.jsm
-    /**
-     * Defines a getter on a specified object that will be created upon first use.
-     *
-     * @param aObject
-     *        The object to define the lazy getter on.
-     * @param aName
-     *        The name of the getter to define on aObject.
-     * @param aLambda
-     *        A function that returns what the getter should return.  This will
-     *        only ever be called once.
-     */
+    // see http://hg.mozilla.org/mozilla-central/diff/f2ebd467b1cd/js/src/xpconnect/loader/XPCOMUtils.jsm
     XPCOMUtils.defineLazyGetter = function XPCU_defineLazyGetter(aObject, aName, aLambda) {
         aObject.__defineGetter__(aName, function() {
             delete aObject[aName];
@@ -71,20 +66,7 @@ if(!XPCOMUtils.defineLazyGetter) { // emulate XPCOMUtils.defineLazyGetter (intro
     }
 }
 if(!XPCOMUtils.defineLazyServiceGetter) { // emulate XPCOMUtils.defineLazyServiceGetter (introduced in Gecko 1.9.2/FF3.6)
-    // modified from http://hg.mozilla.org/mozilla-central/diff/acb4f43ba5ab/js/src/xpconnect/loader/XPCOMUtils.jsm
-    /**
-     * Defines a getter on a specified object for a service.  The service will not
-     * be obtained until first use.
-     *
-     * @param aObject
-     *        The object to define the lazy getter on.
-     * @param aName
-     *        The name of the getter to define on aObject for the service.
-     * @param aContract
-     *        The contract used to obtain the service.
-     * @param aInterfaceName
-     *        The name of the interface to query the service to.
-     */
+    // see http://hg.mozilla.org/mozilla-central/diff/acb4f43ba5ab/js/src/xpconnect/loader/XPCOMUtils.jsm
     XPCOMUtils.defineLazyServiceGetter = function XPCU_defineLazyServiceGetter(aObject, aName, aContract, aInterfaceName) {
         XPCOMUtils.defineLazyGetter(aObject, aName, function XPCU_serviceLambda() {
             return Cc[aContract].getService(Ci[aInterfaceName]);
@@ -96,19 +78,12 @@ let Services = {}; // emulate Services.jsm (introduced in Gecko 2/FF4)
 XPCOMUtils.defineLazyServiceGetter(Services, "console", "@mozilla.org/consoleservice;1", "nsIConsoleService");
 // see http://hg.mozilla.org/mozilla-central/diff/365acfca64dc/toolkit/content/Services.jsm
 XPCOMUtils.defineLazyServiceGetter(Services, "scriptloader", "@mozilla.org/moz/jssubscript-loader;1", "mozIJSSubScriptLoader");
-
-let global = this;
-let bootstrapData = {
-    name: 'JSONovich',
-    lname: 'jsonovich',
-    debug: false
-}
-
-function unload() {} // no-op, can't unload in legacy Gecko
+// see http://hg.mozilla.org/mozilla-central/diff/78e5543c0bc4/toolkit/content/Services.jsm
+XPCOMUtils.defineLazyServiceGetter(Services, "io", "@mozilla.org/network/io-service;1", "nsIIOService2");
 
 function JSONovichBootstrap() {}
 JSONovichBootstrap.prototype = {
-    classDescription: "JSONovich",
+    classDescription: ADDON_NAME,
     classID:          Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a65}"),
     contractID:       "@lackoftalent.org/jsonovichbootstrap;1",
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver]),
@@ -118,9 +93,11 @@ JSONovichBootstrap.prototype = {
 
     observe: function(aSubject, aTopic, aData) {
         switch(aTopic) {
-            case "profile-after-change": // need to wait for at least 'app-startup' befure using resource:// URLs
-                // require('modules/jsonStreamConverter.js');
-                Services.scriptloader.loadSubScript('resource://' + bootstrapData.lname + '-modules/jsonStreamConverter.js', global);
+            case "profile-after-change": // startup
+                let helper = rootPath.clone();
+                helper.append('modules');
+                helper.append('helper-gecko.js');
+                Services.scriptloader.loadSubScript(Services.io.newFileURI(helper).spec, global);
                 break;
             default:
                 throw Components.Exception("Unknown topic: " + aTopic);
@@ -128,8 +105,7 @@ JSONovichBootstrap.prototype = {
     }
 };
 
-if(XPCOMUtils.generateNSGetFactory) { // Gecko 2+ entrypoint (unneeded now we're bootstrapped but negligible overhead)
-    var NSGetFactory = XPCOMUtils.generateNSGetFactory([JSONovichBootstrap]);
-} else { // legacy Gecko entrypoint
-    var NSGetModule = XPCOMUtils.generateNSGetModule([JSONovichBootstrap]);
+function NSGetModule(compMgr, fileSpec) { // legacy Gecko entrypoint
+  rootPath = fileSpec.parent.parent;
+  return XPCOMUtils.generateModule([JSONovichBootstrap]);
 }

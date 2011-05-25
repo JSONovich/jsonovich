@@ -4,11 +4,11 @@
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>jsonovich@lackoftalent.org</id>
     <name>JSONovich</name>
-    <version>1.8</version>
+    <version>1.8.1a1</version>
     <type>2</type>
     <bootstrap>true</bootstrap>
 
-    <description>Pretty-prints and colorizes JSON content.</description>
+    <description>Pretty-prints JSON content in the browser.</description>
     <homepageURL>http://lackoftalent.org/michael/blog/json-in-firefox/</homepageURL>
     <creator>Michael J. Giarlo</creator>
     <developer>Will Elwood</developer>
@@ -27,7 +27,7 @@
       <rdf:Description>
         <id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</id>
         <minVersion>2.0</minVersion>
-        <maxVersion>2.*</maxVersion>
+        <maxVersion>2.1.*</maxVersion>
       </rdf:Description>
     </targetApplication>
   </rdf:Description>
