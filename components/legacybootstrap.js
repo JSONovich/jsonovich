@@ -19,6 +19,8 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *  - Gecko 2 emulation from mozilla-central.
+ *    Portions Copyright (C) 2009, 2010 the Mozilla Foundation.
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -43,16 +45,13 @@
  * TODO: when dropping Gecko 1.9.2/Firefox 3.6 support, all this code becomes unnecessary.
  */
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cm = Components.manager;
-const Cr = Components.results;
-const Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, manager: Cm, results: Cr, utils: Cu} = Components;
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 const ADDON_NAME = 'JSONovich';
 const ADDON_LNAME = 'jsonovich';
 const DEBUG = false;
+const PLATFORM = 'gecko';
 let getResourceURI = null;
 let global = this;
 
@@ -94,7 +93,7 @@ JSONovichBootstrap.prototype = {
     observe: function(aSubject, aTopic, aData) {
         switch(aTopic) {
             case "profile-after-change": // startup
-                Services.scriptloader.loadSubScript(getResourceURI('modules/helper-gecko.js').spec, global);
+                Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/helper.js').spec, global);
                 break;
             default:
                 throw Components.Exception("Unknown topic: " + aTopic);
