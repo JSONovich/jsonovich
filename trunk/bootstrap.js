@@ -40,17 +40,14 @@
  * [2011-05] - Created FF4 restartless bootstrap for JSONovich extension
  */
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cm = Components.manager;
-const Cr = Components.results;
-const Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, manager: Cm, results: Cr, utils: Cu} = Components;
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 
 const ADDON_NAME = 'JSONovich';
 const ADDON_LNAME = 'jsonovich';
 const DEBUG = true;
+const PLATFORM = 'gecko';
 let getResourceURI = null;
 let global = this;
 
@@ -61,17 +58,20 @@ function startup(data, reason) {
         }
         /* don't use Cu.import for anything we want to be reloadable without restart
          * (saves messing with the ugly workaround of changing directories and URLs...) */
-        Services.scriptloader.loadSubScript(getResourceURI('modules/helper-gecko.js').spec, global);
+        Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/helper.js').spec, global);
     });
 }
 
 function shutdown(data, reason) {
-    if(reason != APP_SHUTDOWN) require('unload').unload();
+    if(reason != APP_SHUTDOWN && require) {
+        require('unload').unload();
+    }
     if(reason == ADDON_DISABLE && DEBUG) {
         AddonManager.getAddonByID(data.id, function(addon) {
             addon.userDisabled = false;
         });
     }
 }
+
 function install(data, reason) {}
 function uninstall(data, reason) {}
