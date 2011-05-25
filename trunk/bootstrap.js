@@ -48,29 +48,24 @@ const Cu = Components.utils;
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 
+const ADDON_NAME = 'JSONovich';
+const ADDON_LNAME = 'jsonovich';
+const DEBUG = true;
+let rootPath = null;
 let global = this;
-let bootstrapData = {
-    name: 'JSONovich',
-    lname: 'jsonovich',
-    debug: false
-}
 
 function startup(data, reason) {
+    rootPath = data.installPath;
     AddonManager.getAddonByID(data.id, function(addon) {
         /* don't use Cu.import for anything we want to be reloadable without restart
          * (saves messing with the ugly workaround of changing directories and URLs...) */
-        Services.scriptloader.loadSubScript(addon.getResourceURI("modules/unload.js").spec, global);
-
-        JSONovichBootstrap.setResourceAlias(bootstrapData.lname + '-modules', addon.getResourceURI('modules'));
-        JSONovichBootstrap.setResourceAlias(bootstrapData.lname, addon.getResourceURI('chrome/public'));
-
-        Services.scriptloader.loadSubScript('resource://' + bootstrapData.lname + '-modules/jsonStreamConverter.js', global);
+        Services.scriptloader.loadSubScript(addon.getResourceURI('modules/helper-gecko.js').spec, global);
     });
 }
 
 function shutdown(data, reason) {
-    if(reason != APP_SHUTDOWN) unload();
-    if(reason == ADDON_DISABLE && bootstrapData.debug) {
+    if(reason != APP_SHUTDOWN) require('unload').unload();
+    if(reason == ADDON_DISABLE && DEBUG) {
         AddonManager.getAddonByID(data.id, function(addon) {
             addon.userDisabled = false;
         });
@@ -78,13 +73,3 @@ function shutdown(data, reason) {
 }
 function install(data, reason) {}
 function uninstall(data, reason) {}
-
-let JSONovichBootstrap = {
-    setResourceAlias: function(alias, target) {
-        let proto = Services.io.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
-        proto.setSubstitution(alias, target);
-        unload(function() {
-            proto.setSubstitution(alias, null);
-        });
-    }
-};
