@@ -20,6 +20,10 @@
  * Contributor(s):
  *   Edward Lee <edilee@mozilla.com>
  *
+ *  - Minor niggles suggested by NetBeans, remove 'let' for cross-browser,
+ *    use strict.
+ *    Portions Copyright (C) 2011 William Elwood <we9@kent.ac.uk>.
+ *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
  * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
@@ -34,6 +38,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+'use strict';
+
 /**
  * Save callbacks to run when unloading. Optionally scope the callback to a
  * container, e.g., window. Provide a way to run all the callbacks.
@@ -41,17 +47,17 @@
  * @usage unload(): Run all callbacks and release them.
  *
  * @usage unload(callback): Add a callback to run on unload.
- * @param [function] callback: 0-parameter function to call on unload.
- * @return [function]: A 0-parameter function that undoes adding the callback.
+ * @param callback <function>  0-parameter function to call on unload.
+ * @return <function>  A 0-parameter function that undoes adding the callback.
  *
- * @usage unload(callback, container) Add a scoped callback to run on unload.
- * @param [function] callback: 0-parameter function to call on unload.
- * @param [node] container: Remove the callback when this container unloads.
- * @return [function]: A 0-parameter function that undoes adding the callback.
+ * @usage unload(callback, container): Add a scoped callback to run on unload.
+ * @param callback <function>  0-parameter function to call on unload.
+ * @param container <node>  Remove the callback when this container unloads.
+ * @return <function>  A 0-parameter function that undoes adding the callback.
  */
 function unload(callback, container) {
   // Initialize the array of unloaders on the first usage
-  let unloaders = unload.unloaders;
+  var unloaders = unload.unloaders;
   if (unloaders == null)
     unloaders = unload.unloaders = [];
 
@@ -59,7 +65,7 @@ function unload(callback, container) {
   if (callback == null) {
     unloaders.slice().forEach(function(unloader) unloader());
     unloaders.length = 0;
-    return;
+    return undefined;
   }
 
   // The callback is bound to the lifetime of the container if we have one
@@ -68,7 +74,7 @@ function unload(callback, container) {
     container.addEventListener("unload", removeUnloader, false);
 
     // Wrap the callback to additionally remove the unload listener
-    let origCallback = callback;
+    var origCallback = callback;
     callback = function() {
       container.removeEventListener("unload", removeUnloader, false);
       origCallback();
@@ -86,7 +92,7 @@ function unload(callback, container) {
 
   // Provide a way to remove the unloader
   function removeUnloader() {
-    let index = unloaders.indexOf(unloader);
+    var index = unloaders.indexOf(unloader);
     if (index != -1)
       unloaders.splice(index, 1);
   }

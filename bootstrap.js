@@ -40,6 +40,8 @@
  * [2011-05] - Created FF4 restartless bootstrap for JSONovich extension
  */
 
+'use strict';
+
 const {classes: Cc, interfaces: Ci, manager: Cm, results: Cr, utils: Cu} = Components;
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/AddonManager.jsm");

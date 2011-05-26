@@ -44,6 +44,8 @@
  * TODO: when dropping Gecko 1.9.2/Firefox 3.6 support, remove emulation of Services.jsm.
  */
 
+'use strict';
+
 if(!Services.prefs) { // emulate Services.jsm (introduced in Gecko 2/FF4)
     // see http://hg.mozilla.org/mozilla-central/diff/78e5543c0bc4/toolkit/content/Services.jsm
     XPCOMUtils.defineLazyGetter(Services, "prefs", function () {
