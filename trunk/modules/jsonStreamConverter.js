@@ -158,7 +158,7 @@ let aCompMgr = Cm.QueryInterface(Ci.nsIComponentRegistrar);
 let aFactory = JSONovichFactory;
 try {
     for(let conv in streamConvData.conversions) {
-        aCompMgr.registerFactory(streamConvData.cid, streamConvData.name,
+        aCompMgr.registerFactory(streamConvData.cid, ADDON_NAME,
             '@mozilla.org/streamconv;1?from=' + streamConvData.conversions[conv] + '&to=*/*',
             aFactory);
         aFactory = null; // set null after 1st pass to avoid factory exists warning...
