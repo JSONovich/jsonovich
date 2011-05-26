@@ -41,13 +41,19 @@
 var streamConvData = {
     cid: Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a66}"),
     conversions: [
-    "application/json",
-    "application/jsonrequest",
-    "text/x-json",
-    "application/sparql-results+json",
-    "application/rdf+json",
-    "application/*+json"
-    ]
+    'application/json',
+    'application/jsonrequest',
+    'text/json',
+    'text/x-json',
+    'application/sparql-results+json', // http://www.w3.org/TR/rdf-sparql-json-res/
+    'application/rdf+json',
+    'application/schema+json', // http://json-schema.org/
+    'application/*+json' // untested, not expected to work as a wildcard
+    ],
+    extensions: {
+        'json': 'application/json',
+        'srj': 'application/sparql-results+json'
+    }
 };
 
 function JSONStreamConverter() {
@@ -175,10 +181,14 @@ var JSONovichFactory = {
     // dynamically register filetype mapping
     let aCatMgr = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
     try {
-        aCatMgr.addCategoryEntry('ext-to-type-mapping', 'json', 'application/json', false, true);
+        for(let ext in streamConvData.extensions) {
+            aCatMgr.addCategoryEntry('ext-to-type-mapping', ext, streamConvData.extensions[ext], false, true);
+        }
     } finally {
         require('unload').unload(function() {
-            aCatMgr.deleteCategoryEntry('ext-to-type-mapping', 'json', false);
+            for(let ext in streamConvData.extensions) {
+                aCatMgr.deleteCategoryEntry('ext-to-type-mapping', ext, false);
+            }
         });
     }
 })();
