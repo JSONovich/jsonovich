@@ -153,18 +153,32 @@ var JSONovichFactory = {
     }
 };
 
-// dynamically register converters
-let aCompMgr = Cm.QueryInterface(Ci.nsIComponentRegistrar);
-let aFactory = JSONovichFactory;
-try {
-    for(let conv in streamConvData.conversions) {
-        aCompMgr.registerFactory(streamConvData.cid, ADDON_NAME,
-            '@mozilla.org/streamconv;1?from=' + streamConvData.conversions[conv] + '&to=*/*',
-            aFactory);
-        aFactory = null; // set null after 1st pass to avoid factory exists warning...
+(function() {
+    // dynamically register converters
+    let aCompMgr = Cm.QueryInterface(Ci.nsIComponentRegistrar);
+    let aFactory = JSONovichFactory;
+    try {
+        for(let conv in streamConvData.conversions) {
+            aCompMgr.registerFactory(streamConvData.cid, ADDON_NAME,
+                '@mozilla.org/streamconv;1?from=' + streamConvData.conversions[conv] + '&to=*/*',
+                aFactory);
+            aFactory = null; // set null after 1st pass to avoid factory exists warning...
+        }
+    } finally {
+        require('unload').unload(function() {
+            aCompMgr.unregisterFactory(streamConvData.cid, JSONovichFactory);
+        });
     }
-} finally {
-    require('unload').unload(function() {
-        aCompMgr.unregisterFactory(streamConvData.cid, JSONovichFactory);
-    });
-}
+})();
+
+(function() {
+    // dynamically register filetype mapping
+    let aCatMgr = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
+    try {
+        aCatMgr.addCategoryEntry('ext-to-type-mapping', 'json', 'application/json', false, true);
+    } finally {
+        require('unload').unload(function() {
+            aCatMgr.deleteCategoryEntry('ext-to-type-mapping', 'json', false);
+        });
+    }
+})();
