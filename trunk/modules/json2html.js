@@ -40,6 +40,8 @@
  *              + Initial work towards user-customisable formatting
  */
 
+'use strict';
+
 var EXPORTED_SYMBOLS = ["JSON2HTML"],
 JSON2HTML = function() {
   let lineBreaks = {

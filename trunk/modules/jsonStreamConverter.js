@@ -36,6 +36,8 @@
  *             both restartless and legacy bootstraps.
  */
 
+'use strict';
+
 var streamConvData = {
     cid: Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a66}"),
     conversions: [

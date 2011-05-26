@@ -46,6 +46,8 @@
  * - Assumes the getResourceURI function is defined by the relevant bootstrap script
  */
 
+'use strict';
+
 /**
  * Because this is a simple loader, path is always resolved to:
  *   'modules/' + path + '.js'
