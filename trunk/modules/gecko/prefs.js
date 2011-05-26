@@ -57,20 +57,29 @@ if(!Services.contentPrefs) {
 const NS_PREFBRANCH_PREFCHANGE_TOPIC_ID = "nsPref:changed";
 
 function normaliseBranch(branch) {
-    return typeof branch == 'string'
-    ? Services.prefs.getBranch(branch.charAt(branch.length-1)=='.' ? branch : (branch + '.'))
-    : branch.QueryInterface(Ci.nsIPrefBranch2);
+    if(typeof branch == 'string') {
+        if(branch.length && branch.charAt(branch.length-1)!='.') {
+            branch += '.';
+        }
+        return Services.prefs.getBranch(branch);
+    }
+    return branch.QueryInterface(Ci.nsIPrefBranch2);
 }
 
 /**
- * @param branch <string|nsIPrefBranch>  The branch in the preferences tree.
  * @param callback <function>  A 2-parameter function to execute whenever any preference in
  *                             the specified branch is changed, parameters will be the
  *                             appropriate branch as an instance of nsIPrefBranch and
  *                             the name of the changed preference relative to the branch.
+ * @param branch <string|nsIPrefBranch>  The optional branch in the preferences tree, default root.
  * @return <function>  A 0-parameter function that stops this listener.
  */
-function listenPref(branch, callback) {
+function listenPref(callback, branch) {
+    if(branch) {
+        branch = normaliseBranch(branch);
+    } else {
+        branch = Services.prefs; // assume root
+    }
     branch = normaliseBranch(branch);
     let listener = {
         observe: function(subject, topic, data) {
@@ -94,13 +103,17 @@ function listenPref(branch, callback) {
 }
 
 /**
- * @param branch <string|nsIPrefBranch>  The branch in the preferences tree.
  * @param pref <string>  The preference to get relative to the branch.
  * @param type <string>  The type of value to get (boolean, integer, string-ascii,
  *                       string-unicode, string-locale, file-abs, file-rel)
+ * @param branch <string|nsIPrefBranch>  The optional branch in the preferences tree, default root.
  */
-function getPref(branch, pref, type) {
-    branch = normaliseBranch(branch);
+function getPref(pref, type, branch) {
+    if(branch) {
+        branch = normaliseBranch(branch);
+    } else {
+        branch = Services.prefs; // assume root
+    }
     switch(type) {
         case 'boolean':
             return branch.getBoolPref(pref);
@@ -123,16 +136,20 @@ function getPref(branch, pref, type) {
 }
 
 /**
- * @param branch <string|nsIPrefBranch>  The branch in the preferences tree.
  * @param pref <string>  The preference to be set relative to the branch.
  * @param type <string>  The type of value to set (boolean, integer, string-ascii,
  *                       string-unicode, string-locale, file-abs, file-rel)
  * @param value <bool|int|string|nsISupportsString|nsIPrefLocalizedString
  *              |nsILocalFile|nsIRelativeFilePref>
  *                       The value to set.
+ * @param branch <string|nsIPrefBranch>  The optional branch in the preferences tree, default root.
  */
-function setPref(branch, pref, type, value) {
-    branch = normaliseBranch(branch);
+function setPref(pref, type, value, branch) {
+    if(branch) {
+        branch = normaliseBranch(branch);
+    } else {
+        branch = Services.prefs; // assume root
+    }
     switch(type) {
         case 'boolean':
             branch.setBoolPref(pref, value);

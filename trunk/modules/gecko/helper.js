@@ -87,15 +87,38 @@ function log(msg) {
 }
 
 (function() {
+    // Modify HTTP Accept header
+    (function setAcceptHeader(acceptPart) {
+        let prefs = require(PLATFORM + '/prefs');
+        function setCleanAccept(suffix) {
+            let accept = prefs.get('network.http.accept.default', 'string-ascii');
+            if(suffix && accept.indexOf(acceptPart) != -1) {
+                return; // already accepting specified suffix
+            }
+            accept = accept.split(',');
+            let index;
+            while((index = accept.indexOf(acceptPart)) != -1) {
+                accept.splice(index, 1);
+            }
+            if(suffix) {
+                accept.push(acceptPart);
+            }
+            prefs.set('network.http.accept.default', 'string-ascii', accept.join(','));
+        }
+        setCleanAccept(true);
+        require('unload').unload(function() {
+            setCleanAccept();
+        });
+    })('application/json'); // maybe we can add a lower q-value in the future, track https://issues.apache.org/jira/browse/COUCHDB-234
+
     // Set up resource:// URLs
-    function setResourceAlias(alias, target) {
+    (function setResourceAlias(alias, target) {
         let proto = Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler);
         proto.setSubstitution(alias, target);
         require('unload').unload(function() {
             proto.setSubstitution(alias, null);
         });
-    }
-    setResourceAlias(ADDON_LNAME, getResourceURI('resources/')); // trailing slash required inside XPI
+    })(ADDON_LNAME, getResourceURI('resources/')); // trailing slash required inside XPI
 
     require('jsonStreamConverter');
 })();
