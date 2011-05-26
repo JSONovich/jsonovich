@@ -46,26 +46,26 @@ Cu.import("resource://gre/modules/AddonManager.jsm");
 
 const ADDON_NAME = 'JSONovich';
 const ADDON_LNAME = 'jsonovich';
-const DEBUG = true;
+const ADDON_DOMAIN = 'lackoftalent.org';
 const PLATFORM = 'gecko';
-let getResourceURI = null;
-let global = this;
+const DEBUG = false;
+let jsonovich, getResourceURI;
 
 function startup(data, reason) {
     AddonManager.getAddonByID(data.id, function(addon) {
         getResourceURI = function getResourceURI(path) {
             return addon.getResourceURI(path);
         }
-        /* don't use Cu.import for anything we want to be reloadable without restart
-         * (saves messing with the ugly workaround of changing directories and URLs...) */
-        Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/helper.js').spec, global);
+        jsonovich = {};
+        Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/helper.js').spec, jsonovich);
     });
 }
 
 function shutdown(data, reason) {
-    if(reason != APP_SHUTDOWN && require) {
-        require('unload').unload();
+    if(reason != APP_SHUTDOWN && jsonovich.require) {
+        jsonovich.require('unload').unload();
     }
+    jsonovich = null;
     if(reason == ADDON_DISABLE && DEBUG) {
         AddonManager.getAddonByID(data.id, function(addon) {
             addon.userDisabled = false;
