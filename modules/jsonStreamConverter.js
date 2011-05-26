@@ -164,11 +164,17 @@ var JSONovichFactory = {
     let aCompMgr = Cm.QueryInterface(Ci.nsIComponentRegistrar);
     let aFactory = JSONovichFactory;
     try {
-        for(let conv in streamConvData.conversions) {
-            aCompMgr.registerFactory(streamConvData.cid, ADDON_NAME,
-                '@mozilla.org/streamconv;1?from=' + streamConvData.conversions[conv] + '&to=*/*',
-                aFactory);
-            aFactory = null; // set null after 1st pass to avoid factory exists warning...
+        for(let i = 0; i < streamConvData.conversions.length; i++) {
+            try {
+                aCompMgr.registerFactory(streamConvData.cid, ADDON_NAME,
+                    '@mozilla.org/streamconv;1?from=' + streamConvData.conversions[i] + '&to=*/*',
+                    aFactory);
+            } catch(e) {
+                if(e.name == 'NS_ERROR_FACTORY_EXISTS') { // this only happens in Gecko 2+...
+                    aFactory = null; // set null to avoid factory exists warning
+                    i--; // and try again
+                }
+            }
         }
     } finally {
         require('unload').unload(function() {
