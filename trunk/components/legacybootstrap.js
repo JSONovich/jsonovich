@@ -50,10 +50,10 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 const ADDON_NAME = 'JSONovich';
 const ADDON_LNAME = 'jsonovich';
-const DEBUG = false;
+const ADDON_DOMAIN = 'lackoftalent.org';
 const PLATFORM = 'gecko';
-let getResourceURI = null;
-let global = this;
+const DEBUG = false;
+let jsonovich, getResourceURI;
 
 if(!XPCOMUtils.defineLazyGetter) { // emulate XPCOMUtils.defineLazyGetter (introduced in Gecko 1.9.2/FF3.6)
     // see http://hg.mozilla.org/mozilla-central/diff/f2ebd467b1cd/js/src/xpconnect/loader/XPCOMUtils.jsm
@@ -78,25 +78,49 @@ XPCOMUtils.defineLazyServiceGetter(Services, "console", "@mozilla.org/consoleser
 // see http://hg.mozilla.org/mozilla-central/diff/365acfca64dc/toolkit/content/Services.jsm
 XPCOMUtils.defineLazyServiceGetter(Services, "scriptloader", "@mozilla.org/moz/jssubscript-loader;1", "mozIJSSubScriptLoader");
 // see http://hg.mozilla.org/mozilla-central/diff/78e5543c0bc4/toolkit/content/Services.jsm
+XPCOMUtils.defineLazyServiceGetter(Services, "obs", "@mozilla.org/observer-service;1", "nsIObserverService");
 XPCOMUtils.defineLazyServiceGetter(Services, "io", "@mozilla.org/network/io-service;1", "nsIIOService2");
+
+function startup() {
+    jsonovich = {};
+    Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/helper.js').spec, jsonovich);
+}
+
+function shutdown() { // thanks to work on restartless support, we can do this on-demand in legacy Gecko :D
+    if(jsonovich.require) {
+        jsonovich.require('unload').unload();
+    }
+    jsonovich = null;
+}
 
 function JSONovichBootstrap() {}
 JSONovichBootstrap.prototype = {
     classDescription: ADDON_NAME,
     classID:          Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a65}"),
-    contractID:       "@lackoftalent.org/jsonovichbootstrap;1",
+    contractID:       '@' + ADDON_DOMAIN + '/' + ADDON_LNAME + 'bootstrap;1',
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver]),
-    _xpcom_categories: [{
-        category: "profile-after-change"
-    }],
+    _xpcom_categories: [{category: "profile-after-change"}],
 
     observe: function(aSubject, aTopic, aData) {
         switch(aTopic) {
-            case "profile-after-change": // startup
-                Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/helper.js').spec, global);
+            case "profile-after-change":
+                startup();
+                Services.obs.addObserver(this, "em-action-requested", false);
                 break;
-            default:
-                throw Components.Exception("Unknown topic: " + aTopic);
+            case "em-action-requested":
+                aSubject.QueryInterface(Ci.nsIUpdateItem);
+                if(aSubject.id == ADDON_LNAME + '@' + ADDON_DOMAIN) {
+                    switch(aData) {
+                        case "item-uninstalled":
+                        case "item-disabled":
+                            shutdown();
+                            break;
+                        case "item-cancel-action":
+                            startup();
+                            break;
+                    }
+                }
+                break;
         }
     }
 };
