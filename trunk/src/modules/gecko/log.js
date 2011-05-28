@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is JSONovich restartless bootstrap.
+ * The Original Code is JSONovich logging module.
  *
  * The Initial Developer of the Original Code is
  * William Elwood <we9@kent.ac.uk>.
@@ -34,46 +34,44 @@
  *
  * ***** END LICENSE BLOCK *****
  *
- * This file contains the JSONovich bootstrap for Gecko 2+ browsers.
+ * This file contains utility functions for logging to the error console.
  *
  * Changelog:
- * [2011-05] - Created FF4 restartless bootstrap for JSONovich extension
+ * [2011-05] - Created log module
+ *
+ * TODO: when dropping Gecko 1.9.2/Firefox 3.6 support, remove emulation of Services.jsm.
  */
 
 'use strict';
 
-const {classes: Cc, interfaces: Ci, manager: Cm, results: Cr, utils: Cu} = Components;
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/AddonManager.jsm");
+let debug = false;
 
-const ADDON_NAME = 'JSONovich';
-const ADDON_LNAME = 'jsonovich';
-const ADDON_DOMAIN = 'lackoftalent.org';
-const PLATFORM = 'gecko';
-let jsonovich, getResourceURI;
-
-function startup(data, reason) {
-    AddonManager.getAddonByID(data.id, function(addon) {
-        getResourceURI = function getResourceURI(path) {
-            return addon.getResourceURI(path);
-        }
-        jsonovich = {};
-        Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/helper.js').spec, jsonovich);
-        if(jsonovich.startup) {
-            jsonovich.startup();
-        }
-    });
+if(!Services.console) { // emulate Services.jsm (introduced in Gecko 2/FF4)
+    // see http://hg.mozilla.org/mozilla-central/diff/b264a7e3c0f5/toolkit/content/Services.jsm
+    XPCOMUtils.defineLazyServiceGetter(Services, "console", "@mozilla.org/consoleservice;1", "nsIConsoleService");
 }
 
-function shutdown(data, reason) {
-    if(reason == ADDON_UNINSTALL && jsonovich.uninstall) {
-        jsonovich.uninstall();
-    }
-    if(reason != APP_SHUTDOWN && jsonovich.shutdown) {
-        jsonovich.shutdown();
-    }
-    jsonovich = null;
+function logError(msg) {
+    Cu.reportError(msg);
 }
 
-function install(data, reason) {}
-function uninstall(data, reason) {}
+function logInfo(msg) {
+    Services.console.logStringMessage(msg);
+}
+
+function logDebug(msg) {
+    if(debug) {
+        Services.console.logStringMessage(msg);
+    }
+}
+
+function setDebug(enable) {
+    debug = enable;
+}
+
+var exports = {
+    error: logError,
+    info: logInfo,
+    debug: logDebug,
+    setDebug: setDebug
+};

@@ -38,7 +38,7 @@
 
 'use strict';
 
-var streamConvData = {
+let streamConvData = {
     cid: Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a66}"),
     conversions: [
     'application/json',
@@ -56,9 +56,11 @@ var streamConvData = {
     }
 };
 
+let log = require(PLATFORM + '/log');
+
 function JSONStreamConverter() {
     this.JSON2HTML = require('json2html').JSON2HTML;
-    log("JSONStreamConverter initialized");
+    log.debug("JSONStreamConverter initialized");
 }
 JSONStreamConverter.prototype = {
     listener: null,
@@ -75,27 +77,27 @@ JSONStreamConverter.prototype = {
 
     // nsIRequestObserver::onStartRequest
     onStartRequest: function(aReq, aCtx) {
-        log("Entered onStartRequest");
+        log.debug("Entered onStartRequest");
         this.data = "";
         this.rawdata = "";
         this.channel = aReq.QueryInterface(Ci.nsIChannel);
         this.uri = this.channel.URI.spec;
-        log(this.channel.contentType);
+        log.debug(this.channel.contentType);
         this.channel.contentType = "text/html";
         if(this.listener)
             this.listener.onStartRequest(this.channel, aCtx);
-        log("Exiting onStartRequest");
+        log.debug("Exiting onStartRequest");
     },
 
     // nsIRequestObserver::onStopRequest
     onStopRequest: function(aReq, aCtx, aStatus) {
-        log("Entered onStopRequest");
+        log.debug("Entered onStopRequest");
         let prettyPrinted = "";
         try {
             let jsonData = JSON.parse(this.data);
             prettyPrinted = this.JSON2HTML.formatJSON(jsonData);
         } catch(e) {
-            log(e);
+            log.error(e);
             prettyPrinted = this.JSON2HTML.encodeHTML(this.data);
         }
         let htmlDocument = "<!DOCTYPE html>\n" +
@@ -121,12 +123,12 @@ JSONStreamConverter.prototype = {
             this.listener.onDataAvailable(this.channel, aCtx, stream, 0, len);
             this.listener.onStopRequest(this.channel, aCtx, aStatus);
         }
-        log("Exiting onStopRequest");
+        log.debug("Exiting onStopRequest");
     },
 
     // nsIStreamListener::onDataAvailable
     onDataAvailable: function(aReq, aCtx, aStream, aOffset, aCount) {
-        log("Entered onDataAvailable");
+        log.debug("Entered onDataAvailable");
         var sis = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
         sis.init(aStream);
         this.rawdata += sis.read(aCount);
@@ -134,7 +136,7 @@ JSONStreamConverter.prototype = {
         converter.charset = "UTF-8";
         sis.close();
         this.data = converter.ConvertToUnicode(this.rawdata);
-        log("Exiting onDataAvailable");
+        log.debug("Exiting onDataAvailable");
     },
 
     // nsIStreamConverter::asyncConvertData
@@ -173,6 +175,8 @@ var JSONovichFactory = {
                 if(e.name == 'NS_ERROR_FACTORY_EXISTS') { // this only happens in Gecko 2+...
                     aFactory = null; // set null to avoid factory exists warning
                     i--; // and try again
+                } else {
+                    log.error(e);
                 }
             }
         }

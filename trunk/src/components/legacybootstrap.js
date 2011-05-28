@@ -52,7 +52,6 @@ const ADDON_NAME = 'JSONovich';
 const ADDON_LNAME = 'jsonovich';
 const ADDON_DOMAIN = 'lackoftalent.org';
 const PLATFORM = 'gecko';
-const DEBUG = false;
 let jsonovich, getResourceURI;
 
 if(!XPCOMUtils.defineLazyGetter) { // emulate XPCOMUtils.defineLazyGetter (introduced in Gecko 1.9.2/FF3.6)
@@ -73,8 +72,6 @@ if(!XPCOMUtils.defineLazyServiceGetter) { // emulate XPCOMUtils.defineLazyServic
     }
 }
 let Services = {}; // emulate Services.jsm (introduced in Gecko 2/FF4)
-// see http://hg.mozilla.org/mozilla-central/diff/b264a7e3c0f5/toolkit/content/Services.jsm
-XPCOMUtils.defineLazyServiceGetter(Services, "console", "@mozilla.org/consoleservice;1", "nsIConsoleService");
 // see http://hg.mozilla.org/mozilla-central/diff/365acfca64dc/toolkit/content/Services.jsm
 XPCOMUtils.defineLazyServiceGetter(Services, "scriptloader", "@mozilla.org/moz/jssubscript-loader;1", "mozIJSSubScriptLoader");
 // see http://hg.mozilla.org/mozilla-central/diff/78e5543c0bc4/toolkit/content/Services.jsm
@@ -127,7 +124,7 @@ JSONovichBootstrap.prototype = {
                         case "item-disabled": // disable
                             shutdown();
                             break;
-                        case "item-cancel-action": // re-enable
+                        case "item-cancel-action": // re-enable / re-install
                             startup();
                             break;
                     }
