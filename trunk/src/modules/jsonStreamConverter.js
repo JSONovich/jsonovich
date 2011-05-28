@@ -18,17 +18,15 @@
  * are Copyright (C) 2004 the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *  - Initial support for application/json pretty-printing.
- *    Portions Copyright (C) 2008 Michael J. Giarlo.
- *
- *  - Gecko 2 support and other changes listed below.
- *    Portions Copyright (C) 2010, 2011 William Elwood <we9@kent.ac.uk>.
+ *   Michael J. Giarlo
+ *   William Elwood <we9@kent.ac.uk>
  *
  * ***** END LICENSE BLOCK *****
  *
  * This file contains the stream converter for JSON content types (JSONStreamConverter).
  *
- * Changes by William Elwood:
+ * Changelog:
+ * [2008]    - Initial support for application/json pretty-printing in JSONovich.
  * [2010-09] - Support for XPCOM registration differences in Gecko 2 (Firefox 4).
  * [2010-12] - Remove separate JSON module, use native JSON parser.
  *           - Custom JSON stringifier module.

@@ -19,10 +19,7 @@
  *
  * Contributor(s):
  *   Edward Lee <edilee@mozilla.com>
- *
- *  - Minor niggles suggested by NetBeans, remove 'let' for cross-browser,
- *    use strict.
- *    Portions Copyright (C) 2011 William Elwood <we9@kent.ac.uk>.
+ *   William Elwood <we9@kent.ac.uk>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,7 +33,12 @@
  * the provisions above, a recipient may use your version of this file under
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
- * ***** END LICENSE BLOCK ***** */
+ * ***** END LICENSE BLOCK *****
+ *
+ * Changelog:
+ * [2011-05] (William Elwood) - Minor niggles suggested by NetBeans, remove
+ *                              'let' for cross-browser, use strict.
+ */
 
 'use strict';
 
@@ -56,45 +58,46 @@
  * @return <function>  A 0-parameter function that undoes adding the callback.
  */
 function unload(callback, container) {
-  // Initialize the array of unloaders on the first usage
-  var unloaders = unload.unloaders;
-  if (unloaders == null)
-    unloaders = unload.unloaders = [];
+    // Initialize the array of unloaders on the first usage
+    var unloaders = unload.unloaders;
+    if (unloaders == null)
+        unloaders = unload.unloaders = [];
 
-  // Calling with no arguments runs all the unloader callbacks
-  if (callback == null) {
-    unloaders.slice().forEach(function(unloader) unloader());
-    unloaders.length = 0;
-    return undefined;
-  }
-
-  // The callback is bound to the lifetime of the container if we have one
-  if (container != null) {
-    // Remove the unloader when the container unloads
-    container.addEventListener("unload", removeUnloader, false);
-
-    // Wrap the callback to additionally remove the unload listener
-    var origCallback = callback;
-    callback = function() {
-      container.removeEventListener("unload", removeUnloader, false);
-      origCallback();
+    // Calling with no arguments runs all the unloader callbacks
+    if (callback == null) {
+        unloaders.slice().forEach(function(unloader) {
+            unloader()
+        });
+        unloaders.length = 0;
+        return undefined;
     }
-  }
 
-  // Wrap the callback in a function that ignores failures
-  function unloader() {
-    try {
-      callback();
+    // The callback is bound to the lifetime of the container if we have one
+    if (container != null) {
+        // Remove the unloader when the container unloads
+        container.addEventListener("unload", removeUnloader, false);
+
+        // Wrap the callback to additionally remove the unload listener
+        var origCallback = callback;
+        callback = function() {
+            container.removeEventListener("unload", removeUnloader, false);
+            origCallback();
+        }
     }
-    catch(ex) {}
-  }
-  unloaders.push(unloader);
 
-  // Provide a way to remove the unloader
-  function removeUnloader() {
-    var index = unloaders.indexOf(unloader);
-    if (index != -1)
-      unloaders.splice(index, 1);
-  }
-  return removeUnloader;
+    // Wrap the callback in a function that ignores failures
+    function unloader() {
+        try {
+            callback();
+        } catch(ex) {}
+    }
+    unloaders.push(unloader);
+
+    // Provide a way to remove the unloader
+    function removeUnloader() {
+        var index = unloaders.indexOf(unloader);
+        if (index != -1)
+            unloaders.splice(index, 1);
+    }
+    return removeUnloader;
 }

@@ -1,4 +1,12 @@
-body, .json {
+/**
+ * This file contains style rules for rendering formatted JSON.
+ *
+ * @license MPL 1.1/GPL 2.0/LGPL 2.1, see license.txt
+ * @author William Elwood <we9@kent.ac.uk>
+ * @copyright 2010 All Rights Reserved
+ */
+
+ body, .json {
   margin:0;
   padding:0;
 }
