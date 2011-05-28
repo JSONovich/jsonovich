@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is JSONovich logging module.
+ * The Original Code is JSONovich Gecko logging module.
  *
  * The Initial Developer of the Original Code is
  * William Elwood <we9@kent.ac.uk>.

@@ -89,6 +89,7 @@ function startup() {
     let prefs = require(PLATFORM + '/prefs');
     let addonDefaultPrefs = prefs.branch('extensions.' + ADDON_LNAME, true);
     addonDefaultPrefs.set('acceptHeader.json', 'boolean', true); // user set to false stops us adding json mime to http accept header
+    addonDefaultPrefs.set('debug', 'boolean', false); // user set to true enables debugging messages in console
 
     let addonPrefs = prefs.branch('extensions.' + ADDON_LNAME);
 
@@ -120,6 +121,9 @@ function startup() {
     addonPrefs.listen('acceptHeader.json', function(branch, pref) {
         // maybe we can add a lower q-value in the future, track https://issues.apache.org/jira/browse/COUCHDB-234
         setAcceptHeader('application/json', branch.get(pref, 'boolean'));
+    });
+    addonPrefs.listen('debug', function(branch, pref) {
+        require(PLATFORM + '/log').setDebug(branch.get(pref, 'boolean'));
     });
 
     (function setResourceAlias(alias, target) {
