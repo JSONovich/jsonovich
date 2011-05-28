@@ -88,7 +88,7 @@ function startup() {
     let unload = require('unload').unload;
     let prefs = require(PLATFORM + '/prefs');
     let addonDefaultPrefs = prefs.branch('extensions.' + ADDON_LNAME, true);
-    addonDefaultPrefs.set('acceptHeader.json', 'boolean', true);
+    addonDefaultPrefs.set('acceptHeader.json', 'boolean', true); // user set to false stops us adding json mime to http accept header
 
     let addonPrefs = prefs.branch('extensions.' + ADDON_LNAME);
 
@@ -117,14 +117,10 @@ function startup() {
             setCleanAccept();
         }
     }
-    unload(addonPrefs.listen(function(branch, pref) {
-        switch(pref) {
-            case 'acceptHeader.json': // user set to false stops us adding json mime to http accept header
-                // maybe we can add a lower q-value in the future, track https://issues.apache.org/jira/browse/COUCHDB-234
-                setAcceptHeader('application/json', branch.get(pref, 'boolean'));
-                break;
-        }
-    }));
+    addonPrefs.listen('acceptHeader.json', function(branch, pref) {
+        // maybe we can add a lower q-value in the future, track https://issues.apache.org/jira/browse/COUCHDB-234
+        setAcceptHeader('application/json', branch.get(pref, 'boolean'));
+    });
 
     (function setResourceAlias(alias, target) {
         let proto = Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler);
