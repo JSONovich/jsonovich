@@ -80,35 +80,65 @@ function selectBranch(name, defaults) {
             branch.deleteBranch('');
         };
     } else {
-        /**
-         * @param callback <function>  A 2-parameter function to execute whenever any preference in
-         *                             the specified branch is changed, parameters will be the
-         *                             appropriate branch as an instance of nsIPrefBranch and
-         *                             the name of the changed preference relative to the branch.
-         * @return <function>  A 0-parameter function that stops this listener.
-         */
-        returnObj.listen = function listenPref(callback) {
+        (function() {
             let listener = {
+                callbacks: {},
+                listening: false,
                 observe: function(subject, topic, data) {
-                    if(subject == branch && topic == NS_PREFBRANCH_PREFCHANGE_TOPIC_ID) {
-                        callback(returnObj, data);
+                    if(subject == branch && topic == NS_PREFBRANCH_PREFCHANGE_TOPIC_ID && this.callbacks.hasOwnProperty(data)) {
+                        this.callbacks[data](returnObj, data);
                     }
+                },
+                start: function() {
+                    this.listening = true;
+                    branch.QueryInterface(Ci.nsIPrefBranch2);
+                    branch.addObserver('', this, false);
+                    branch.getChildList('', {}).forEach(function(name) {
+                        listener.observe(branch, NS_PREFBRANCH_PREFCHANGE_TOPIC_ID, name);
+                    });
+                    require('unload').unload(this.stop);
+                },
+                stop: function() {
+                    if(branch) {
+                        branch.removeObserver('', this);
+                    }
+                    this.callbacks = {};
+                    this.listening = false;
                 }
             };
 
-            branch.QueryInterface(Ci.nsIPrefBranch2);
-            branch.addObserver('', listener, false);
-            branch.getChildList('', {}).forEach(function(name) {
-                listener.observe(branch, NS_PREFBRANCH_PREFCHANGE_TOPIC_ID, name);
-            });
-
-            function removeListener() {
-                if(branch) {
-                    branch.removeObserver('', listener);
+            /**
+             * This function efficiently handles observing several preferences with their own
+             * callbacks using a single preference listener on the branch.
+             *
+             * @usage listenPref(pref, callback): Execute callback whenever pref changes.
+             * @param pref <string>  The preference to observe for changes.
+             * @param callback <function>  A 2-parameter function to execute whenever the specified preference
+             *                             in this branch is changed, parameters will be 1) the closure returned
+             *                             from the original selectBranch call containing this preferences API
+             *                             and 2) the name of the changed preference relative to the branch.
+             *                             Any previous callback for this pref will be overwritten.
+             *
+             * @usage listenPref(pref): Remove callback stored for pref.
+             * @param pref <string>  The preference to stop observing for changes.
+             */
+            returnObj.listen = function listenPref(pref, callback) {
+                if(callback) {
+                    listener.callbacks[pref] = callback;
+                    if(!listener.listening) {
+                        listener.start();
+                    }
+                } else {
+                    delete listener.callbacks[pref];
+                    for(let p in listener.callbacks) { // why is there no easier way to do this? :(
+                        if(listener.callbacks.hasOwnProperty(p)) {
+                            return; // still listening to another preference, don't stop
+                        }
+                    }
+                    listener.stop();
                 }
-            }
-            return removeListener;
-        };
+            };
+        })();
 
         /**
          * @param pref <string>  The preference to get relative to the branch.
