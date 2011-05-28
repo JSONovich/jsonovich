@@ -65,8 +65,7 @@ function require(path) {
 
     if(!registry[path]) {
         let scope = {
-            require: require,
-            log: log
+            require: require
         }; // Load the module into a local scope
         Services.scriptloader.loadSubScript(getResourceURI('modules/' + path + '.js').spec, scope);
 
@@ -83,12 +82,6 @@ function require(path) {
     }
 
     return registry[path];
-}
-
-function log(msg) {
-    if(DEBUG) {
-        Services.console.logStringMessage(msg);
-    }
 }
 
 function startup() {
