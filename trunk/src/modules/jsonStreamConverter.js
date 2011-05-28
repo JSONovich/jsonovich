@@ -38,24 +38,6 @@
 
 'use strict';
 
-let streamConvData = {
-    cid: Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a66}"),
-    conversions: [
-    'application/json',
-    'application/jsonrequest',
-    'text/json',
-    'text/x-json',
-    'application/sparql-results+json', // http://www.w3.org/TR/rdf-sparql-json-res/
-    'application/rdf+json',
-    'application/schema+json', // http://json-schema.org/
-    'application/*+json' // untested, not expected to work as a wildcard
-    ],
-    extensions: {
-        'json': 'application/json',
-        'srj': 'application/sparql-results+json'
-    }
-};
-
 let log = require(PLATFORM + '/log');
 
 function JSONStreamConverter() {
@@ -161,44 +143,6 @@ var JSONovichFactory = {
     }
 };
 
-(function() {
-    // dynamically register converters
-    let aCompMgr = Cm.QueryInterface(Ci.nsIComponentRegistrar);
-    let aFactory = JSONovichFactory;
-    try {
-        for(let i = 0; i < streamConvData.conversions.length; i++) {
-            try {
-                aCompMgr.registerFactory(streamConvData.cid, ADDON_NAME,
-                    '@mozilla.org/streamconv;1?from=' + streamConvData.conversions[i] + '&to=*/*',
-                    aFactory);
-            } catch(e) {
-                if(e.name == 'NS_ERROR_FACTORY_EXISTS') { // this only happens in Gecko 2+...
-                    aFactory = null; // set null to avoid factory exists warning
-                    i--; // and try again
-                } else {
-                    log.error(e);
-                }
-            }
-        }
-    } finally {
-        require('unload').unload(function() {
-            aCompMgr.unregisterFactory(streamConvData.cid, JSONovichFactory);
-        });
-    }
-})();
-
-(function() {
-    // dynamically register filetype mapping
-    let aCatMgr = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
-    try {
-        for(let ext in streamConvData.extensions) {
-            aCatMgr.addCategoryEntry('ext-to-type-mapping', ext, streamConvData.extensions[ext], false, true);
-        }
-    } finally {
-        require('unload').unload(function() {
-            for(let ext in streamConvData.extensions) {
-                aCatMgr.deleteCategoryEntry('ext-to-type-mapping', ext, false);
-            }
-        });
-    }
-})();
+var exports = {
+    factory: JSONovichFactory
+}
