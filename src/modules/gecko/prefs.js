@@ -93,9 +93,6 @@ function selectBranch(name, defaults) {
                     this.listening = true;
                     branch.QueryInterface(Ci.nsIPrefBranch2);
                     branch.addObserver('', this, false);
-                    branch.getChildList('', {}).forEach(function(name) {
-                        listener.observe(branch, NS_PREFBRANCH_PREFCHANGE_TOPIC_ID, name);
-                    });
                     require('unload').unload(this.stop);
                 },
                 stop: function() {
@@ -124,6 +121,7 @@ function selectBranch(name, defaults) {
              */
             returnObj.listen = function listenPref(pref, callback) {
                 if(callback) {
+                    callback(returnObj, pref);
                     listener.callbacks[pref] = callback;
                     if(!listener.listening) {
                         listener.start();
