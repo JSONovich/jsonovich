@@ -84,11 +84,21 @@ XPCOMUtils.defineLazyServiceGetter(Services, "io", "@mozilla.org/network/io-serv
 function startup() {
     jsonovich = {};
     Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/helper.js').spec, jsonovich);
+    if(jsonovich.startup) {
+        jsonovich.startup();
+    }
+}
+
+function uninstall() {
+    if(jsonovich.uninstall) {
+        jsonovich.uninstall();
+    }
+    shutdown();
 }
 
 function shutdown() { // thanks to work on restartless support, we can do this on-demand in legacy Gecko :D
-    if(jsonovich.require) {
-        jsonovich.require('unload').unload();
+    if(jsonovich.shutdown) {
+        jsonovich.shutdown();
     }
     jsonovich = null;
 }
@@ -103,7 +113,7 @@ JSONovichBootstrap.prototype = {
 
     observe: function(aSubject, aTopic, aData) {
         switch(aTopic) {
-            case "profile-after-change":
+            case "profile-after-change": // startup
                 startup();
                 Services.obs.addObserver(this, "em-action-requested", false);
                 break;
@@ -111,11 +121,13 @@ JSONovichBootstrap.prototype = {
                 aSubject.QueryInterface(Ci.nsIUpdateItem);
                 if(aSubject.id == ADDON_LNAME + '@' + ADDON_DOMAIN) {
                     switch(aData) {
-                        case "item-uninstalled":
-                        case "item-disabled":
+                        case "item-uninstalled": // uninstall
+                            uninstall();
+                            break;
+                        case "item-disabled": // disable
                             shutdown();
                             break;
-                        case "item-cancel-action":
+                        case "item-cancel-action": // re-enable
                             startup();
                             break;
                     }

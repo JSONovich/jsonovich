@@ -77,7 +77,7 @@ function selectBranch(name, defaults) {
          * use responsibly to handle uninstallation of the addon's own preferences only.
          */
         returnObj.uninstall = function deleteBranch() {
-            branch.deleteBranch();
+            branch.deleteBranch('');
         };
     } else {
         /**

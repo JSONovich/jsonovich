@@ -91,7 +91,7 @@ function log(msg) {
     }
 }
 
-(function() {
+function startup() {
     let unload = require('unload').unload;
     let prefs = require(PLATFORM + '/prefs');
     let addonDefaultPrefs = prefs.branch('extensions.' + ADDON_LNAME, true);
@@ -119,9 +119,7 @@ function log(msg) {
 
         if(enabled) {
             setCleanAccept(true);
-            unload(function() {
-                setCleanAccept();
-            });
+            unload(setCleanAccept);
         } else {
             setCleanAccept();
         }
@@ -144,4 +142,14 @@ function log(msg) {
     })(ADDON_LNAME, getResourceURI('resources/')); // trailing slash required inside XPI
 
     require('jsonStreamConverter');
-})();
+}
+
+function uninstall() {
+    let prefs = require(PLATFORM + '/prefs');
+    prefs.branch('extensions.' + ADDON_LNAME, true).uninstall();
+    prefs.branch('extensions.' + ADDON_LNAME + '@' + ADDON_DOMAIN, true).uninstall();
+}
+
+function shutdown() {
+    require('unload').unload();
+}
