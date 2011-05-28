@@ -92,11 +92,17 @@ function log(msg) {
 }
 
 (function() {
-    // Modify HTTP Accept header
-    (function setAcceptHeader(acceptPart) {
-        let prefs = require(PLATFORM + '/prefs');
+    let unload = require('unload').unload;
+    let prefs = require(PLATFORM + '/prefs');
+    let addonDefaultPrefs = prefs.branch('extensions.' + ADDON_LNAME, true);
+    addonDefaultPrefs.set('acceptHeader.json', 'boolean', true);
+
+    let addonPrefs = prefs.branch('extensions.' + ADDON_LNAME);
+
+    function setAcceptHeader(acceptPart, enabled) {
         function setCleanAccept(suffix) {
-            let accept = prefs.get('network.http.accept.default', 'string-ascii');
+            let pref = prefs.branch('network.http.accept');
+            let accept = pref.get('default', 'string-ascii');
             if(suffix && accept.indexOf(acceptPart) != -1) {
                 return; // already accepting specified suffix
             }
@@ -108,19 +114,31 @@ function log(msg) {
             if(suffix) {
                 accept.push(acceptPart);
             }
-            prefs.set('network.http.accept.default', 'string-ascii', accept.join(','));
+            pref.set('default', 'string-ascii', accept.join(','));
         }
-        setCleanAccept(true);
-        require('unload').unload(function() {
-            setCleanAccept();
-        });
-    })('application/json'); // maybe we can add a lower q-value in the future, track https://issues.apache.org/jira/browse/COUCHDB-234
 
-    // Set up resource:// URLs
+        if(enabled) {
+            setCleanAccept(true);
+            unload(function() {
+                setCleanAccept();
+            });
+        } else {
+            setCleanAccept();
+        }
+    }
+    unload(addonPrefs.listen(function(branch, pref) {
+        switch(pref) {
+            case 'acceptHeader.json': // user set to false stops us adding json mime to http accept header
+                // maybe we can add a lower q-value in the future, track https://issues.apache.org/jira/browse/COUCHDB-234
+                setAcceptHeader('application/json', branch.get(pref, 'boolean'));
+                break;
+        }
+    }));
+
     (function setResourceAlias(alias, target) {
         let proto = Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler);
         proto.setSubstitution(alias, target);
-        require('unload').unload(function() {
+        unload(function() {
             proto.setSubstitution(alias, null);
         });
     })(ADDON_LNAME, getResourceURI('resources/')); // trailing slash required inside XPI
