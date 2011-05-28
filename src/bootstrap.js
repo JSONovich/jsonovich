@@ -60,12 +60,18 @@ function startup(data, reason) {
         }
         jsonovich = {};
         Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/helper.js').spec, jsonovich);
+        if(jsonovich.startup) {
+            jsonovich.startup();
+        }
     });
 }
 
 function shutdown(data, reason) {
-    if(reason != APP_SHUTDOWN && jsonovich.require) {
-        jsonovich.require('unload').unload();
+    if(reason == ADDON_UNINSTALL && jsonovich.uninstall) {
+        jsonovich.uninstall();
+    }
+    if(reason != APP_SHUTDOWN && jsonovich.shutdown) {
+        jsonovich.shutdown();
     }
     jsonovich = null;
     if(reason == ADDON_DISABLE && DEBUG) {
