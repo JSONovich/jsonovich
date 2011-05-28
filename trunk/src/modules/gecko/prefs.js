@@ -58,146 +58,145 @@ if(!Services.contentPrefs) {
 }
 const NS_PREFBRANCH_PREFCHANGE_TOPIC_ID = "nsPref:changed";
 
-function normaliseBranch(branch) {
-    if(typeof branch == 'string') {
-        if(branch.length && branch.charAt(branch.length-1)!='.') {
-            branch += '.';
-        }
-        return Services.prefs.getBranch(branch);
-    }
-    return branch.QueryInterface(Ci.nsIPrefBranch2);
-}
-
 /**
- * @param callback <function>  A 2-parameter function to execute whenever any preference in
- *                             the specified branch is changed, parameters will be the
- *                             appropriate branch as an instance of nsIPrefBranch and
- *                             the name of the changed preference relative to the branch.
- * @param branch <string|nsIPrefBranch>  The optional branch in the preferences tree, default root.
- * @return <function>  A 0-parameter function that stops this listener.
+ * Preferences wrapped in a closure per branch
  */
-function listenPref(callback, branch) {
-    if(branch) {
-        branch = normaliseBranch(branch);
-    } else {
-        branch = Services.prefs; // assume root
+function selectBranch(name, defaults) {
+    if(!name || typeof name != 'string' || !name.length) {
+        return null; // disallow root branch
     }
-    branch = normaliseBranch(branch);
-    let listener = {
-        observe: function(subject, topic, data) {
-            if(topic == NS_PREFBRANCH_PREFCHANGE_TOPIC_ID) {
-                callback(subject, data);
+    if(name.charAt(name.length-1)!='.') {
+        name += '.';
+    }
+    let branch = defaults ? Services.prefs.getDefaultBranch(name) : Services.prefs.getBranch(name);
+    let returnObj = {};
+
+    if(defaults) {
+        /**
+         * Deletes the selected default branch and the user branch of the same name, please
+         * use responsibly to handle uninstallation of the addon's own preferences only.
+         */
+        returnObj.uninstall = function deleteBranch() {
+            branch.deleteBranch();
+        };
+    } else {
+        /**
+         * @param callback <function>  A 2-parameter function to execute whenever any preference in
+         *                             the specified branch is changed, parameters will be the
+         *                             appropriate branch as an instance of nsIPrefBranch and
+         *                             the name of the changed preference relative to the branch.
+         * @return <function>  A 0-parameter function that stops this listener.
+         */
+        returnObj.listen = function listenPref(callback) {
+            let listener = {
+                observe: function(subject, topic, data) {
+                    if(subject == branch && topic == NS_PREFBRANCH_PREFCHANGE_TOPIC_ID) {
+                        callback(returnObj, data);
+                    }
+                }
+            };
+
+            branch.QueryInterface(Ci.nsIPrefBranch2);
+            branch.addObserver('', listener, false);
+            branch.getChildList('', {}).forEach(function(name) {
+                listener.observe(branch, NS_PREFBRANCH_PREFCHANGE_TOPIC_ID, name);
+            });
+
+            function removeListener() {
+                if(branch) {
+                    branch.removeObserver('', listener);
+                }
             }
+            return removeListener;
+        };
+
+        /**
+         * @param pref <string>  The preference to get relative to the branch.
+         * @param type <string>  The type of value to get (boolean, integer, string-ascii,
+         *                       string-unicode, string-locale, file-abs, file-rel)
+         * @return <bool|int|string|nsISupportsString|nsIPrefLocalizedString
+         *              |nsILocalFile|nsIRelativeFilePref>
+         *                       The requested value, or the default if not set, or throw exception if default not set.
+         */
+        returnObj.get = function getPref(pref, type) {
+            switch(type) {
+                case 'boolean':
+                    return branch.getBoolPref(pref);
+                case 'integer':
+                    return branch.getIntPref(pref);
+                case 'string-ascii':
+                    return branch.getCharPref(pref);
+                case 'string-unicode':
+                    return branch.getComplexType(pref, Ci.nsISupportsString).data;
+                case 'string-locale':
+                    return branch.getComplexType(pref, Ci.nsIPrefLocalizedString).data;
+                case 'file-abs':
+                    return branch.getComplexType(pref, Ci.nsILocalFile).data;
+                case 'file-rel':
+                    return branch.getComplexType(pref, Ci.nsIRelativeFilePref).data;
+                default:
+                    log('Unexpected pref type "' + type + '" in getPref.');
+                    return null;
+            }
+        };
+    }
+
+    /**
+     * @param pref <string>  The preference to be set relative to the branch.
+     * @param type <string>  The type of value to set (boolean, integer, string-ascii,
+     *                       string-unicode, string-locale, file-abs, file-rel)
+     * @param value <bool|int|string|nsISupportsString|nsIPrefLocalizedString
+     *              |nsILocalFile|nsIRelativeFilePref>
+     *                       The value to set.
+     */
+    returnObj.set = function setPref(pref, type, value) {
+        switch(type) {
+            case 'boolean':
+                branch.setBoolPref(pref, value);
+                break;
+            case 'integer':
+                branch.setIntPref(pref, value);
+                break;
+            case 'string-ascii':
+                branch.setCharPref(pref, value);
+                break;
+            case 'string-unicode':
+                if(typeof value == 'string') {
+                    let str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+                    str.data = value;
+                    value = str;
+                }
+                prefs.setComplexValue(pref, Ci.nsISupportsString, value);
+                break;
+            case 'string-locale':
+                if(typeof value == 'string') {
+                    let pls = Cc["@mozilla.org/pref-localizedstring;1"].createInstance(Ci.nsIPrefLocalizedString);
+                    pls.data = value;
+                    value = pls;
+                }
+                prefs.setComplexValue(pref, Ci.nsIPrefLocalizedString, value);
+                break;
+            case 'file-abs':
+                if(typeof value == 'string') {
+                    let file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+                    file.initWithPath(value);
+                    value = file;
+                }
+                prefs.setComplexValue(pref, Ci.nsILocalFile, value);
+                break;
+            case 'file-rel':
+                // see https://developer.mozilla.org/en/Code_snippets/File_I%2f%2fO#Relative_path_(nsIRelativeFilePref)
+                prefs.setComplexValue(pref, Ci.nsIRelativeFilePref, value);
+                break;
+            default:
+                log('Unexpected pref type "' + type + '" in setPref.');
+                break;
         }
     };
 
-    branch.addObserver('', listener, false);
-    branch.getChildList('', {}).forEach(function(name) {
-        listener.observe(branch, NS_PREFBRANCH_PREFCHANGE_TOPIC_ID, name);
-    });
-
-    function removeListener() {
-        if(branch) {
-            branch.removeObserver('', listener);
-        }
-    }
-    return removeListener;
-}
-
-/**
- * @param pref <string>  The preference to get relative to the branch.
- * @param type <string>  The type of value to get (boolean, integer, string-ascii,
- *                       string-unicode, string-locale, file-abs, file-rel)
- * @param branch <string|nsIPrefBranch>  The optional branch in the preferences tree, default root.
- */
-function getPref(pref, type, branch) {
-    if(branch) {
-        branch = normaliseBranch(branch);
-    } else {
-        branch = Services.prefs; // assume root
-    }
-    switch(type) {
-        case 'boolean':
-            return branch.getBoolPref(pref);
-        case 'integer':
-            return branch.getIntPref(pref);
-        case 'string-ascii':
-            return branch.getCharPref(pref);
-        case 'string-unicode':
-            return branch.getComplexType(pref, Ci.nsISupportsString).data;
-        case 'string-locale':
-            return branch.getComplexType(pref, Ci.nsIPrefLocalizedString).data;
-        case 'file-abs':
-            return branch.getComplexType(pref, Ci.nsILocalFile).data;
-        case 'file-rel':
-            return branch.getComplexType(pref, Ci.nsIRelativeFilePref).data;
-        default:
-            log('Unexpected pref type "' + type + '" in getPref.');
-            return null;
-    }
-}
-
-/**
- * @param pref <string>  The preference to be set relative to the branch.
- * @param type <string>  The type of value to set (boolean, integer, string-ascii,
- *                       string-unicode, string-locale, file-abs, file-rel)
- * @param value <bool|int|string|nsISupportsString|nsIPrefLocalizedString
- *              |nsILocalFile|nsIRelativeFilePref>
- *                       The value to set.
- * @param branch <string|nsIPrefBranch>  The optional branch in the preferences tree, default root.
- */
-function setPref(pref, type, value, branch) {
-    if(branch) {
-        branch = normaliseBranch(branch);
-    } else {
-        branch = Services.prefs; // assume root
-    }
-    switch(type) {
-        case 'boolean':
-            branch.setBoolPref(pref, value);
-            break;
-        case 'integer':
-            branch.setIntPref(pref, value);
-            break;
-        case 'string-ascii':
-            branch.setCharPref(pref, value);
-            break;
-        case 'string-unicode':
-            if(typeof value == 'string') {
-                let str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-                str.data = value;
-                value = str;
-            }
-            prefs.setComplexValue(pref, Ci.nsISupportsString, value);
-            break;
-        case 'string-locale':
-            if(typeof value == 'string') {
-                let pls = Cc["@mozilla.org/pref-localizedstring;1"].createInstance(Ci.nsIPrefLocalizedString);
-                pls.data = value;
-                value = pls;
-            }
-            prefs.setComplexValue(pref, Ci.nsIPrefLocalizedString, value);
-            break;
-        case 'file-abs':
-            if(typeof value == 'string') {
-                let file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-                file.initWithPath(value);
-                value = file;
-            }
-            prefs.setComplexValue(pref, Ci.nsILocalFile, value);
-            break;
-        case 'file-rel':
-            // see https://developer.mozilla.org/en/Code_snippets/File_I%2f%2fO#Relative_path_(nsIRelativeFilePref)
-            prefs.setComplexValue(pref, Ci.nsIRelativeFilePref, value);
-            break;
-        default:
-            log('Unexpected pref type "' + type + '" in setPref.');
-            break;
-    }
+    return returnObj;
 }
 
 var exports = {
-    listen: listenPref,
-    get: getPref,
-    set: setPref
+    branch: selectBranch
 };
