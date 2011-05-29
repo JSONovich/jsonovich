@@ -1,16 +1,14 @@
 /**
- * This file contains the JSONovich bootstrap for older Gecko browsers.
+ * @license MPL 1.1/GPL 2.0/LGPL 2.1, see license.txt
+ * @author William Elwood <we9@kent.ac.uk>
+ * @copyright 2011 JSONovich Team. All Rights Reserved.
+ * @copyright Portions (C) 2009, 2010 the Mozilla Foundation.
+ * @description This file contains the JSONovich bootstrap for older Gecko browsers.
+ * @todo When dropping Gecko 1.9.1/Firefox 3.5 support, remove emulation of XPCOMUtils lazy getters.
+ * @todo When dropping Gecko 1.9.2/Firefox 3.6 support, all this code becomes unnecessary.
  *
  * Changelog:
  * [2011-05] - Created FF4 legacy bootstrap for JSONovich extension
- *
- * TODO: when dropping Gecko 1.9.1/Firefox 3.5 support, remove emulation of XPCOMUtils lazy getters.
- * TODO: when dropping Gecko 1.9.2/Firefox 3.6 support, all this code becomes unnecessary.
- *
- * @license MPL 1.1/GPL 2.0/LGPL 2.1, see license.txt
- * @author William Elwood <we9@kent.ac.uk>
- * @copyright 2011 All Rights Reserved
- * Portions Copyright (C) 2009, 2010 the Mozilla Foundation.
  */
 
 const {classes: Cc, interfaces: Ci, manager: Cm, results: Cr, utils: Cu} = Components;
@@ -48,7 +46,7 @@ XPCOMUtils.defineLazyServiceGetter(Services, "io", "@mozilla.org/network/io-serv
 
 function startup() {
     jsonovich = {};
-    Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/helper.js').spec, jsonovich);
+    Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/jsonovich.js').spec, jsonovich);
     if(jsonovich.startup) {
         jsonovich.startup();
     }

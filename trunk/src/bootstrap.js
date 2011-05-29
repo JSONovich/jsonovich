@@ -1,12 +1,11 @@
 /**
- * This file contains the JSONovich bootstrap for Gecko 2+ browsers.
+ * @license MPL 1.1/GPL 2.0/LGPL 2.1, see license.txt
+ * @author William Elwood <we9@kent.ac.uk>
+ * @copyright 2011 JSONovich Team. All Rights Reserved.
+ * @description This file contains the JSONovich bootstrap for Gecko 2+ browsers.
  *
  * Changelog:
  * [2011-05] - Created FF4 restartless bootstrap for JSONovich extension
- *
- * @license MPL 1.1/GPL 2.0/LGPL 2.1, see license.txt
- * @author William Elwood <we9@kent.ac.uk>
- * @copyright 2011 All Rights Reserved
  */
 
 'use strict';
@@ -27,7 +26,7 @@ function startup(data, reason) {
             return addon.getResourceURI(path);
         }
         jsonovich = {};
-        Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/helper.js').spec, jsonovich);
+        Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/jsonovich.js').spec, jsonovich);
         if(jsonovich.startup) {
             jsonovich.startup();
         }
