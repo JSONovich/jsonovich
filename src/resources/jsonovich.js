@@ -1,9 +1,8 @@
 /**
- * This file contains block-folding functions for the rendered JSON content.
- *
  * @license MPL 1.1/GPL 2.0/LGPL 2.1, see license.txt
  * @author William Elwood <we9@kent.ac.uk>
- * @copyright 2010 All Rights Reserved
+ * @copyright 2010 JSONovich Team. All Rights Reserved.
+ * @description This file contains block-folding functions for the rendered JSON content.
  */
 
 'use strict';
