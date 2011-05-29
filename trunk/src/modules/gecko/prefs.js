@@ -51,22 +51,22 @@ function selectBranch(name, defaults) {
                 callbacks: {},
                 listening: false,
                 observe: function(subject, topic, data) {
-                    if(subject == branch && topic == NS_PREFBRANCH_PREFCHANGE_TOPIC_ID && this.callbacks.hasOwnProperty(data)) {
-                        this.callbacks[data](returnObj, data);
+                    if(subject == branch && topic == NS_PREFBRANCH_PREFCHANGE_TOPIC_ID && listener.callbacks.hasOwnProperty(data)) {
+                        listener.callbacks[data](returnObj, data);
                     }
                 },
                 start: function() {
-                    this.listening = true;
+                    listener.listening = true;
                     branch.QueryInterface(Ci.nsIPrefBranch2);
-                    branch.addObserver('', this, false);
-                    require('unload').unload(this.stop);
+                    branch.addObserver('', listener, false);
+                    require('unload').unload(listener.stop);
                 },
                 stop: function() {
                     if(branch) {
-                        branch.removeObserver('', this);
+                        branch.removeObserver('', listener);
                     }
-                    this.callbacks = {};
-                    this.listening = false;
+                    listener.callbacks = {};
+                    listener.listening = false;
                 }
             };
 
