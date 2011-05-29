@@ -10,6 +10,7 @@
 
 'use strict';
 
+var TS = {'Bootstrap': [Date.now()]};
 const {classes: Cc, interfaces: Ci, manager: Cm, results: Cr, utils: Cu} = Components;
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/AddonManager.jsm");
@@ -21,7 +22,9 @@ const PLATFORM = 'gecko';
 let jsonovich, getResourceURI;
 
 function startup(data, reason) {
+    let measure = reason == APP_STARTUP ? 'Startup' : (reason == ADDON_INSTALL ? 'Install' : 'Restart');
     AddonManager.getAddonByID(data.id, function(addon) {
+        TS[measure] = [Date.now()];
         getResourceURI = function getResourceURI(path) {
             return addon.getResourceURI(path);
         }
@@ -30,6 +33,7 @@ function startup(data, reason) {
         if(jsonovich.startup) {
             jsonovich.startup();
         }
+        TS[measure].push(Date.now());
     });
 }
 
@@ -39,9 +43,8 @@ function shutdown(data, reason) {
     }
     if(reason != APP_SHUTDOWN && jsonovich.shutdown) {
         jsonovich.shutdown();
+        jsonovich = null;
     }
-    jsonovich = null;
 }
 
-function install(data, reason) {}
-function uninstall(data, reason) {}
+TS['Bootstrap'].push(Date.now());

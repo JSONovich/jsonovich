@@ -11,6 +11,7 @@
  * [2011-05] - Created FF4 legacy bootstrap for JSONovich extension
  */
 
+var TS = {'Bootstrap': [Date.now()]};
 const {classes: Cc, interfaces: Ci, manager: Cm, results: Cr, utils: Cu} = Components;
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -77,8 +78,10 @@ JSONovichBootstrap.prototype = {
     observe: function(aSubject, aTopic, aData) {
         switch(aTopic) {
             case "profile-after-change": // startup
+                TS['Startup'] = [Date.now()];
                 startup();
                 Services.obs.addObserver(this, "em-action-requested", false);
+                TS['Startup'].push(Date.now());
                 break;
             case "em-action-requested":
                 aSubject.QueryInterface(Ci.nsIUpdateItem);
@@ -91,7 +94,9 @@ JSONovichBootstrap.prototype = {
                             shutdown();
                             break;
                         case "item-cancel-action": // re-enable / re-install
+                            TS['Restart'] = [Date.now()];
                             startup();
+                            TS['Restart'].push(Date.now());
                             break;
                     }
                 }
@@ -118,5 +123,7 @@ function NSGetModule(compMgr, fileSpec) { // legacy Gecko entrypoint
         return Services.io.newFileURI(bundle);
     }
 
-    return XPCOMUtils.generateModule([JSONovichBootstrap]);
+    let module = XPCOMUtils.generateModule([JSONovichBootstrap]);
+    TS['Bootstrap'].push(Date.now());
+    return module;
 }
