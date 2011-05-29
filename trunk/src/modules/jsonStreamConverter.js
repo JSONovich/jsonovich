@@ -57,6 +57,7 @@ JSONStreamConverter.prototype = {
 
     // nsIRequestObserver::onStartRequest
     onStartRequest: function(aReq, aCtx) {
+        TS['StartRequest'] = [Date.now()];
         log.debug("Entered onStartRequest");
         this.data = "";
         this.rawdata = "";
@@ -67,15 +68,21 @@ JSONStreamConverter.prototype = {
         if(this.listener)
             this.listener.onStartRequest(this.channel, aCtx);
         log.debug("Exiting onStartRequest");
+        TS['StartRequest'].push(Date.now());
     },
 
     // nsIRequestObserver::onStopRequest
     onStopRequest: function(aReq, aCtx, aStatus) {
+        TS['StopRequest'] = [Date.now()];
         log.debug("Entered onStopRequest");
         let prettyPrinted = "";
         try {
+            TS['ParseJSON'] = [Date.now()];
             let jsonData = JSON.parse(this.data);
+            TS['ParseJSON'].push(Date.now());
+            TS['FormatJSON'] = [Date.now()];
             prettyPrinted = this.JSON2HTML.formatJSON(jsonData);
+            TS['FormatJSON'].push(Date.now());
         } catch(e) {
             log.error(e);
             prettyPrinted = this.JSON2HTML.encodeHTML(this.data);
@@ -104,10 +111,12 @@ JSONStreamConverter.prototype = {
             this.listener.onStopRequest(this.channel, aCtx, aStatus);
         }
         log.debug("Exiting onStopRequest");
+        TS['StopRequest'].push(Date.now());
     },
 
     // nsIStreamListener::onDataAvailable
     onDataAvailable: function(aReq, aCtx, aStream, aOffset, aCount) {
+        TS['DataAvailable'] = [Date.now()];
         log.debug("Entered onDataAvailable");
         var sis = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
         sis.init(aStream);
@@ -117,6 +126,7 @@ JSONStreamConverter.prototype = {
         sis.close();
         this.data = converter.ConvertToUnicode(this.rawdata);
         log.debug("Exiting onDataAvailable");
+        TS['DataAvailable'].push(Date.now());
     },
 
     // nsIStreamConverter::asyncConvertData

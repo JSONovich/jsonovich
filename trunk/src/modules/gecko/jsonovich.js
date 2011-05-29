@@ -66,7 +66,12 @@ function startup() {
                 'Bootstrap': 'time taken to execute bootstrap script',
                 'Startup': 'time between us receiving startup event and leaving event listener during browser startup',
                 'Install': 'time between us receiving startup event and leaving event listener during user-initiated install',
-                'Restart': 'time between us receiving startup event and leaving event listener after user-initiated enable'
+                'Restart': 'time between us receiving startup event and leaving event listener after user-initiated enable',
+                'StartRequest': 'time spent in the most recent call to the stream converter\'s onStartRequest function',
+                'DataAvailable': 'time spent in the most recent call to the stream converter\'s onDataAvailable function',
+                'ParseJSON': 'time spent parsing the received JSON string into an object',
+                'FormatJSON': 'time spent tokenising the parsed object and generating a string of HTML',
+                'StopRequest': 'time spent in the most recent call to the stream converter\'s onStopRequest function'
             };
             for(let measure in TS) {
                 if(TS[measure].length>1) {
