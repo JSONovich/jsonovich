@@ -58,7 +58,22 @@ function startup() {
 
     let listenPref = prefs('extensions.' + ADDON_LNAME).listen;
     listenPref('debug', function(branch, pref) {
-        require(PLATFORM + '/log').setDebug(branch.get(pref, 'boolean'));
+        let debug = branch.get(pref, 'boolean');
+        let log = require(PLATFORM + '/log');
+        log.setDebug(debug);
+        if(debug) {
+            let desc = {
+                'Bootstrap': 'time taken to execute bootstrap script',
+                'Startup': 'time between us receiving startup event and leaving event listener during browser startup',
+                'Install': 'time between us receiving startup event and leaving event listener during user-initiated install',
+                'Restart': 'time between us receiving startup event and leaving event listener after user-initiated enable'
+            };
+            for(let measure in TS) {
+                if(TS[measure].length>1) {
+                    log.info(measure + ' Performance: ' + (TS[measure][1]-TS[measure][0]) + 'ms' + (measure in desc ? ' (' + desc[measure] + ')' : ''));
+                }
+            }
+        }
     });
 
     let prefUtils = require(PLATFORM + '/prefUtils');

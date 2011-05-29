@@ -10,6 +10,8 @@
 
 'use strict';
 
+let unload = require('unload').unload;
+
 /**
  * Dynamically register converters
  *
@@ -50,7 +52,7 @@ function registerConversions(listenPref) {
                     }
                 }
             } finally {
-                require('unload').unload(unregister);
+                unload(unregister);
             }
         }
     });
@@ -83,7 +85,7 @@ function registerExtMap(listenPref) {
                     }
                 }
             } finally {
-                require('unload').unload(unregister);
+                unload(unregister);
             }
         }
     });
@@ -119,7 +121,7 @@ function registerAcceptHeader(listenPref, mimePref, mimeType) {
 
         if(enabled) {
             setCleanAccept(true);
-            require('unload').unload(setCleanAccept);
+            unload(setCleanAccept);
         } else {
             setCleanAccept();
         }

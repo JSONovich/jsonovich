@@ -20,16 +20,16 @@ if(!Services.console) { // emulate Services.jsm (introduced in Gecko 2/FF4)
 }
 
 function logError(msg) {
-    Cu.reportError(msg);
+    Cu.reportError('[' + ADDON_NAME + ' Error] ' + msg);
 }
 
 function logInfo(msg) {
-    Services.console.logStringMessage(msg);
+    Services.console.logStringMessage('[' + ADDON_NAME + ' Info] ' + msg);
 }
 
 function logDebug(msg) {
     if(debug) {
-        Services.console.logStringMessage(msg);
+        Services.console.logStringMessage('[' + ADDON_NAME + ' Debug] ' + msg);
     }
 }
 
