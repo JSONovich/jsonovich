@@ -85,7 +85,7 @@ function registerExtMap(listenPref) {
                 conversions = branch.get('mime.conversions', 'string-ascii').split('|');
                 for(let i = 0; i < extensions.length; i++) {
                     ext = extensions[i].split(':');
-                    if(ext.length == 2 && ext[1] in conversions) { // only register if we handle the MIME type
+                    if(ext.length == 2 && conversions.indexOf(ext[1]) > -1) { // only register if we handle the MIME type
                         try { // only register extensions that aren't already mapped
                             existing = mimeSvc.getTypeFromExtension(ext[0]);
                         } catch(e) {
