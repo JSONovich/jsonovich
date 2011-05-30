@@ -32,24 +32,34 @@ function registerConversions(listenPref) {
         }
     };
     listenPref('mime.conversions', function(branch, pref) {
-        let conversions = branch.get(pref, 'string-ascii').split('|');
+        let orig = branch.get(pref, 'string-ascii');
+        let conversions = orig.split('|');
         if(conversions.length) {
             unregister();
             let tmpFactory = factory;
             try {
+                let validConversions = [],
+                webNavInfo = Cc["@mozilla.org/webnavigation-info;1"].getService(Ci.nsIWebNavigationInfo);
                 for(let i = 0; i < conversions.length; i++) {
-                    try {
-                        aCompMgr.registerFactory(cid, ADDON_NAME,
-                            '@mozilla.org/streamconv;1?from=' + conversions[i] + '&to=*/*',
-                            tmpFactory);
-                    } catch(e) {
-                        if(e.name == 'NS_ERROR_FACTORY_EXISTS') { // this only happens in Gecko 2+...
-                            tmpFactory = null; // set null to avoid factory exists warning
-                            i--; // and try again
-                        } else {
-                            throw e;
+                    if(!webNavInfo.isTypeSupported(conversions[i], null)) {
+                        try {
+                            aCompMgr.registerFactory(cid, ADDON_NAME,
+                                '@mozilla.org/streamconv;1?from=' + conversions[i] + '&to=*/*',
+                                tmpFactory);
+                            validConversions.push(conversions[i]);
+                        } catch(e) {
+                            if(e.name == 'NS_ERROR_FACTORY_EXISTS') { // this only happens in Gecko 2+...
+                                tmpFactory = null; // set null to avoid factory exists warning
+                                i--; // and try again
+                            } else {
+                                throw e;
+                            }
                         }
                     }
+                }
+                validConversions = validConversions.join('|');
+                if(orig != validConversions) { // some conversions were invalid, let's remove them from prefs
+                    branch.set(pref, 'string-ascii', validConversions);
                 }
             } catch(e) {
                 uncaughtE(pref, e);
