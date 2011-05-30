@@ -47,10 +47,12 @@ function registerConversions(listenPref) {
                             tmpFactory = null; // set null to avoid factory exists warning
                             i--; // and try again
                         } else {
-                            require(PLATFORM + '/log').error(e);
+                            throw e;
                         }
                     }
                 }
+            } catch(e) {
+                uncaughtE(pref, e);
             } finally {
                 unload(unregister);
             }
@@ -66,6 +68,7 @@ function registerConversions(listenPref) {
  */
 function registerExtMap(listenPref) {
     let aCatMgr = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
+    let mimeSvc = Cc["@mozilla.org/mime;1"].getService(Ci.nsIMIMEService);
     let registered = [];
     let unregister = function() {
         for(let i = 0; i < registered.length; i++) {
@@ -73,17 +76,37 @@ function registerExtMap(listenPref) {
         }
     };
     listenPref('mime.extensionMap', function(branch, pref) {
-        let extensions = branch.get(pref, 'string-ascii').split('|');
+        let orig = branch.get(pref, 'string-ascii');
+        let extensions = orig.split('|');
         if(extensions.length) {
             unregister();
             try {
+                let validMappings = [], ext, existing;
                 for(let i = 0; i < extensions.length; i++) {
-                    let ext = extensions[i].split(':');
+                    ext = extensions[i].split(':');
                     if(ext.length == 2) {
-                        aCatMgr.addCategoryEntry('ext-to-type-mapping', ext[0], ext[1], false, true);
-                        registered.push(ext[0]);
+                        try { // only register extensions that aren't already mapped
+                            existing = mimeSvc.getTypeFromExtension(ext[0]);
+                        } catch(e) {
+                            if(e.name == 'NS_ERROR_NOT_AVAILABLE') {
+                                existing = false;
+                            } else {
+                                throw e;
+                            }
+                        }
+                        if(!existing) {
+                            aCatMgr.addCategoryEntry('ext-to-type-mapping', ext[0], ext[1], false, true);
+                            registered.push(ext[0]);
+                            validMappings.push(extensions[i]);
+                        }
                     }
                 }
+                validMappings = validMappings.join('|');
+                if(orig != validMappings) { // some mappings were invalid, let's remove them from prefs
+                    branch.set(pref, 'string-ascii', validMappings);
+                }
+            } catch(e) {
+                uncaughtE(pref, e);
             } finally {
                 unload(unregister);
             }
@@ -127,8 +150,16 @@ function registerAcceptHeader(listenPref, mimePref, mimeType) {
         }
     }
     listenPref(mimePref, function(branch, pref) {
-        setAccept(mimeType, branch.get(pref, 'boolean'));
+        try {
+            setAccept(mimeType, branch.get(pref, 'boolean'));
+        } catch(e) {
+            uncaughtE(pref, e);
+        }
     });
+}
+
+function uncaughtE(pref, e) {
+    require(PLATFORM + '/log').error('Uncaught exception in "' + pref + '" listener - ' + e);
 }
 
 var exports = {
