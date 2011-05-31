@@ -166,7 +166,7 @@ JSON2HTML = function() {
       data.currentLine = this;
       data.lines.push(this);
       this.folds = data.folds.length // in FF4, empty data attributes are equivalent to not having the attribute
-        ? '" data-fold' + data.folds.join('="1" data-fold') + '="1"' : "";
+        ? (' data-fold' + data.folds.join('="1" data-fold') + '="1"') : '';
       this.indent = data.numIndent;
       this.indentContent = [];
       this.content = [];
@@ -193,13 +193,10 @@ JSON2HTML = function() {
     },
     toString: function() {
       let content = this.content, indentContent = this.indentContent,
-      gutter = '<span class="line' + this.folds, prefix = "";
+      gutter = '<span class="line' + (this.fold ? ' foldable" data-fold="' + this.fold : '') + '"' + this.folds, prefix = "";
       if(!content.length && indentContent.length && (!this.indent || ((lineBreaks["before items"] || indentContent[0].css.indexOf("open") === -1) && (lineBreaks["before separator"] || indentContent[0].css.indexOf("separator") === -1)))) {
         content = indentContent;
         indentContent = [];
-      }
-      if(this.fold) {
-        gutter += '" data-fold="' + this.fold;
       }
       if(this.indent) {
         for(let i = this.indent, j = indentContent.length - this.indent, d; i > 0; i--, j++) {
@@ -212,7 +209,7 @@ JSON2HTML = function() {
         }
       }
       return gutter
-        + '"><span class="fold gutter"></span><span class="number gutter"></span><code>'
+        + '><span class="fold gutter"></span><span class="number gutter"></span><code>'
         + (prefix
         + content.join("")).trimRight()
         + "</code></span>";
