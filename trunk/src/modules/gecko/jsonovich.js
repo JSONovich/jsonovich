@@ -59,8 +59,8 @@ function startup() {
     require('defaultPrefs').setDefaults(prefs('extensions.' + ADDON_LNAME, true).set);
     TS['SetDefaultPrefs'].push(Date.now());
 
-    let listenPref = prefs('extensions.' + ADDON_LNAME).listen;
-    let prefUtils = require(PLATFORM + '/prefUtils');
+    let listenPref = prefs('extensions.' + ADDON_LNAME).listen,
+    prefUtils = require(PLATFORM + '/prefUtils');
 
     TS['RegisterConversions'] = [Date.now()];
     prefUtils.registerConversions(listenPref);
