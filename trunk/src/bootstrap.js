@@ -47,4 +47,6 @@ function shutdown(data, reason) {
     }
 }
 
+function install() {}
+function uninstall() {}
 TS['Bootstrap'].push(Date.now());
