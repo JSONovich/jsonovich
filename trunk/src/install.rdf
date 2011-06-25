@@ -4,7 +4,7 @@
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>jsonovich@lackoftalent.org</id>
     <name>JSONovich</name>
-    <version>1.8.2</version>
+    <version>1.8.3</version>
     <type>2</type>
     <bootstrap>true</bootstrap>
 
