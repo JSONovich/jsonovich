@@ -36,7 +36,8 @@
 
 'use strict';
 
-let log = require(PLATFORM + '/log');
+let log = require(PLATFORM + '/log'),
+BinaryInputStream = Components.Constructor("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream", "setInputStream");
 
 function JSONStreamConverter() {
     this.JSON2HTML = require('json2html').JSON2HTML;
@@ -59,14 +60,13 @@ JSONStreamConverter.prototype = {
     onStartRequest: function(aReq, aCtx) {
         TS['StartRequest'] = [Date.now()];
         log.debug("Entered onStartRequest");
-        this.data = "";
         this.rawdata = "";
-        this.channel = aReq.QueryInterface(Ci.nsIChannel);
-        this.uri = this.channel.URI.spec;
-        log.debug(this.channel.contentType);
-        this.channel.contentType = "text/html";
+        aReq.QueryInterface(Ci.nsIChannel);
+        this.uri = aReq.URI.spec;
+        log.debug(aReq.contentType);
+        aReq.contentType = "text/html";
         if(this.listener)
-            this.listener.onStartRequest(this.channel, aCtx);
+            this.listener.onStartRequest(aReq, aCtx);
         log.debug("Exiting onStartRequest");
         TS['StartRequest'].push(Date.now());
     },
@@ -75,17 +75,20 @@ JSONStreamConverter.prototype = {
     onStopRequest: function(aReq, aCtx, aStatus) {
         TS['StopRequest'] = [Date.now()];
         log.debug("Entered onStopRequest");
+        var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
+        converter.charset = "UTF-8";
+        var data = converter.ConvertToUnicode(this.rawdata);
         let prettyPrinted = "";
         try {
             TS['ParseJSON'] = [Date.now()];
-            let jsonData = JSON.parse(this.data);
+            let jsonData = JSON.parse(data);
             TS['ParseJSON'].push(Date.now());
             TS['FormatJSON'] = [Date.now()];
             prettyPrinted = this.JSON2HTML.formatJSON(jsonData);
             TS['FormatJSON'].push(Date.now());
         } catch(e) {
             log.error(e);
-            prettyPrinted = this.JSON2HTML.encodeHTML(this.data);
+            prettyPrinted = this.JSON2HTML.encodeHTML(data);
         }
         let htmlDocument = "<!DOCTYPE html>\n" +
         "<html>\n" +
@@ -100,15 +103,13 @@ JSONStreamConverter.prototype = {
         "  </body>\n" +
         "</html>\n";
 
-        var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
-        converter.charset = "UTF-8";
         var stream = converter.convertToInputStream(htmlDocument);
         var len = stream.available();
 
         // Pass the data to the main content listener
         if(this.listener){
-            this.listener.onDataAvailable(this.channel, aCtx, stream, 0, len);
-            this.listener.onStopRequest(this.channel, aCtx, aStatus);
+            this.listener.onDataAvailable(aReq, aCtx, stream, 0, len);
+            this.listener.onStopRequest(aReq, aCtx, aStatus);
         }
         log.debug("Exiting onStopRequest");
         TS['StopRequest'].push(Date.now());
@@ -118,13 +119,8 @@ JSONStreamConverter.prototype = {
     onDataAvailable: function(aReq, aCtx, aStream, aOffset, aCount) {
         TS['DataAvailable'] = [Date.now()];
         log.debug("Entered onDataAvailable");
-        var sis = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
-        sis.init(aStream);
-        this.rawdata += sis.read(aCount);
-        var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
-        converter.charset = "UTF-8";
-        sis.close();
-        this.data = converter.ConvertToUnicode(this.rawdata);
+        var bis = new BinaryInputStream(aStream);
+        this.rawdata += bis.readBytes(aCount);
         log.debug("Exiting onDataAvailable");
         TS['DataAvailable'].push(Date.now());
     },
