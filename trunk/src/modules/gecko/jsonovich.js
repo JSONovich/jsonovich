@@ -37,13 +37,16 @@ function require(path) {
         }; // Load the module into a local scope
         Services.scriptloader.loadSubScript(getResourceURI('modules/' + path + '.js').spec, scope);
 
-        let module = scope; // Construct the module for return
+        let module;
         if(scope.exports) { // Support CommonJS style
             module = scope.exports;
         } else if(scope.EXPORTED_SYMBOLS && scope.EXPORTED_SYMBOLS.length) { // Support existing .jsm style
+            module = {};
             for(let i = 0; i < scope.EXPORTED_SYMBOLS.length; i++) {
                 module[scope.EXPORTED_SYMBOLS[i]] = scope[scope.EXPORTED_SYMBOLS[i]];
             }
+        } else { // Support plain old JS
+            module = scope;
         }
 
         registry[path] = module; // Save the loaded module for repeated require()s
