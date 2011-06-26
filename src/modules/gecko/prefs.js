@@ -12,7 +12,7 @@
 
 'use strict';
 
-if(!Services.prefs) { // emulate Services.jsm (introduced in Gecko 2/FF4)
+if(!"prefs" in Services) { // emulate Services.jsm (introduced in Gecko 2/FF4)
     // @see http://hg.mozilla.org/mozilla-central/diff/78e5543c0bc4/toolkit/content/Services.jsm
     XPCOMUtils.defineLazyGetter(Services, "prefs", function () {
         return Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).QueryInterface(Ci.nsIPrefBranch2);
