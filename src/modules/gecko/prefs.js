@@ -18,7 +18,7 @@ if(!"prefs" in Services) { // emulate Services.jsm (introduced in Gecko 2/FF4)
         return Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).QueryInterface(Ci.nsIPrefBranch2);
     });
 }
-if(!Services.contentPrefs) {
+if(!"contentPrefs" in Services) {
     // @see http://hg.mozilla.org/mozilla-central/diff/3ccadf603301/toolkit/content/Services.jsm
     XPCOMUtils.defineLazyServiceGetter(Services, "contentPrefs", "@mozilla.org/content-pref/service;1", "nsIContentPrefService");
 }
