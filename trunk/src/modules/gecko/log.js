@@ -18,7 +18,7 @@ prefixError = '[' + ADDON_NAME + ' Error] ',
 prefixInfo = '[' + ADDON_NAME + ' Info] ',
 prefixDebug = '[' + ADDON_NAME + ' Debug] ';
 
-if(!Services.console) { // emulate Services.jsm (introduced in Gecko 2/FF4)
+if(!"console" in Services) { // emulate Services.jsm (introduced in Gecko 2/FF4)
     // @see http://hg.mozilla.org/mozilla-central/diff/b264a7e3c0f5/toolkit/content/Services.jsm
     XPCOMUtils.defineLazyServiceGetter(Services, "console", "@mozilla.org/consoleservice;1", "nsIConsoleService");
 }
