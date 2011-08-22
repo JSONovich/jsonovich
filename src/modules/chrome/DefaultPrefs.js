@@ -44,14 +44,10 @@ var defaults = {
  * @param setDefaultPref <function>  Reference to the set function for the appropriate default
  *                                   preferences branch, require('prefs').branch(<branch>, true).set
  */
-function setDefaults(setDefaultPref) {
+exports.set = function setDefaults(setDefaultPref) {
     for(var type in defaults) {
         for(var pref in defaults[type]) {
             setDefaultPref(pref, type, defaults[type][pref]);
         }
     }
 }
-
-var exports = {
-    setDefaults: setDefaults
-};
