@@ -10,43 +10,92 @@
 
 'use strict';
 
-var TS = {'Bootstrap': [Date.now()]};
-const {classes: Cc, interfaces: Ci, manager: Cm, results: Cr, utils: Cu} = Components;
-Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/AddonManager.jsm");
+var TS = {
+    'Bootstrap': [Date.now()]
+};
 
-const ADDON_NAME = 'JSONovich';
-const ADDON_LNAME = 'jsonovich';
-const ADDON_DOMAIN = 'lackoftalent.org';
-const PLATFORM = 'gecko';
-let jsonovich, getResourceURI;
+Components.utils['import']("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils['import']("resource://gre/modules/Services.jsm");
+Components.utils['import']("resource://gre/modules/AddonManager.jsm");
 
-function startup(data, reason) {
-    let measure = reason == APP_STARTUP ? 'Startup' : (reason == ADDON_INSTALL ? 'Install' : 'Restart');
-    AddonManager.getAddonByID(data.id, function(addon) {
-        TS[measure] = [Date.now()];
-        getResourceURI = function getResourceURI(path) {
-            return addon.getResourceURI(path);
+(function(global) {
+    'use strict';
+
+    var ADDON_NAME = 'JSONovich',
+    ADDON_LNAME = 'jsonovich',
+    ADDON_DOMAIN = 'lackoftalent.org',
+    electrolyte = null,
+    bootstrapSyncListener = null;
+
+    global.startup = function startup(data, reason) {
+        let measure = reason == APP_STARTUP ? 'Startup' : (reason == ADDON_INSTALL ? 'Install' : 'Restart');
+        AddonManager.getAddonByID(data.id, function(addon) {
+            TS[measure] = [Date.now()];
+
+            function getResourceURI(path) {
+                return addon.getResourceURI(path);
+            }
+
+            function getResourceURISpec(path) {
+                return getResourceURI(path).spec;
+            }
+
+            bootstrapSyncListener = function bootstrapSyncListener(msg) {
+                switch(msg.name) {
+                    case ADDON_LNAME + ':getResourceURISpec':
+                        return {
+                            spec: getResourceURI(msg.json.path).spec
+                        };
+                }
+            };
+
+            electrolyte = {
+                ADDON_NAME: ADDON_NAME,
+                ADDON_LNAME: ADDON_LNAME,
+                ADDON_DOMAIN: ADDON_DOMAIN,
+                IN_CHROME: true,
+                IN_CONTENT: false,
+                Cc: Components.classes,
+                Ci: Components.interfaces,
+                Cm: Components.manager,
+                Cr: Components.results,
+                Cu: Components.utils,
+                getResourceURI: getResourceURI,
+                getResourceURISpec: getResourceURISpec,
+                messageManager: Components.classes["@mozilla.org/globalmessagemanager;1"].getService(Components.interfaces.nsIChromeFrameMessageManager)
+            };
+            electrolyte.messageManager.addMessageListener(ADDON_LNAME + ':getResourceURISpec', bootstrapSyncListener);
+            electrolyte.messageManager.loadFrameScript(getResourceURISpec('modules/content/e10sbootstrap.js'), true);
+            Services.scriptloader.loadSubScript(getResourceURISpec('modules/electrolyte.js'), electrolyte);
+            if(electrolyte.startup) {
+                electrolyte.startup();
+            }
+            TS[measure].push(Date.now());
+        });
+    };
+
+    global.shutdown = function shutdown(data, reason) {
+        if(electrolyte != null) {
+            if(reason == ADDON_UNINSTALL) {
+                if(electrolyte.uninstall) {
+                    electrolyte.uninstall();
+                }
+            }
+            if(reason != APP_SHUTDOWN) {
+                if(electrolyte.messageManager) {
+                    electrolyte.messageManager.sendAsyncMessage(ADDON_LNAME + ':shutdown', {});
+                    electrolyte.messageManager.removeMessageListener(ADDON_LNAME + ':getResourceURISpec', bootstrapSyncListener);
+                }
+                if(electrolyte.shutdown) {
+                    electrolyte.shutdown();
+                }
+                bootstrapSyncListener = null;
+            }
         }
-        jsonovich = {};
-        Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/jsonovich.js').spec, jsonovich);
-        if(jsonovich.startup) {
-            jsonovich.startup();
-        }
-        TS[measure].push(Date.now());
-    });
-}
+        electrolyte = null;
+    };
 
-function shutdown(data, reason) {
-    if(reason == ADDON_UNINSTALL && jsonovich.uninstall) {
-        jsonovich.uninstall();
-    }
-    if(reason != APP_SHUTDOWN && jsonovich.shutdown) {
-        jsonovich.shutdown();
-        jsonovich = null;
-    }
-}
-
-function install() {}
-function uninstall() {}
+    global.install = function install() {};
+    global.uninstall = function uninstall() {};
+})(this);
 TS['Bootstrap'].push(Date.now());
