@@ -11,15 +11,28 @@
  * [2011-05] - Created FF4 legacy bootstrap for JSONovich extension
  */
 
-var TS = {'Bootstrap': [Date.now()]};
-const {classes: Cc, interfaces: Ci, manager: Cm, results: Cr, utils: Cu} = Components;
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-
 const ADDON_NAME = 'JSONovich';
 const ADDON_LNAME = 'jsonovich';
 const ADDON_DOMAIN = 'lackoftalent.org';
-const PLATFORM = 'gecko';
-let jsonovich, getResourceURI;
+const IN_CHROME = true;
+const IN_CONTENT = true; // no process separation or message manager
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cm = Components.manager;
+const Cr = Components.results;
+const Cu = Components.utils;
+
+var TS = {
+    'Bootstrap': [Date.now()]
+};
+var electrolyte = null;
+var getResourceURI = null;
+
+Cu['import']("resource://gre/modules/XPCOMUtils.jsm");
+
+function getResourceURISpec(path) {
+    return getResourceURI(path).spec;
+}
 
 if(!XPCOMUtils.defineLazyGetter) { // emulate XPCOMUtils.defineLazyGetter (introduced in Gecko 1.9.2/FF3.6)
     // @see http://hg.mozilla.org/mozilla-central/diff/f2ebd467b1cd/js/src/xpconnect/loader/XPCOMUtils.jsm
@@ -46,25 +59,25 @@ XPCOMUtils.defineLazyServiceGetter(Services, "obs", "@mozilla.org/observer-servi
 XPCOMUtils.defineLazyServiceGetter(Services, "io", "@mozilla.org/network/io-service;1", "nsIIOService2");
 
 function startup() {
-    jsonovich = {};
-    Services.scriptloader.loadSubScript(getResourceURI('modules/' + PLATFORM + '/jsonovich.js').spec, jsonovich);
-    if(jsonovich.startup) {
-        jsonovich.startup();
+    electrolyte = {};
+    Services.scriptloader.loadSubScript(getResourceURISpec('modules/electrolyte.js'), electrolyte);
+    if(electrolyte.startup) {
+        electrolyte.startup();
     }
 }
 
 function uninstall() {
-    if(jsonovich.uninstall) {
-        jsonovich.uninstall();
+    if(electrolyte.uninstall) {
+        electrolyte.uninstall();
     }
     shutdown();
 }
 
 function shutdown() { // thanks to work on restartless support, we can do this on-demand in legacy Gecko :D
-    if(jsonovich.shutdown) {
-        jsonovich.shutdown();
+    if(electrolyte.shutdown) {
+        electrolyte.shutdown();
     }
-    jsonovich = null;
+    electrolyte = null;
 }
 
 function JSONovichBootstrap() {}
@@ -73,7 +86,9 @@ JSONovichBootstrap.prototype = {
     classID:          Components.ID("{dcc31be0-c861-11dd-ad8b-0800200c9a65}"),
     contractID:       '@' + ADDON_DOMAIN + '/' + ADDON_LNAME + 'bootstrap;1',
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver]),
-    _xpcom_categories: [{category: "profile-after-change"}],
+    _xpcom_categories: [{
+        category: "profile-after-change"
+    }],
 
     observe: function(aSubject, aTopic, aData) {
         switch(aTopic) {
