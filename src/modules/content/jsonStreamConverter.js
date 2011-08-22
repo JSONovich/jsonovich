@@ -36,59 +36,76 @@
 
 'use strict';
 
-let log = require(PLATFORM + '/log'),
-BinaryInputStream = Components.Constructor("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream", "setInputStream");
+let log = require('log');
+XPCOMUtils.defineLazyGetter(this, "JSON2HTML", function() {
+    return require('content/json2html').JSON2HTML;
+});
+XPCOMUtils.defineLazyGetter(this, "BinaryInputStream", function() {
+    return Components.Constructor("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream", "setInputStream");
+});
+XPCOMUtils.defineLazyGetter(this, "scriptableunicodeconverter", function() {
+    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
+    converter.charset = "UTF-8";
+    return converter;
+});
+XPCOMUtils.defineLazyServiceGetter(this, "utf8Converter", "@mozilla.org/intl/utf8converterservice;1", "nsIUTF8ConverterService");
 
-function JSONStreamConverter() {
-    this.JSON2HTML = require('json2html').JSON2HTML;
-    log.debug("JSONStreamConverter initialized");
-}
+function JSONStreamConverter() {}
 JSONStreamConverter.prototype = {
-    listener: null,
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIStreamConverter, Ci.nsIStreamListener, Ci.nsIRequestObserver]),
 
-    QueryInterface: function(aIid) {
-        if(aIid.equals(Ci.nsISupports)
-            || aIid.equals(Ci.nsIStreamConverter)
-            || aIid.equals(Ci.nsIStreamListener)
-            || aIid.equals(Ci.nsIRequestObserver)) {
-            return this;
-        }
-        throw Cr.NS_ERROR_NO_INTERFACE;
+    // nsIStreamConverter::convert
+    convert: function(aStream, aFromType, aToType, aCtx) {
+        return aStream;
+    },
+
+    // nsIStreamConverter::asyncConvertData
+    asyncConvertData: function(aFromType, aToType, aListener, aCtx) {
+        this.listener = aListener; // Store the listener passed to us
+    },
+
+    // nsIStreamListener::onDataAvailable
+    onDataAvailable: function(aReq, aCtx, aStream, aOffset, aCount) {
+        //TS['DataAvailable'] = [Date.now()];
+        log.debug("Entered onDataAvailable");
+        var bis = new BinaryInputStream(aStream);
+        this.rawdata += bis.readBytes(aCount);
+        log.debug("Exiting onDataAvailable");
+        //TS['DataAvailable'].push(Date.now());
     },
 
     // nsIRequestObserver::onStartRequest
     onStartRequest: function(aReq, aCtx) {
-        TS['StartRequest'] = [Date.now()];
+        //TS['StartRequest'] = [Date.now()];
         log.debug("Entered onStartRequest");
         this.rawdata = "";
         aReq.QueryInterface(Ci.nsIChannel);
         this.uri = aReq.URI.spec;
-        log.debug(aReq.contentType);
+        this.mimetype = aReq.contentType || "application/json";
         aReq.contentType = "text/html";
-        if(this.listener)
-            this.listener.onStartRequest(aReq, aCtx);
+        this.charset = aReq.contentCharset || "UTF-8";
+        aReq.contentCharset = "UTF-8";
+        this.listener.onStartRequest(aReq, aCtx);
         log.debug("Exiting onStartRequest");
-        TS['StartRequest'].push(Date.now());
+        //TS['StartRequest'].push(Date.now());
     },
 
     // nsIRequestObserver::onStopRequest
     onStopRequest: function(aReq, aCtx, aStatus) {
-        TS['StopRequest'] = [Date.now()];
+        //TS['StopRequest'] = [Date.now()];
         log.debug("Entered onStopRequest");
-        var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
-        converter.charset = "UTF-8";
-        var data = converter.ConvertToUnicode(this.rawdata);
+        var data = utf8Converter.convertStringToUTF8(this.rawdata, this.charset, true);
         let prettyPrinted = "";
         try {
-            TS['ParseJSON'] = [Date.now()];
+            //TS['ParseJSON'] = [Date.now()];
             let jsonData = JSON.parse(data);
-            TS['ParseJSON'].push(Date.now());
-            TS['FormatJSON'] = [Date.now()];
-            prettyPrinted = this.JSON2HTML.formatJSON(jsonData);
-            TS['FormatJSON'].push(Date.now());
+            //TS['ParseJSON'].push(Date.now());
+            //TS['FormatJSON'] = [Date.now()];
+            prettyPrinted = JSON2HTML.formatJSON(jsonData);
+            //TS['FormatJSON'].push(Date.now());
         } catch(e) {
             log.error(e);
-            prettyPrinted = this.JSON2HTML.encodeHTML(data);
+            prettyPrinted = JSON2HTML.encodeHTML(data);
         }
         let htmlDocument = "<!DOCTYPE html>\n" +
         "<html>\n" +
@@ -103,37 +120,14 @@ JSONStreamConverter.prototype = {
         "  </body>\n" +
         "</html>\n";
 
-        var stream = converter.convertToInputStream(htmlDocument);
+        var stream = scriptableunicodeconverter.convertToInputStream(htmlDocument);
         var len = stream.available();
 
         // Pass the data to the main content listener
-        if(this.listener){
-            this.listener.onDataAvailable(aReq, aCtx, stream, 0, len);
-            this.listener.onStopRequest(aReq, aCtx, aStatus);
-        }
+        this.listener.onDataAvailable(aReq, aCtx, stream, 0, len);
+        this.listener.onStopRequest(aReq, aCtx, aStatus);
         log.debug("Exiting onStopRequest");
-        TS['StopRequest'].push(Date.now());
-    },
-
-    // nsIStreamListener::onDataAvailable
-    onDataAvailable: function(aReq, aCtx, aStream, aOffset, aCount) {
-        TS['DataAvailable'] = [Date.now()];
-        log.debug("Entered onDataAvailable");
-        var bis = new BinaryInputStream(aStream);
-        this.rawdata += bis.readBytes(aCount);
-        log.debug("Exiting onDataAvailable");
-        TS['DataAvailable'].push(Date.now());
-    },
-
-    // nsIStreamConverter::asyncConvertData
-    asyncConvertData: function(aFromType, aToType, aListener, aCtx) {
-        // Store the listener passed to us
-        this.listener = aListener;
-    },
-
-    // nsIStreamConverter::convert
-    convert: function(aStream, aFromType, aToType, aCtx) {
-        return aStream;
+        //TS['StopRequest'].push(Date.now());
     }
 };
 
