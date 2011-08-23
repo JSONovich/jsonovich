@@ -18,32 +18,46 @@ prefixError = '[' + ADDON_NAME + ' Error] ',
 prefixInfo = '[' + ADDON_NAME + ' Info] ',
 prefixDebug = '[' + ADDON_NAME + ' Debug] ';
 
-if(!"console" in Services) { // emulate Services.jsm (introduced in Gecko 2/FF4)
+if(!("console" in Services)) { // emulate Services.jsm (introduced in Gecko 2/FF4)
     // @see http://hg.mozilla.org/mozilla-central/diff/b264a7e3c0f5/toolkit/content/Services.jsm
     XPCOMUtils.defineLazyServiceGetter(Services, "console", "@mozilla.org/consoleservice;1", "nsIConsoleService");
 }
 
-function logError(err) {
+exports.error = function logError(err) {
     Cu.reportError(err instanceof Error ? err : prefixError + err);
 }
 
-function logInfo(msg) {
+exports.info = function logInfo(msg) {
     Services.console.logStringMessage(prefixInfo + msg);
 }
 
-function logDebug(msg) {
+exports.debug = function logDebug(msg) {
     if(debug) {
         Services.console.logStringMessage(prefixDebug + msg);
     }
 }
 
-function setDebug(enable) {
+exports.setDebug = function setDebug(enable) {
     debug = enable;
+    if(IN_CHROME && typeof messageManager !== 'undefined') {
+        messageManager.sendAsyncMessage(ADDON_LNAME + ':log', {
+            enable: enable
+        });
+    }
 }
 
-var exports = {
-    error: logError,
-    info: logInfo,
-    debug: logDebug,
-    setDebug: setDebug
-};
+if(IN_CONTENT && typeof messageManager !== 'undefined') {
+    (function(global) {
+        let unload = require('unload').unload,
+        setDebugAsyncListener = function(msg) {
+            switch(msg.name) {
+                case ADDON_LNAME + ':log:setDebug':
+                    setDebug.call(global, msg.json.enable);
+            }
+        };
+        messageManager.addMessageListener(ADDON_LNAME + ':log:setDebug', setDebugAsyncListener);
+        unload(function() {
+            messageManager.removeMessageListener(ADDON_LNAME + ':log:setDebug', setDebugAsyncListener);
+        });
+    })(this);
+}
