@@ -11,6 +11,8 @@
 'use strict';
 
 function startup(once) {
+    require('unload'); // workaround to avoid race condition in content scripts at shutdown where the getResourceURISpec listener in the parent has been removed
+
     function init() {
         let prefs = require('prefs').branch,
         listenPref = prefs('extensions.' + ADDON_LNAME).listen;
