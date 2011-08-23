@@ -98,7 +98,7 @@ function startup() {
         require('chrome/' + ADDON_LNAME).startup();
     }
     if(IN_CONTENT) {
-        require('content/' + ADDON_LNAME).startup();
+        require('content/' + ADDON_LNAME).startup(once || undefined);
     }
 }
 
