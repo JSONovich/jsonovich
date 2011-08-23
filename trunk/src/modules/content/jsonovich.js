@@ -10,7 +10,7 @@
 
 'use strict';
 
-function startup() {
+function startup(once) {
     function init() {
         let prefs = require('prefs').branch,
         listenPref = prefs('extensions.' + ADDON_LNAME).listen;
@@ -20,10 +20,10 @@ function startup() {
     //TS['RegisterConversions'].push(Date.now());
     }
 
-    if(typeof once == 'undefined') {
-        init();
-    } else {
+    if(once) {
         once.runOnce('init', init);
+    } else {
+        init();
     }
 
 // TODO: listen for document load event, prettify json
