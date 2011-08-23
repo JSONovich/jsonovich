@@ -17,7 +17,8 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
     var ADDON_NAME = 'JSONovich',
     ADDON_LNAME = 'jsonovich',
     ADDON_DOMAIN = 'lackoftalent.org',
-    electrolyte = null;
+    electrolyte = null,
+    once = null;
 
     function startup() {
 
@@ -44,14 +45,16 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
             Cu: Components.utils,
             getResourceURI: getResourceURI,
             getResourceURISpec: getResourceURISpec,
-            messageManager: global,
-            once: {}
+            messageManager: global
+        };
+        once = {
+            path: getResourceURISpec('modules/content/OncePerProcess.jsm')
         };
         electrolyte.messageManager.addMessageListener(ADDON_LNAME + ':shutdown', shutdown);
-        Components.utils['import'](getResourceURISpec('modules/content/OncePerProcess.jsm'), electrolyte.once);
+        Components.utils['import'](once.path, once);
         Services.scriptloader.loadSubScript(getResourceURISpec('modules/electrolyte.js'), electrolyte);
         if(electrolyte.startup) {
-            electrolyte.startup();
+            electrolyte.startup(once);
         }
     }
 
@@ -60,10 +63,11 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
         if(electrolyte.shutdown) {
             electrolyte.shutdown();
         }
-        electrolyte.once.resetOncePerProcess();
+        once.resetOncePerProcess();
         if(typeof Components.utils['unload'] == 'function') {
-            Components.utils['unload'](getResourceURISpec('modules/content/OncePerProcess.jsm'));
+            Components.utils['unload'](once.path);
         }
+        once = null;
         electrolyte = null;
     }
 
