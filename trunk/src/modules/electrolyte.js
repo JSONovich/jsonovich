@@ -93,12 +93,12 @@ function require(path) {
     return registry[path];
 }
 
-function startup() {
+function startup(once) {
     if(IN_CHROME) {
         require('chrome/' + ADDON_LNAME).startup();
     }
     if(IN_CONTENT) {
-        require('content/' + ADDON_LNAME).startup(once || undefined);
+        require('content/' + ADDON_LNAME).startup(once);
     }
 }
 
