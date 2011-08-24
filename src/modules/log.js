@@ -40,7 +40,7 @@ exports.debug = function logDebug(msg) {
 exports.setDebug = function setDebug(enable) {
     debug = enable;
     if(IN_CHROME && typeof messageManager !== 'undefined') {
-        messageManager.sendAsyncMessage(ADDON_LNAME + ':log', {
+        messageManager.sendAsyncMessage(ADDON_LNAME + ':log:setDebug', {
             enable: enable
         });
     }
