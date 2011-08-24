@@ -25,7 +25,7 @@ Components.utils['import']("resource://gre/modules/AddonManager.jsm");
     ADDON_LNAME = 'jsonovich',
     ADDON_DOMAIN = 'lackoftalent.org',
     electrolyte = null,
-    bootstrapSyncListener = null;
+    messages = null;
 
     global.startup = function startup(data, reason) {
         let measure = reason == APP_STARTUP ? 'Startup' : (reason == ADDON_INSTALL ? 'Install' : 'Restart');
@@ -40,15 +40,6 @@ Components.utils['import']("resource://gre/modules/AddonManager.jsm");
                 return getResourceURI(path).spec;
             }
 
-            bootstrapSyncListener = function bootstrapSyncListener(msg) {
-                switch(msg.name) {
-                    case ADDON_LNAME + ':getResourceURISpec':
-                        return {
-                            spec: getResourceURI(msg.json.path).spec
-                        };
-                }
-            };
-
             electrolyte = {
                 ADDON_NAME: ADDON_NAME,
                 ADDON_LNAME: ADDON_LNAME,
@@ -61,11 +52,33 @@ Components.utils['import']("resource://gre/modules/AddonManager.jsm");
                 Cr: Components.results,
                 Cu: Components.utils,
                 getResourceURI: getResourceURI,
-                getResourceURISpec: getResourceURISpec,
-                messageManager: Components.classes["@mozilla.org/globalmessagemanager;1"].getService(Components.interfaces.nsIChromeFrameMessageManager)
+                getResourceURISpec: getResourceURISpec
             };
-            electrolyte.messageManager.addMessageListener(ADDON_LNAME + ':getResourceURISpec', bootstrapSyncListener);
-            electrolyte.messageManager.loadFrameScript(getResourceURISpec('modules/content/e10sbootstrap.js'), true);
+            messages = {
+                manager: Components.classes["@mozilla.org/globalmessagemanager;1"].getService(Components.interfaces.nsIChromeFrameMessageManager),
+                listener: function bootstrapSyncListener(msg) {
+                    switch(msg.name) {
+                        case ADDON_LNAME + ':getResourceURISpec':
+                            return {
+                                spec: getResourceURI(msg.json.path).spec
+                            };
+                    }
+                }
+            };
+
+            // unloadable global frame scripts OR no choice (Fennec)
+            if('removeDelayedFrameScript' in messages.manager || Services.appinfo.ID == '{a23983c0-fd0e-11dc-95ff-0800200c9a66}') { // TODO: check if adding support for more platforms
+                messages.manager.addMessageListener(ADDON_LNAME + ':getResourceURISpec', messages.listener);
+                messages.manager.loadFrameScript(getResourceURISpec('modules/content/e10sbootstrap.js'), true);
+                electrolyte.messageManager = messages.manager;
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=681206 cannot be avoided in Fennec
+                // TODO: manually add frame script to each existing and future tab's message manager instead of using global message manager
+                // ref: http://adblockplus.org/jsdoc/adblockplus/symbols/src/modules_AppIntegrationFennec.jsm.html
+            } else { // avoid IPC system, performance of not sending messages is obviously better without multi-process
+                electrolyte.IN_CONTENT = true;
+                messages = null;
+            }
+
             Services.scriptloader.loadSubScript(getResourceURISpec('modules/electrolyte.js'), electrolyte);
             if(electrolyte.startup) {
                 electrolyte.startup();
@@ -82,14 +95,17 @@ Components.utils['import']("resource://gre/modules/AddonManager.jsm");
                 }
             }
             if(reason != APP_SHUTDOWN) {
-                if(electrolyte.messageManager) {
-                    electrolyte.messageManager.sendAsyncMessage(ADDON_LNAME + ':shutdown', {});
-                    electrolyte.messageManager.removeMessageListener(ADDON_LNAME + ':getResourceURISpec', bootstrapSyncListener);
+                if(messages) {
+                    if('removeDelayedFrameScript' in messages.manager) {
+                        messages.manager.removeDelayedFrameScript(getResourceURISpec('modules/content/e10sbootstrap.js'));
+                    }
+                    messages.manager.sendAsyncMessage(ADDON_LNAME + ':shutdown', {});
+                    messages.manager.removeMessageListener(ADDON_LNAME + ':getResourceURISpec', messages.listener);
                 }
                 if(electrolyte.shutdown) {
                     electrolyte.shutdown();
                 }
-                bootstrapSyncListener = null;
+                messages = null;
             }
         }
         electrolyte = null;
