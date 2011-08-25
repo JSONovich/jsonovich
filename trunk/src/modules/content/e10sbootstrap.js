@@ -18,19 +18,30 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
     ADDON_LNAME = 'jsonovich',
     ADDON_DOMAIN = 'lackoftalent.org',
     electrolyte = null,
-    once = null;
+    once = null,
+    installPath = null;
 
     function startup() {
-
-        function getResourceURI(path) {
-            return Services.io.newFileURI(getResourceURISpec(path));
+        function getResourceURI(aPath) { // @see http://mxr.mozilla.org/mozilla-central/source/toolkit/mozapps/extensions/XPIProvider.jsm
+            let bundle = installPath.clone();
+            if(aPath) {
+                if(bundle.isDirectory()) {
+                    aPath.split("/").forEach(function(aPart) {
+                        bundle.append(aPart);
+                    });
+                } else {
+                    return Services.io.newURI("jar:" + bundle.spec + "!/" + aPath, null, null);
+                }
+            }
+            return Services.io.newFileURI(bundle);
         }
 
         function getResourceURISpec(path) {
-            return sendSyncMessage(ADDON_LNAME + ':getResourceURISpec', {
-                path: path
-            })[0].spec;
+            return getResourceURI(path).spec;
         }
+
+        installPath = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+        installPath.initWithPath(sendSyncMessage(ADDON_LNAME + ':getInstallPath', {})[0].path);
 
         electrolyte = {
             ADDON_NAME: ADDON_NAME,
@@ -67,6 +78,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
         if(typeof Components.utils['unload'] == 'function') {
             Components.utils['unload'](once.path);
         }
+        installPath = null;
         once = null;
         electrolyte = null;
     }
