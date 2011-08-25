@@ -32,9 +32,11 @@ function startup() {
     require('chrome/ResourceAlias').register(ADDON_LNAME, getResourceURI('resources/')); // trailing slash required inside XPI;
     TS['RegisterResAlias'].push(Date.now());
 
-    TS['ObserveOptionsUI'] = [Date.now()];
-    require('chrome/Options').observe();
-    TS['ObserveOptionsUI'].push(Date.now());
+    if(Services.vc.compare(Services.appinfo.platformVersion, '6.9') > 0) { // no point loading this before Gecko7
+        TS['ObserveOptionsUI'] = [Date.now()];
+        require('chrome/Options').observe();
+        TS['ObserveOptionsUI'].push(Date.now());
+    }
 
     TS['PrepareAsyncLoad'] = [Date.now()];
     let timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
