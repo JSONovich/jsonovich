@@ -7,6 +7,7 @@
     <version>1.8.3</version>
     <type>2</type>
     <bootstrap>true</bootstrap>
+    <optionsType>2</optionsType>
 
     <description>Pretty-prints JSON content in the browser.</description>
     <homepageURL>http://lackoftalent.org/michael/blog/json-in-firefox/</homepageURL>

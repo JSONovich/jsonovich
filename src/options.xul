@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <setting type="bool"
+             title="Add to default HTTP Accept header"
+             desc="Modify the default HTTP Accept header to include 'application/json'. Mainly useful for working with CouchDB, known to cause conflicts with Confluence, Netflix and the BBC."
+             pref="extensions.jsonovich.acceptHeader.json"/>
+    <setting type="bool"
+             title="Debug mode"
+             desc="More console messages to help diagnose problems with the addon."
+             pref="extensions.jsonovich.debug"/>
+    <setting type="control"
+             title="MIME types"
+             desc="Control MIME types to be intercepted and treated as JSON. Currently this should only include MIME types for which a download dialog would normally appear.">
+        <button id="jsonovich-pref-mime-add" label="Add..."/>
+        <button id="jsonovich-pref-mime-rem" label="Remove..."/>
+    </setting>
+    <setting type="control"
+             title="File extensions"
+             desc="Set up mappings from file extension to MIME type. File extensions should only map to MIME types which are intercepted by this addon.">
+        <button id="jsonovich-pref-ext-add" label="Add..."/>
+        <button id="jsonovich-pref-ext-rem" label="Remove..."/>
+    </setting>
+    <setting type="control"
+             title="Restore defaults"
+             desc="Clear all preferences for this addon and restore the clean-installation defaults.">
+        <button id="jsonovich-pref-reset" label="Clear Preferences"/>
+    </setting>
+</vbox>
