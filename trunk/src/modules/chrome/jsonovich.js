@@ -32,6 +32,10 @@ function startup() {
     require('chrome/ResourceAlias').register(ADDON_LNAME, getResourceURI('resources/')); // trailing slash required inside XPI;
     TS['RegisterResAlias'].push(Date.now());
 
+    TS['ObserveOptionsUI'] = [Date.now()];
+    require('chrome/Options').observe();
+    TS['ObserveOptionsUI'].push(Date.now());
+
     TS['PrepareAsyncLoad'] = [Date.now()];
     let timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
     timer.init({ // async load
@@ -56,6 +60,7 @@ function startup() {
                         'RegisterExtMap': 'time taken to register file extension to type mappings',
                         'RegisterAcceptHeader': 'time taken to set up Accept header',
                         'RegisterResAlias': 'time taken to register resource:// URL alias',
+                        'ObserveOptionsUI': 'time taken to add options UI observer',
                         'PrepareAsyncLoad': 'time spent initialising nsiTimer to defer loading non-essentials'
                     };
                     for(let measure in TS) {
@@ -72,9 +77,7 @@ function startup() {
 }
 
 function uninstall() {
-    let prefs = require('prefs').branch;
-    prefs('extensions.' + ADDON_LNAME, true).uninstall();
-    prefs('extensions.' + ADDON_LNAME + '@' + ADDON_DOMAIN, true).uninstall();
+    require('chrome/Options').clear();
 }
 
 function shutdown() {
