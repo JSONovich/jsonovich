@@ -67,9 +67,9 @@ Components.utils['import']("resource://gre/modules/AddonManager.jsm");
             manager: Components.classes["@mozilla.org/globalmessagemanager;1"].getService(Components.interfaces.nsIChromeFrameMessageManager),
             listener: function bootstrapSyncListener(msg) {
                 switch(msg.name) {
-                    case ADDON_LNAME + ':getResourceURISpec':
+                    case ADDON_LNAME + ':getInstallPath':
                         return {
-                            spec: getResourceURI(msg.json.path).spec
+                            path: data.installPath.path
                         };
                 }
             }
@@ -77,7 +77,7 @@ Components.utils['import']("resource://gre/modules/AddonManager.jsm");
 
         // unloadable global frame scripts OR no choice (Fennec)
         if('removeDelayedFrameScript' in messages.manager || Services.appinfo.ID == '{a23983c0-fd0e-11dc-95ff-0800200c9a66}') { // TODO: check if adding support for more platforms
-            messages.manager.addMessageListener(ADDON_LNAME + ':getResourceURISpec', messages.listener);
+            messages.manager.addMessageListener(ADDON_LNAME + ':getInstallPath', messages.listener);
             messages.manager.loadFrameScript(getResourceURISpec('modules/content/e10sbootstrap.js'), true);
             electrolyte.messageManager = messages.manager;
         // https://bugzilla.mozilla.org/show_bug.cgi?id=681206 cannot be avoided in Fennec
@@ -108,7 +108,7 @@ Components.utils['import']("resource://gre/modules/AddonManager.jsm");
                         messages.manager.removeDelayedFrameScript(getResourceURISpec('modules/content/e10sbootstrap.js'));
                     }
                     messages.manager.sendAsyncMessage(ADDON_LNAME + ':shutdown', {});
-                    messages.manager.removeMessageListener(ADDON_LNAME + ':getResourceURISpec', messages.listener);
+                    messages.manager.removeMessageListener(ADDON_LNAME + ':getInstallPath', messages.listener);
                 }
                 if(electrolyte.shutdown) {
                     electrolyte.shutdown();
