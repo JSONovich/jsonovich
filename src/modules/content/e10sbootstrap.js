@@ -14,7 +14,10 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
 (function(global) {
     'use strict';
 
-    var ADDON_NAME = 'JSONovich',
+    var TS = {
+        'E10SBootstrap': [Date.now()]
+    },
+    ADDON_NAME = 'JSONovich',
     ADDON_LNAME = 'jsonovich',
     ADDON_DOMAIN = 'lackoftalent.org',
     electrolyte = null,
@@ -44,6 +47,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
         installPath.initWithPath(sendSyncMessage(ADDON_LNAME + ':getInstallPath', {})[0].path);
 
         electrolyte = {
+            TS: TS,
             ADDON_NAME: ADDON_NAME,
             ADDON_LNAME: ADDON_LNAME,
             ADDON_DOMAIN: ADDON_DOMAIN,
@@ -84,4 +88,5 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
     }
 
     startup();
+    TS['E10SBootstrap'].push(Date.now());
 })(this);

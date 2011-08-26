@@ -30,7 +30,3 @@ function startup(once) {
 /*addEventListener("DOMContentLoaded", function() {
 }, false);*/
 }
-
-function shutdown() {
-    require('unload').unload();
-}

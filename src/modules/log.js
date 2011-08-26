@@ -39,25 +39,4 @@ exports.debug = function logDebug(msg) {
 
 exports.setDebug = function setDebug(enable) {
     debug = enable;
-    if(IN_CHROME && typeof messageManager !== 'undefined') {
-        messageManager.sendAsyncMessage(ADDON_LNAME + ':log:setDebug', {
-            enable: enable
-        });
-    }
-}
-
-if(IN_CONTENT && typeof messageManager !== 'undefined') {
-    (function(global) {
-        let unload = require('unload').unload,
-        setDebugAsyncListener = function(msg) {
-            switch(msg.name) {
-                case ADDON_LNAME + ':log:setDebug':
-                    setDebug.call(global, msg.json.enable);
-            }
-        };
-        messageManager.addMessageListener(ADDON_LNAME + ':log:setDebug', setDebugAsyncListener);
-        unload(function() {
-            messageManager.removeMessageListener(ADDON_LNAME + ':log:setDebug', setDebugAsyncListener);
-        });
-    })(this);
 }

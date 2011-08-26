@@ -66,17 +66,17 @@ JSONStreamConverter.prototype = {
 
     // nsIStreamListener::onDataAvailable
     onDataAvailable: function(aReq, aCtx, aStream, aOffset, aCount) {
-        //TS['DataAvailable'] = [Date.now()];
+        TS['DataAvailable'] = [Date.now()];
         log.debug("Entered onDataAvailable");
         var bis = new BinaryInputStream(aStream);
         this.rawdata += bis.readBytes(aCount);
         log.debug("Exiting onDataAvailable");
-        //TS['DataAvailable'].push(Date.now());
+        TS['DataAvailable'].push(Date.now());
     },
 
     // nsIRequestObserver::onStartRequest
     onStartRequest: function(aReq, aCtx) {
-        //TS['StartRequest'] = [Date.now()];
+        TS['StartRequest'] = [Date.now()];
         log.debug("Entered onStartRequest");
         this.rawdata = "";
         aReq.QueryInterface(Ci.nsIChannel);
@@ -87,22 +87,22 @@ JSONStreamConverter.prototype = {
         aReq.contentCharset = "UTF-8";
         this.listener.onStartRequest(aReq, aCtx);
         log.debug("Exiting onStartRequest");
-        //TS['StartRequest'].push(Date.now());
+        TS['StartRequest'].push(Date.now());
     },
 
     // nsIRequestObserver::onStopRequest
     onStopRequest: function(aReq, aCtx, aStatus) {
-        //TS['StopRequest'] = [Date.now()];
+        TS['StopRequest'] = [Date.now()];
         log.debug("Entered onStopRequest");
         var data = utf8Converter.convertStringToUTF8(this.rawdata, this.charset, true);
         let prettyPrinted = "";
         try {
-            //TS['ParseJSON'] = [Date.now()];
+            TS['ParseJSON'] = [Date.now()];
             let jsonData = JSON.parse(data);
-            //TS['ParseJSON'].push(Date.now());
-            //TS['FormatJSON'] = [Date.now()];
+            TS['ParseJSON'].push(Date.now());
+            TS['FormatJSON'] = [Date.now()];
             prettyPrinted = JSON2HTML.formatJSON(jsonData);
-            //TS['FormatJSON'].push(Date.now());
+            TS['FormatJSON'].push(Date.now());
         } catch(e) {
             log.error(e);
             prettyPrinted = JSON2HTML.encodeHTML(data);
@@ -127,7 +127,7 @@ JSONStreamConverter.prototype = {
         this.listener.onDataAvailable(aReq, aCtx, stream, 0, len);
         this.listener.onStopRequest(aReq, aCtx, aStatus);
         log.debug("Exiting onStopRequest");
-        //TS['StopRequest'].push(Date.now());
+        TS['StopRequest'].push(Date.now());
     }
 };
 

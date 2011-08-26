@@ -50,6 +50,7 @@ function require(path) {
     if(!registry[path]) {
         registry[path] = {};
         let scope = {
+            TS: TS,
             ADDON_NAME: ADDON_NAME,
             ADDON_LNAME: ADDON_LNAME,
             ADDON_DOMAIN: ADDON_DOMAIN,
@@ -93,26 +94,44 @@ function require(path) {
     return registry[path];
 }
 
-function startup(once) {
-    if(IN_CHROME) {
-        require('chrome/' + ADDON_LNAME).startup();
-    }
-    if(IN_CONTENT) {
-        require('content/' + ADDON_LNAME).startup(once);
-    }
-}
+(function(global) {
+    var chromeProcess = IN_CHROME ? require('chrome/' + ADDON_LNAME) : null,
+    contentProcess = IN_CONTENT ? require('content/' + ADDON_LNAME) : null,
+    bothProcesses = require(ADDON_LNAME);
 
-function uninstall() {
-    if(IN_CHROME) {
-        require('chrome/' + ADDON_LNAME).uninstall();
-    }
-}
+    global.startup = function startup(once) {
+        if(chromeProcess && (typeof chromeProcess.startup === 'function')) {
+            chromeProcess.startup();
+        }
+        if(contentProcess && (typeof contentProcess.startup === 'function')) {
+            contentProcess.startup(once);
+        }
+        if(typeof bothProcesses.startup === 'function'){
+            bothProcesses.startup();
+        }
+    };
 
-function shutdown() {
-    if(IN_CHROME) {
-        require('chrome/' + ADDON_LNAME).shutdown();
-    }
-    if(IN_CONTENT) {
-        require('content/' + ADDON_LNAME).shutdown();
-    }
-}
+    global.uninstall = function uninstall() {
+        if(chromeProcess && (typeof chromeProcess.uninstall === 'function')) {
+            chromeProcess.uninstall();
+        }
+        if(contentProcess && (typeof contentProcess.uninstall === 'function')) {
+            contentProcess.uninstall();
+        }
+        if(typeof bothProcesses.uninstall === 'function'){
+            bothProcesses.uninstall();
+        }
+    };
+
+    global.shutdown = function shutdown() {
+        if(chromeProcess && (typeof chromeProcess.shutdown === 'function')) {
+            chromeProcess.shutdown();
+        }
+        if(contentProcess && (typeof contentProcess.shutdown === 'function')) {
+            contentProcess.shutdown();
+        }
+        if(typeof bothProcesses.shutdown === 'function'){
+            bothProcesses.shutdown();
+        }
+    };
+})(this);
