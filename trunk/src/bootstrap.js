@@ -10,17 +10,16 @@
 
 'use strict';
 
-var TS = {
-    'Bootstrap': [Date.now()]
-};
-
 Components.utils['import']("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils['import']("resource://gre/modules/Services.jsm");
 
 (function(global) {
     'use strict';
 
-    var ADDON_NAME = 'JSONovich',
+    var TS = {
+        'Bootstrap': [Date.now()]
+    },
+    ADDON_NAME = 'JSONovich',
     ADDON_LNAME = 'jsonovich',
     ADDON_DOMAIN = 'lackoftalent.org',
     electrolyte = null,
@@ -49,6 +48,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
         }
 
         electrolyte = {
+            TS: TS,
             ADDON_NAME: ADDON_NAME,
             ADDON_LNAME: ADDON_LNAME,
             ADDON_DOMAIN: ADDON_DOMAIN,
@@ -120,5 +120,5 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
 
     global.install = function install() {};
     global.uninstall = function uninstall() {};
+    TS['Bootstrap'].push(Date.now());
 })(this);
-TS['Bootstrap'].push(Date.now());
