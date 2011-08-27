@@ -28,9 +28,8 @@ function startup(optionsUI) {
     require('chrome/ExtToTypeMapping').register(listenPref);
     TS['RegisterExtMap'].push(Date.now());
 
-    // maybe we can add a lower q-value in the future, track https://issues.apache.org/jira/browse/COUCHDB-234
     TS['RegisterAcceptHeader'] = [Date.now()];
-    require('chrome/DefaultAcceptHeader').register(listenPref, 'acceptHeader.json', 'application/json');
+    require('chrome/DefaultAcceptHeader').register(listenPref, 'json');
     TS['RegisterAcceptHeader'].push(Date.now());
 
     TS['RegisterResAlias'] = [Date.now()];

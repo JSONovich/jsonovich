@@ -8,48 +8,65 @@
  * [2011-07] - Created separate module for default Accept header
  */
 
-'use strict';
+(function() {
+    'use strict';
 
-/**
- * Dynamically append to default HTTP Accept header
- *
- * @param listenPref <function>  Reference to the listen function for the appropriate preferences
- *                               branch, require('prefs').branch(<branch>).listen
- * @param mimePref <string>  The boolean preference to watch, when true given MIME type should be appended
- * @param mimeType <string>  The MIME type to append to the Accept header. May include q-value, etc.
- */
-exports.register = function registerAcceptHeader(listenPref, mimePref, mimeType) {
-    let prefs = require('prefs').branch;
-    function setAccept(acceptPart, enabled) {
-        function setCleanAccept(suffix) {
-            let pref = prefs('network.http.accept');
-            let accept = pref.get('default', 'string-ascii');
-            if(suffix && accept.indexOf(acceptPart) != -1) {
-                return; // already accepting specified suffix
-            }
-            accept = accept.split(',');
-            let index;
-            while((index = accept.indexOf(acceptPart)) != -1) {
-                accept.splice(index, 1);
-            }
-            if(suffix) {
-                accept.push(acceptPart);
-            }
-            pref.set('default', 'string-ascii', accept.join(','));
+    var lazy = {},
+    observers = {
+        'json': {
+            mime: 'application/json'
         }
+    };
 
-        if(enabled) {
-            setCleanAccept(true);
-            require('unload').unload(setCleanAccept);
-        } else {
-            setCleanAccept();
+    XPCOMUtils.defineLazyGetter(lazy, 'globalAccept', function() {
+        return require('prefs').branch('network.http.accept');
+    });
+
+    /**
+     * Dynamically append to default HTTP Accept header
+     *
+     * @param listenPref <function>  Reference to the listen function for the appropriate preferences
+     *                               branch, require('prefs').branch(<branch>).listen
+     * @param type <string>  A string matching an entry in this module's private observers object.
+     */
+    exports.register = function registerAcceptHeader(listenPref, type) {
+        if(observers[type]) {
+            listenPref('acceptHeader.' + type, function(branch, pref) {
+                function setDefaultAccept(suffix) {
+                    let acceptOrig = lazy.globalAccept.get('default', 'string-ascii'),
+                    accept = acceptOrig.split(/\s*,\s*/).filter(function(value) {
+                        return (value.indexOf(observers[type].mime) != 0
+                            || (value.length > observers[type].mime.length
+                                && (value[observers[type].mime.length] == ' '
+                                    || value[observers[type].mime.length] == ';'
+                                    )
+                                )
+                            );
+                    });
+                    if(suffix) {
+                        accept.push(observers[type].mime);
+                    }
+                    accept = accept.join(',');
+                    if(acceptOrig != accept) {
+                        lazy.globalAccept.set('default', 'string-ascii', accept);
+                    }
+                }
+
+                try {
+                    if(observers[type].cleanup) {
+                        observers[type].cleanup();
+                        delete observers[type].cleanup;
+                    }
+                    if(branch.get(pref, 'boolean')) {
+                        setDefaultAccept(true);
+                        observers[type].cleanup = require('unload').unload(setDefaultAccept);
+                    } else {
+                        setDefaultAccept();
+                    }
+                } catch(e) {
+                    require('log').error('Uncaught exception in "' + pref + '" listener - ' + e);
+                }
+            });
         }
     }
-    listenPref(mimePref, function(branch, pref) {
-        try {
-            setAccept(mimeType, branch.get(pref, 'boolean'));
-        } catch(e) {
-            require('log').error('Uncaught exception in "' + pref + '" listener - ' + e);
-        }
-    });
-}
+})();
