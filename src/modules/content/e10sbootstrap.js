@@ -43,8 +43,13 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
             return getResourceURI(path).spec;
         }
 
-        installPath = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
-        installPath.initWithPath(sendSyncMessage(ADDON_LNAME + ':getInstallPath', {})[0].path);
+        var startupConsts = (function() {
+            var reply;
+            while(!(reply = sendSyncMessage(ADDON_LNAME + ':getStartupConstants', {})).length) {
+            // spin until parent listener is there? i get occasional errors without this loop
+            }
+            return reply[0];
+        })();
 
         electrolyte = {
             TS: TS,
@@ -53,6 +58,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
             ADDON_DOMAIN: ADDON_DOMAIN,
             IN_CHROME: false,
             IN_CONTENT: true,
+            PLATFORM_VER: startupConsts.platformVersion,
             Cc: Components.classes,
             Ci: Components.interfaces,
             Cm: Components.manager,
@@ -62,9 +68,14 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
             getResourceURISpec: getResourceURISpec,
             messageManager: global
         };
+
+        installPath = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+        installPath.initWithPath(startupConsts.installPath);
+
         once = {
             path: getResourceURISpec('modules/content/OncePerProcess.jsm')
         };
+
         electrolyte.messageManager.addMessageListener(ADDON_LNAME + ':shutdown', shutdown);
         Components.utils['import'](once.path, once);
         Services.scriptloader.loadSubScript(getResourceURISpec('modules/electrolyte.js'), electrolyte);

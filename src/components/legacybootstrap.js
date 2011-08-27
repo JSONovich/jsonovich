@@ -61,11 +61,11 @@ XPCOMUtils.defineLazyGetter(Services, "appinfo", function () {
 });
 XPCOMUtils.defineLazyServiceGetter(Services, "vc", "@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 XPCOMUtils.defineLazyServiceGetter(Services, "scriptloader", "@mozilla.org/moz/jssubscript-loader;1", "mozIJSSubScriptLoader");
-// @see http://hg.mozilla.org/mozilla-central/diff/3ccadf603301/toolkit/content/Services.jsm
-XPCOMUtils.defineLazyServiceGetter(Services, "contentPrefs", "@mozilla.org/content-pref/service;1", "nsIContentPrefService");
 
 function startup() {
-    electrolyte = {};
+    electrolyte = {
+        PLATFORM_VER: Services.appinfo.platformVersion
+    };
     Services.scriptloader.loadSubScript(getResourceURISpec('modules/electrolyte.js'), electrolyte);
     if(electrolyte.startup) {
         electrolyte.startup();
