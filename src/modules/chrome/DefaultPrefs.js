@@ -33,15 +33,10 @@ var defaults = {
         'mime.extensionMap': [
         'json:application/json',
         'srj:application/sparql-results+json'
-        ].join('|')
-    }
-},
-contentDefaults = {
-    'bbc.co.uk': {
-        'acceptHeader.json': 0
-    },
-    'www.bbc.co.uk': {
-        'acceptHeader.json': 0
+        ].join('|'),
+
+        'acceptHeaderOverride.json.bbc.co.uk': 0,
+        'acceptHeaderOverride.json.www.bbc.co.uk': 0
     }
 };
 
@@ -55,27 +50,6 @@ exports.set = function setDefaults(setDefaultPref) {
     for(let type in defaults) {
         for(let pref in defaults[type]) {
             setDefaultPref(pref, type, defaults[type][pref]);
-        }
-    }
-}
-
-/**
- * Dynamically sets default content preferences
- *
- * @param prefRoot <string>  Prefix for content preferences
- */
-exports.setContent = function setContentDefaults(prefRoot) {
-    if(!prefRoot || typeof prefRoot != 'string' || !prefRoot.length) {
-        return; // disallow root branch
-    }
-    if(prefRoot.charAt(prefRoot.length - 1) !== '.') {
-        prefRoot += '.';
-    }
-    for(let host in contentDefaults) {
-        for(let pref in contentDefaults[host]) {
-            if(!Services.contentPrefs.hasPref(host, prefRoot + pref)) {
-                Services.contentPrefs.setPref(host, prefRoot + pref, contentDefaults[host][pref]);
-            }
         }
     }
 }

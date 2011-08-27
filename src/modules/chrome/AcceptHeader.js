@@ -1,0 +1,79 @@
+/**
+ * @license MPL 1.1/GPL 2.0/LGPL 2.1, see license.txt
+ * @author William Elwood <we9@kent.ac.uk>
+ * @copyright 2011 JSONovich Team. All Rights Reserved.
+ * @description Modifies the default HTTP Accept header based on user preference.
+ *
+ * Changelog:
+ * [2011-07] - Created separate module for default Accept header
+ */
+
+(function() {
+    'use strict';
+
+    var lazy = {},
+    modes = {
+        'json': {
+            mime: 'application/json'
+        }
+    };
+
+    XPCOMUtils.defineLazyGetter(lazy, 'acceptUtils', function() {
+        return require('AcceptHeaderUtils');
+    });
+    XPCOMUtils.defineLazyGetter(lazy, 'globalAccept', function() {
+        return require('prefs').branch('network.http.accept');
+    });
+
+    /**
+     * Dynamically append to default HTTP Accept header and check host overrides are valid
+     *
+     * @param mode <string>  A string matching an entry in this module's private modes object.
+     * @param listenPref <function>  Reference to the listen function for the appropriate preferences
+     *                               branch, require('prefs').branch(<branch>).listen - optional,
+     *                               provide it if you're already using the branch to save mem.
+     */
+    exports.register = function registerAcceptHeader(mode, listenPref) {
+        if(modes[mode]) {
+            listenPref = listenPref || require('prefs').branch(ADDON_PREFROOT).listen;
+
+            // global
+            listenPref('acceptHeader.' + mode, function(branch, pref) {
+                function setDefaultAccept(suffix) {
+                    let acceptOrig = lazy.globalAccept.get('default', 'string-ascii'),
+                    accept = lazy.acceptUtils.modifyAccept(acceptOrig, modes[mode].mime, suffix);
+                    if(acceptOrig != accept) {
+                        lazy.globalAccept.set('default', 'string-ascii', accept);
+                    }
+                }
+
+                try {
+                    if(modes[mode].cleanup) {
+                        modes[mode].cleanup();
+                        delete modes[mode].cleanup;
+                    }
+                    if(branch.get(pref, 'boolean')) {
+                        setDefaultAccept(true);
+                        modes[mode].cleanup = require('unload').unload(setDefaultAccept);
+                    } else {
+                        setDefaultAccept();
+                    }
+                } catch(e) {
+                    require('log').error('Uncaught exception in "' + pref + '" listener - ' + e);
+                }
+            });
+
+            // host override
+            var overrides = require('prefs').branch(ADDON_PREFROOT + '.acceptHeaderOverride.' + mode),
+            startupCount = overrides.getChildList().length;
+            overrides.listen('', function(branch, pref) {
+                if(startupCount > 0) {
+                    startupCount--;
+                }
+                if(!(startupCount > 0 || lazy.acceptUtils.validHost(pref)) || !lazy.acceptUtils.validQ(branch.get(pref, 'string-ascii'))) {
+                    branch.unset(pref);
+                }
+            });
+        }
+    };
+})();

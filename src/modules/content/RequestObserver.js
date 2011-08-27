@@ -11,44 +11,37 @@
 (function() {
     'use strict';
 
-    var observers = {
+    var lazy = {},
+    modes = {
         'json': {
             mime: 'application/json'
         }
     };
 
+    XPCOMUtils.defineLazyGetter(lazy, 'acceptUtils', function() {
+        return require('AcceptHeaderUtils');
+    });
+
     /**
      * Dynamically register an HTTP request observer for the given type
      *
-     * @param type <string>  A string matching an entry in this module's private observers object.
+     * @param mode <string>  A string matching an entry in this module's private observers object.
      */
-    exports.register = function registerRequestObserver(type) {
-        if(observers[type] && typeof observers[type].observer != 'object') {
-            observers[type].observer = {
+    exports.register = function registerRequestObserver(mode) {
+        if(modes[mode] && typeof modes[mode].observer != 'object') {
+            modes[mode].overrideBranch = require('prefs').branch(ADDON_PREFROOT + '.acceptHeaderOverride.' + mode);
+            modes[mode].observer = {
                 observe: function(aSubject, aTopic, aData) {
                     if(aTopic == 'http-on-modify-request') {
-                        var httpChannel = aSubject.QueryInterface(Ci.nsIHttpChannel);
                         try {
-                            if((httpChannel.loadFlags & httpChannel.LOAD_DOCUMENT_URI)
-                                && Services.contentPrefs.hasPref(httpChannel.originalURI.host, ADDON_PREFROOT + '.acceptHeader.' + type)) {
-                                let accept = httpChannel.getRequestHeader('Accept').split(/\s*,\s*/).filter(function(value) {
-                                    return (value.indexOf(observers[type].mime) != 0
-                                        || (value.length > observers[type].mime.length
-                                            && (value[observers[type].mime.length] == ' '
-                                                || value[observers[type].mime.length] == ';'
-                                                )
-                                            )
-                                        );
-                                }),
-                                q = Services.contentPrefs.getPref(httpChannel.originalURI.host, ADDON_PREFROOT + '.acceptHeader.' + type);
-                                if(q) {
-                                    let acceptPart = observers[type].mime;
-                                    if(q < 1) {
-                                        acceptPart += ';q=' + q;
-                                    }
-                                    accept.push(acceptPart);
+                            aSubject.QueryInterface(Ci.nsIHttpChannel);
+                            let q = (aSubject.loadFlags & aSubject.LOAD_DOCUMENT_URI) ? modes[mode].overrideBranch.get(aSubject.originalURI.host, 'string-ascii') : null;
+                            if(q !== null) {
+                                let acceptOrig = aSubject.getRequestHeader('Accept'),
+                                accept = lazy.acceptUtils.modifyAccept(acceptOrig, modes[mode].mime, parseFloat(q));
+                                if(acceptOrig != accept) {
+                                    aSubject.setRequestHeader('Accept', accept, false);
                                 }
-                                httpChannel.setRequestHeader('Accept', accept.join(','), false);
                             }
                         } catch(e) {
                             require('log').error(e);
@@ -56,10 +49,11 @@
                     }
                 }
             };
-            Services.obs.addObserver(observers[type].observer, 'http-on-modify-request', false);
+            Services.obs.addObserver(modes[mode].observer, 'http-on-modify-request', false);
             require('unload').unload(function(){
-                Services.obs.removeObserver(observers[type].observer, 'http-on-modify-request');
-                delete observers[type].observer;
+                Services.obs.removeObserver(modes[mode].observer, 'http-on-modify-request');
+                delete modes[mode].observer;
+                delete modes[mode].overrideBranch;
             });
         }
     };
