@@ -12,12 +12,16 @@
 
 'use strict';
 
-function startup() {
+function startup(optionsUI) {
     let prefs = require('prefs').branch,
-    listenPref = prefs('extensions.' + ADDON_LNAME).listen;
+    listenPref = prefs(ADDON_PREFROOT).listen;
 
     TS['SetDefaultPrefs'] = [Date.now()];
-    require('chrome/DefaultPrefs').set(prefs('extensions.' + ADDON_LNAME, true).set, 'extensions.' + ADDON_LNAME);
+    let defaults = require('chrome/DefaultPrefs');
+    defaults.set(prefs(ADDON_PREFROOT, true).set);
+    if(optionsUI) {
+        defaults.setContent(ADDON_PREFROOT);
+    }
     TS['SetDefaultPrefs'].push(Date.now());
 
     TS['RegisterExtMap'] = [Date.now()];
@@ -30,10 +34,10 @@ function startup() {
     TS['RegisterAcceptHeader'].push(Date.now());
 
     TS['RegisterResAlias'] = [Date.now()];
-    require('chrome/ResourceAlias').register(ADDON_LNAME, getResourceURI('resources/')); // trailing slash required inside XPI;
+    require('chrome/ResourceAlias').register(ADDON_LNAME, getResourceURI('resources/')); // trailing slash required inside XPI
     TS['RegisterResAlias'].push(Date.now());
 
-    if(Services.vc.compare(Services.appinfo.platformVersion, '6.9') > 0) { // no point loading this before Gecko7
+    if(optionsUI) {
         TS['ObserveOptionsUI'] = [Date.now()];
         require('chrome/Options').observe();
         TS['ObserveOptionsUI'].push(Date.now());
