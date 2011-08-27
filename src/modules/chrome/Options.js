@@ -48,13 +48,17 @@
         };
         while(Services.prompt.prompt(null, 'Add host override', 'Enter a valid host name for which the default HTTP Accept setting should be overridden:', host, 'Send "application/json" in the HTTP Accept header for this host', mode)) {
             try {
-                host = lazy.idnService.normalize(host.value);
+                let testHost = lazy.idnService.normalize(host.value);
+                testHost = Services.io.newURI('http://' + testHost + '/', null, null).host;
+                if(testHost !== host.value) {
+                    throw "Given host doesn't match normalised host.";
+                }
             } catch(e) {
                 require('log').error(e);
                 Services.prompt.alert(null, 'Bad host', "The specified host name didn't look right.");
                 continue;
             }
-            Services.contentPrefs.setPref(host, prefBaseName + '.acceptHeader.json', mode.value);
+            Services.contentPrefs.setPref(host.value, prefBaseName + '.acceptHeader.json', mode.value);
             return;
         }
     }
