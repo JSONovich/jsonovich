@@ -4,7 +4,7 @@
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>jsonovich@lackoftalent.org</id>
     <name>JSONovich</name>
-    <version>1.9.0</version>
+    <version>1.9.0.1</version>
     <type>2</type>
     <bootstrap>true</bootstrap>
     <optionsType>2</optionsType>
@@ -28,7 +28,7 @@
       <rdf:Description>
         <id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</id>
         <minVersion>2.0</minVersion>
-        <maxVersion>2.5.*</maxVersion>
+        <maxVersion>2.5a2</maxVersion>
       </rdf:Description>
     </targetApplication>
 
@@ -37,7 +37,7 @@
       <rdf:Description>
         <id>{a23983c0-fd0e-11dc-95ff-0800200c9a66}</id>
         <minVersion>1.1</minVersion>
-        <maxVersion>8.*</maxVersion>
+        <maxVersion>8.0</maxVersion>
       </rdf:Description>
     </targetApplication>
   </rdf:Description>
