@@ -30,17 +30,21 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
         TS[measure] = [Date.now()];
 
         function getResourceURI(aPath) { // @see http://mxr.mozilla.org/mozilla-central/source/toolkit/mozapps/extensions/XPIProvider.jsm
-            let bundle = data.installPath.clone();
+            let doJar = false, bundle = data.installPath.clone();
             if(aPath) {
                 if(bundle.isDirectory()) {
                     aPath.split("/").forEach(function(aPart) {
                         bundle.append(aPart);
                     });
                 } else {
-                    return Services.io.newURI("jar:" + bundle.spec + "!/" + aPath, null, null);
+                    doJar = true;
                 }
             }
-            return Services.io.newFileURI(bundle);
+            bundle = Services.io.newFileURI(bundle);
+            if(doJar) {
+                return Services.io.newURI("jar:" + bundle.spec + "!/" + aPath, null, null);
+            }
+            return bundle;
         }
 
         function getResourceURISpec(path) {
