@@ -54,6 +54,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
             ADDON_DOMAIN: ADDON_DOMAIN,
             IN_CHROME: true,
             IN_CONTENT: false,
+            PLATFORM_VER: Services.appinfo.platformVersion,
             Cc: Components.classes,
             Ci: Components.interfaces,
             Cm: Components.manager,
@@ -66,9 +67,10 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
             manager: Components.classes["@mozilla.org/globalmessagemanager;1"].getService(Components.interfaces.nsIChromeFrameMessageManager),
             listener: function bootstrapSyncListener(msg) {
                 switch(msg.name) {
-                    case ADDON_LNAME + ':getInstallPath':
+                    case ADDON_LNAME + ':getStartupConstants':
                         return {
-                            path: data.installPath.path
+                            installPath: data.installPath.path,
+                            platformVersion: electrolyte.PLATFORM_VER
                         };
                 }
             }
@@ -76,7 +78,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
 
         // unloadable global frame scripts OR no choice (Fennec)
         if('removeDelayedFrameScript' in messages.manager || Services.appinfo.ID == '{a23983c0-fd0e-11dc-95ff-0800200c9a66}') { // TODO: check if adding support for more platforms
-            messages.manager.addMessageListener(ADDON_LNAME + ':getInstallPath', messages.listener);
+            messages.manager.addMessageListener(ADDON_LNAME + ':getStartupConstants', messages.listener);
             messages.manager.loadFrameScript(getResourceURISpec('modules/content/e10sbootstrap.js'), true);
             electrolyte.messageManager = messages.manager;
         // https://bugzilla.mozilla.org/show_bug.cgi?id=681206 cannot be avoided in Fennec
@@ -107,7 +109,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
                         messages.manager.removeDelayedFrameScript(getResourceURISpec('modules/content/e10sbootstrap.js'));
                     }
                     messages.manager.sendAsyncMessage(ADDON_LNAME + ':shutdown', {});
-                    messages.manager.removeMessageListener(ADDON_LNAME + ':getInstallPath', messages.listener);
+                    messages.manager.removeMessageListener(ADDON_LNAME + ':getStartupConstants', messages.listener);
                 }
                 if(electrolyte.shutdown) {
                     electrolyte.shutdown();
