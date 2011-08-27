@@ -54,7 +54,6 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
             ADDON_DOMAIN: ADDON_DOMAIN,
             IN_CHROME: true,
             IN_CONTENT: false,
-            PLATFORM_VER: Services.appinfo.platformVersion,
             Cc: Components.classes,
             Ci: Components.interfaces,
             Cm: Components.manager,
@@ -69,8 +68,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
                 switch(msg.name) {
                     case ADDON_LNAME + ':getStartupConstants':
                         return {
-                            installPath: data.installPath.path,
-                            platformVersion: electrolyte.PLATFORM_VER
+                            installPath: data.installPath.path
                         };
                 }
             }
