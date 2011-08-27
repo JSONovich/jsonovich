@@ -2,10 +2,10 @@
  * @license MPL 1.1/GPL 2.0/LGPL 2.1, see license.txt
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
- * @description __________.
+ * @description This file contains lifecycle functions relevant to both chrome and content processes.
  *
  * Changelog:
- * [2011-08] - Created __________
+ * [2011-08] - Moved logging initialisation to all processes
  */
 
 'use strict';
