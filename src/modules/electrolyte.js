@@ -101,12 +101,11 @@ function require(path) {
     bothProcesses = require(ADDON_LNAME);
 
     global.startup = function startup(once) {
-        var optionsUI = (Services.vc.compare(PLATFORM_VER, '6.9') > 0); // inline options UI only available in Gecko7+
         if(chromeProcess && (typeof chromeProcess.startup === 'function')) {
-            chromeProcess.startup(optionsUI);
+            chromeProcess.startup();
         }
         if(contentProcess && (typeof contentProcess.startup === 'function')) {
-            contentProcess.startup(optionsUI, once);
+            contentProcess.startup(once);
         }
         if(typeof bothProcesses.startup === 'function'){
             bothProcesses.startup();

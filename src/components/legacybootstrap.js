@@ -63,9 +63,7 @@ XPCOMUtils.defineLazyServiceGetter(Services, "vc", "@mozilla.org/xpcom/version-c
 XPCOMUtils.defineLazyServiceGetter(Services, "scriptloader", "@mozilla.org/moz/jssubscript-loader;1", "mozIJSSubScriptLoader");
 
 function startup() {
-    electrolyte = {
-        PLATFORM_VER: Services.appinfo.platformVersion
-    };
+    electrolyte = {};
     Services.scriptloader.loadSubScript(getResourceURISpec('modules/electrolyte.js'), electrolyte);
     if(electrolyte.startup) {
         electrolyte.startup();

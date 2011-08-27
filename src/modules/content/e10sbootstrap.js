@@ -58,7 +58,6 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
             ADDON_DOMAIN: ADDON_DOMAIN,
             IN_CHROME: false,
             IN_CONTENT: true,
-            PLATFORM_VER: startupConsts.platformVersion,
             Cc: Components.classes,
             Ci: Components.interfaces,
             Cm: Components.manager,

@@ -10,13 +10,11 @@
 
 'use strict';
 
-function startup(optionsUI, once) {
+function startup(once) {
     function init() {
-        if(optionsUI) {
-            TS['RegisterReqObserver'] = [Date.now()];
-            require('content/RequestObserver').register('json');
-            TS['RegisterReqObserver'].push(Date.now());
-        }
+        TS['RegisterReqObserver'] = [Date.now()];
+        require('content/RequestObserver').register('json');
+        TS['RegisterReqObserver'].push(Date.now());
 
         let prefs = require('prefs').branch,
         listenPref = prefs(ADDON_PREFROOT).listen;
