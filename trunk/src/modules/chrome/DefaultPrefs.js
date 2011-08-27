@@ -16,7 +16,6 @@ var defaults = {
         'acceptHeader.json': false // user set to true adds json mime to http accept header
     },
     'string-ascii': {
-
         'mime.conversions': [
         'application/json',                // standard, http://www.ietf.org/rfc/rfc4627.txt
         'application/sparql-results+json', // standard, http://www.w3.org/TR/rdf-sparql-json-res/
@@ -36,6 +35,11 @@ var defaults = {
         'srj:application/sparql-results+json'
         ].join('|')
     }
+},
+contentDefaults = {
+    'www.bbc.co.uk': {
+        'acceptHeader.json': false
+    }
 };
 
 /**
@@ -43,11 +47,24 @@ var defaults = {
  *
  * @param setDefaultPref <function>  Reference to the set function for the appropriate default
  *                                   preferences branch, require('prefs').branch(<branch>, true).set
+ * @param contentPrefBaseName <string>  Prefix for content preferences
  */
-exports.set = function setDefaults(setDefaultPref) {
-    for(var type in defaults) {
-        for(var pref in defaults[type]) {
+exports.set = function setDefaults(setDefaultPref, contentPrefBaseName) {
+    for(let type in defaults) {
+        for(let pref in defaults[type]) {
             setDefaultPref(pref, type, defaults[type][pref]);
+        }
+    }
+    if(contentPrefBaseName) {
+        if(contentPrefBaseName.charAt(contentPrefBaseName.length - 1) !== '.') {
+            contentPrefBaseName += '.';
+        }
+        for(let host in contentDefaults) {
+            for(let pref in contentDefaults[host]) {
+                if(!Services.contentPrefs.hasPref(host, contentPrefBaseName + pref)) {
+                    Services.contentPrefs.setPref(host, contentPrefBaseName + pref, contentDefaults[host][pref]);
+                }
+            }
         }
     }
 }

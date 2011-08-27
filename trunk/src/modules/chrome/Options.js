@@ -11,10 +11,13 @@
 (function() {
     'use strict';
 
-    var observer = {
+    var lazy = {},
+    observer = {
         observe: function(aSubject, aTopic, aData) {
             if(aTopic == 'addon-options-displayed' && aData == ADDON_LNAME + '@' + ADDON_DOMAIN) {
                 aSubject.getElementById(ADDON_LNAME + '-pref-reset').addEventListener('click', resetPrefs, false);
+                aSubject.getElementById(ADDON_LNAME + '-pref-accept-add').addEventListener('click', addAccept, false);
+                aSubject.getElementById(ADDON_LNAME + '-pref-accept-rem').addEventListener('click', removeAccept, false);
                 aSubject.getElementById(ADDON_LNAME + '-pref-mime-add').addEventListener('click', addMime, false);
                 aSubject.getElementById(ADDON_LNAME + '-pref-mime-rem').addEventListener('click', removeMime, false);
                 aSubject.getElementById(ADDON_LNAME + '-pref-ext-add').addEventListener('click', addExtMap, false);
@@ -23,17 +26,51 @@
         }
     },
     observing = false,
+    prefBaseName = 'extensions.' + ADDON_LNAME,
     prefs = require('prefs').branch,
-    prefBranch = prefs('extensions.' + ADDON_LNAME),
+    prefBranch = prefs(prefBaseName),
 
     clearPrefs = exports.clear = function clearPrefs() {
-        prefs('extensions.' + ADDON_LNAME, true).uninstall();
-        prefs('extensions.' + ADDON_LNAME + '@' + ADDON_DOMAIN, true).uninstall();
-    }
+        prefs(prefBaseName, true).uninstall();
+        prefs(prefBaseName + '@' + ADDON_DOMAIN, true).uninstall();
+        Services.contentPrefs.removePrefsByName(prefBaseName + '.acceptHeader.json');
+    };
 
     function resetPrefs() {
         clearPrefs();
-        require('chrome/DefaultPrefs').set(require('prefs').branch('extensions.' + ADDON_LNAME, true).set);
+        require('chrome/DefaultPrefs').set(require('prefs').branch(prefBaseName, true).set, prefBaseName);
+    }
+
+    XPCOMUtils.defineLazyServiceGetter(lazy, "idnService", "@mozilla.org/network/idn-service;1", "nsIIDNService");
+    function addAccept() {
+        var host = {}, mode = {
+            value: !prefBranch.get('acceptHeader.json', 'boolean')
+        };
+        while(Services.prompt.prompt(null, 'Add host override', 'Enter a valid host name for which the default HTTP Accept setting should be overridden:', host, 'Send "application/json" in the HTTP Accept header for this host', mode)) {
+            try {
+                host = lazy.idnService.normalize(host.value);
+            } catch(e) {
+                require('log').error(e);
+                Services.prompt.alert(null, 'Bad host', "The specified host name didn't look right.");
+                continue;
+            }
+            Services.contentPrefs.setPref(host, prefBaseName + '.acceptHeader.json', mode.value);
+            return;
+        }
+    }
+
+    function removeAccept() {
+        var overrides = [], overrideHosts = [], overridesEnum = Services.contentPrefs.getPrefsByName(prefBaseName + '.acceptHeader.json').enumerator, selected = {};
+        while(overridesEnum.hasMoreElements()) {
+            let property = overridesEnum.getNext().QueryInterface(Components.interfaces.nsIProperty);
+            overrides.push('[' + (property.value ? 'send' : "don't send") + ']: ' + property.name);
+            overrideHosts.push(property.name);
+        }
+        if(overrides.length == 0) {
+            Services.prompt.alert(null, 'Remove host override', 'No host names are currently set to override the default HTTP Accept header setting.');
+        } else if(Services.prompt.select(null, 'Remove host override', 'Select 1 host name that should no longer override the default HTTP Accept header setting:', overrides.length, overrides, selected)) {
+            Services.contentPrefs.removePref(overrideHosts[selected.value], prefBaseName + '.acceptHeader.json');
+        }
     }
 
     function addMime() {

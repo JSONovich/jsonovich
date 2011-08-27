@@ -7,6 +7,7 @@
  * Changelog:
  * [2011-05] - Added require, startup, uninstall and shutdown functions.
  * [2011-05] - Moved require out for Electrolysis.
+ * [2011-08] - Moved logging initialisation out since it's also needed by content processes
  */
 
 'use strict';
@@ -16,7 +17,7 @@ function startup() {
     listenPref = prefs('extensions.' + ADDON_LNAME).listen;
 
     TS['SetDefaultPrefs'] = [Date.now()];
-    require('chrome/DefaultPrefs').set(prefs('extensions.' + ADDON_LNAME, true).set);
+    require('chrome/DefaultPrefs').set(prefs('extensions.' + ADDON_LNAME, true).set, 'extensions.' + ADDON_LNAME);
     TS['SetDefaultPrefs'].push(Date.now());
 
     TS['RegisterExtMap'] = [Date.now()];
