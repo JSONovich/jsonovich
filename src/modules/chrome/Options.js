@@ -26,19 +26,20 @@
         }
     },
     observing = false,
-    prefBaseName = 'extensions.' + ADDON_LNAME,
     prefs = require('prefs').branch,
-    prefBranch = prefs(prefBaseName),
+    prefBranch = prefs(ADDON_PREFROOT),
 
     clearPrefs = exports.clear = function clearPrefs() {
-        prefs(prefBaseName, true).uninstall();
-        prefs(prefBaseName + '@' + ADDON_DOMAIN, true).uninstall();
-        Services.contentPrefs.removePrefsByName(prefBaseName + '.acceptHeader.json');
+        prefs(ADDON_PREFROOT, true).uninstall();
+        prefs(ADDON_PREFROOT + '@' + ADDON_DOMAIN, true).uninstall();
+        Services.contentPrefs.removePrefsByName(ADDON_PREFROOT + '.acceptHeader.json');
     };
 
     function resetPrefs() {
         clearPrefs();
-        require('chrome/DefaultPrefs').set(require('prefs').branch(prefBaseName, true).set, prefBaseName);
+        let defaults = require('chrome/DefaultPrefs');
+        defaults.set(require('prefs').branch(ADDON_PREFROOT, true).set);
+        defaults.setContent(ADDON_PREFROOT);
     }
 
     XPCOMUtils.defineLazyServiceGetter(lazy, "idnService", "@mozilla.org/network/idn-service;1", "nsIIDNService");
@@ -82,13 +83,13 @@
             } else {
                 mode = 0;
             }
-            Services.contentPrefs.setPref(host.value, prefBaseName + '.acceptHeader.json', mode);
+            Services.contentPrefs.setPref(host.value, ADDON_PREFROOT + '.acceptHeader.json', mode);
             return;
         }
     }
 
     function removeAccept() {
-        var overrides = [], overrideHosts = [], overridesEnum = Services.contentPrefs.getPrefsByName(prefBaseName + '.acceptHeader.json').enumerator, selected = {};
+        var overrides = [], overrideHosts = [], overridesEnum = Services.contentPrefs.getPrefsByName(ADDON_PREFROOT + '.acceptHeader.json').enumerator, selected = {};
         while(overridesEnum.hasMoreElements()) {
             let property = overridesEnum.getNext().QueryInterface(Components.interfaces.nsIProperty);
             overrides.push('[q=' + property.value + ']: ' + property.name);
@@ -97,7 +98,7 @@
         if(overrides.length == 0) {
             Services.prompt.alert(null, 'Remove host override', 'No host names are currently set to override the default HTTP Accept header setting.');
         } else if(Services.prompt.select(null, 'Remove host override', 'Select 1 host name that should no longer override the default HTTP Accept header setting:', overrides.length, overrides, selected)) {
-            Services.contentPrefs.removePref(overrideHosts[selected.value], prefBaseName + '.acceptHeader.json');
+            Services.contentPrefs.removePref(overrideHosts[selected.value], ADDON_PREFROOT + '.acceptHeader.json');
         }
     }
 

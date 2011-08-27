@@ -10,14 +10,20 @@
 
 'use strict';
 
-function startup(once) {
+function startup(optionsUI, once) {
     function init() {
-        let prefs = require('prefs').branch,
-        listenPref = prefs('extensions.' + ADDON_LNAME).listen;
+        if(optionsUI) {
+            TS['RegisterReqObserver'] = [Date.now()];
+            require('content/RequestObserver').register('json');
+            TS['RegisterReqObserver'].push(Date.now());
+        }
 
-        //TS['RegisterConversions'] = [Date.now()];
+        let prefs = require('prefs').branch,
+        listenPref = prefs(ADDON_PREFROOT).listen;
+
+        TS['RegisterConversions'] = [Date.now()];
         require('content/StreamConverter').register(listenPref);
-    //TS['RegisterConversions'].push(Date.now());
+        TS['RegisterConversions'].push(Date.now());
     }
 
     if(once) {

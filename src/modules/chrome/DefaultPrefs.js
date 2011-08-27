@@ -37,6 +37,9 @@ var defaults = {
     }
 },
 contentDefaults = {
+    'bbc.co.uk': {
+        'acceptHeader.json': 0
+    },
     'www.bbc.co.uk': {
         'acceptHeader.json': 0
     }
@@ -47,23 +50,31 @@ contentDefaults = {
  *
  * @param setDefaultPref <function>  Reference to the set function for the appropriate default
  *                                   preferences branch, require('prefs').branch(<branch>, true).set
- * @param contentPrefBaseName <string>  Prefix for content preferences
  */
-exports.set = function setDefaults(setDefaultPref, contentPrefBaseName) {
+exports.set = function setDefaults(setDefaultPref) {
     for(let type in defaults) {
         for(let pref in defaults[type]) {
             setDefaultPref(pref, type, defaults[type][pref]);
         }
     }
-    if(contentPrefBaseName) {
-        if(contentPrefBaseName.charAt(contentPrefBaseName.length - 1) !== '.') {
-            contentPrefBaseName += '.';
-        }
-        for(let host in contentDefaults) {
-            for(let pref in contentDefaults[host]) {
-                if(!Services.contentPrefs.hasPref(host, contentPrefBaseName + pref)) {
-                    Services.contentPrefs.setPref(host, contentPrefBaseName + pref, contentDefaults[host][pref]);
-                }
+}
+
+/**
+ * Dynamically sets default content preferences
+ *
+ * @param prefRoot <string>  Prefix for content preferences
+ */
+exports.setContent = function setContentDefaults(prefRoot) {
+    if(!prefRoot || typeof prefRoot != 'string' || !prefRoot.length) {
+        return; // disallow root branch
+    }
+    if(prefRoot.charAt(prefRoot.length - 1) !== '.') {
+        prefRoot += '.';
+    }
+    for(let host in contentDefaults) {
+        for(let pref in contentDefaults[host]) {
+            if(!Services.contentPrefs.hasPref(host, prefRoot + pref)) {
+                Services.contentPrefs.setPref(host, prefRoot + pref, contentDefaults[host][pref]);
             }
         }
     }
