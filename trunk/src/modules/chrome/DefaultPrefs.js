@@ -38,7 +38,7 @@ var defaults = {
 },
 contentDefaults = {
     'www.bbc.co.uk': {
-        'acceptHeader.json': false
+        'acceptHeader.json': 0
     }
 };
 

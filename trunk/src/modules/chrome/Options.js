@@ -58,7 +58,31 @@
                 Services.prompt.alert(null, 'Bad host', "The specified host name didn't look right.");
                 continue;
             }
-            Services.contentPrefs.setPref(host.value, prefBaseName + '.acceptHeader.json', mode.value);
+            if(mode.value) {
+                let q = {
+                    value: '1'
+                };
+                while(Services.prompt.prompt(null, 'Specify q-value', 'Enter the quality factor to attach to the JSON MIME type in the Accept header (greater than 0, up to and including 1, no more than 3 decimal digits):', q, null, {})) {
+                    if(!q.value.length) {
+                        continue;
+                    } else if(/^(?:1(?:\.0{1,3})?|0(?:\.\d{1,3})?)$/.test(q.value)) {
+                        let temp = parseFloat(q.value);
+                        if(temp > 0) {
+                            q = temp;
+                            break;
+                        }
+                    }
+                    Services.prompt.alert(null, 'Bad q-value', "The specified quality factor didn't look right.");
+                }
+                if(typeof q === 'object') {
+                    continue;
+                } else {
+                    mode = q;
+                }
+            } else {
+                mode = 0;
+            }
+            Services.contentPrefs.setPref(host.value, prefBaseName + '.acceptHeader.json', mode);
             return;
         }
     }
@@ -67,7 +91,7 @@
         var overrides = [], overrideHosts = [], overridesEnum = Services.contentPrefs.getPrefsByName(prefBaseName + '.acceptHeader.json').enumerator, selected = {};
         while(overridesEnum.hasMoreElements()) {
             let property = overridesEnum.getNext().QueryInterface(Components.interfaces.nsIProperty);
-            overrides.push('[' + (property.value ? 'send' : "don't send") + ']: ' + property.name);
+            overrides.push('[q=' + property.value + ']: ' + property.name);
             overrideHosts.push(property.name);
         }
         if(overrides.length == 0) {
