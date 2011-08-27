@@ -34,9 +34,10 @@ function startup() {
                         'FormatJSON': 'time spent tokenising the parsed object and generating a string of HTML',
                         'StopRequest': 'time spent in the most recent call to the stream converter\'s onStopRequest function',
                         'SetDefaultPrefs': 'time spent initialising default preferences',
+                        'RegisterReqObserver': 'time taken to register request observer',
                         'RegisterConversions': 'time taken to register stream converters',
                         'RegisterExtMap': 'time taken to register file extension to type mappings',
-                        'RegisterAcceptHeader': 'time taken to set up Accept header',
+                        'RegisterAcceptHeader': 'time taken to set up default Accept header',
                         'RegisterResAlias': 'time taken to register resource:// URL alias',
                         'ObserveOptionsUI': 'time taken to add options UI observer',
                         'PrepareAsyncLoad': 'time spent initialising nsiTimer to defer loading non-essentials'

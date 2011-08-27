@@ -54,6 +54,7 @@ function require(path) {
             ADDON_NAME: ADDON_NAME,
             ADDON_LNAME: ADDON_LNAME,
             ADDON_DOMAIN: ADDON_DOMAIN,
+            ADDON_PREFROOT: 'extensions.' + ADDON_LNAME,
             IN_CHROME: IN_CHROME,
             IN_CONTENT: IN_CONTENT,
             Cc: Cc,
@@ -100,11 +101,12 @@ function require(path) {
     bothProcesses = require(ADDON_LNAME);
 
     global.startup = function startup(once) {
+        var optionsUI = (Services.vc.compare(PLATFORM_VER, '6.9') > 0); // inline options UI only available in Gecko7+
         if(chromeProcess && (typeof chromeProcess.startup === 'function')) {
-            chromeProcess.startup();
+            chromeProcess.startup(optionsUI);
         }
         if(contentProcess && (typeof contentProcess.startup === 'function')) {
-            contentProcess.startup(once);
+            contentProcess.startup(optionsUI, once);
         }
         if(typeof bothProcesses.startup === 'function'){
             bothProcesses.startup();
