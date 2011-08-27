@@ -56,9 +56,7 @@ exports.branch = function selectBranch(name, defaults) {
                             listener.callbacks[data](returnObj, data);
                         }
                         if(listener.callbacks.hasOwnProperty('')) {
-                            for (let c in listener.callbacks['']) {
-                                c(returnObj, data);
-                            }
+                            listener.callbacks[''](returnObj, data);
                         }
                     }
                 },
@@ -87,14 +85,23 @@ exports.branch = function selectBranch(name, defaults) {
              *                             in this branch is changed, parameters will be 1) the closure returned
              *                             from the original selectBranch call containing this preferences API
              *                             and 2) the name of the changed preference relative to the branch.
-             *                             Any previous callback for this pref will be overwritten.
+             *                             Any previous callback for this pref will be overwritten, if multiple
+             *                             callbacks needed use another instance of the outer branch object or
+             *                             combine them for efficiency into a single callback.
              *
              * @usage listenPref(pref): Remove callback stored for pref.
              * @param pref <string>  The preference to stop observing for changes.
              */
             returnObj.listen = function listenPref(pref, callback) {
                 if(callback) {
-                    callback(returnObj, pref);
+                    if(pref === '') {
+                        let prefs = branch.getChildList('', {});
+                        for(let i = 0; i < prefs.length; i++) {
+                            callback(returnObj, prefs[i]);
+                        }
+                    } else {
+                        callback(returnObj, pref);
+                    }
                     listener.callbacks[pref] = callback;
                     if(!listener.listening) {
                         listener.start();
