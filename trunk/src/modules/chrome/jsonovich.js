@@ -12,16 +12,13 @@
 
 'use strict';
 
-function startup(optionsUI) {
+function startup() {
     let prefs = require('prefs').branch,
-    listenPref = prefs(ADDON_PREFROOT).listen;
+    prefBranch = prefs(ADDON_PREFROOT),
+    listenPref = prefBranch.listen;
 
     TS['SetDefaultPrefs'] = [Date.now()];
-    let defaults = require('chrome/DefaultPrefs');
-    defaults.set(prefs(ADDON_PREFROOT, true).set);
-    if(optionsUI) {
-        defaults.setContent(ADDON_PREFROOT);
-    }
+    require('chrome/DefaultPrefs').set(prefs(ADDON_PREFROOT, true).set);
     TS['SetDefaultPrefs'].push(Date.now());
 
     TS['RegisterExtMap'] = [Date.now()];
@@ -29,16 +26,16 @@ function startup(optionsUI) {
     TS['RegisterExtMap'].push(Date.now());
 
     TS['RegisterAcceptHeader'] = [Date.now()];
-    require('chrome/DefaultAcceptHeader').register(listenPref, 'json');
+    require('chrome/AcceptHeader').register('json', listenPref);
     TS['RegisterAcceptHeader'].push(Date.now());
 
     TS['RegisterResAlias'] = [Date.now()];
     require('chrome/ResourceAlias').register(ADDON_LNAME, getResourceURI('resources/')); // trailing slash required inside XPI
     TS['RegisterResAlias'].push(Date.now());
 
-    if(optionsUI) {
+    if(Services.vc.compare(Services.appinfo.platformVersion, '6.9') > 0) { // inline options UI only available in Gecko7+
         TS['ObserveOptionsUI'] = [Date.now()];
-        require('chrome/Options').observe();
+        require('chrome/Options').observe(prefBranch);
         TS['ObserveOptionsUI'].push(Date.now());
     }
 }

@@ -27,35 +27,27 @@
     },
     observing = false,
     prefs = require('prefs').branch,
-    prefBranch = prefs(ADDON_PREFROOT),
+    prefBranch = null,
 
     clearPrefs = exports.clear = function clearPrefs() {
         prefs(ADDON_PREFROOT, true).uninstall();
         prefs(ADDON_PREFROOT + '@' + ADDON_DOMAIN, true).uninstall();
-        Services.contentPrefs.removePrefsByName(ADDON_PREFROOT + '.acceptHeader.json');
     };
 
     function resetPrefs() {
         clearPrefs();
-        let defaults = require('chrome/DefaultPrefs');
-        defaults.set(require('prefs').branch(ADDON_PREFROOT, true).set);
-        defaults.setContent(ADDON_PREFROOT);
+        require('chrome/DefaultPrefs').set(prefs(ADDON_PREFROOT, true).set);
     }
 
-    XPCOMUtils.defineLazyServiceGetter(lazy, "idnService", "@mozilla.org/network/idn-service;1", "nsIIDNService");
+    XPCOMUtils.defineLazyGetter(lazy, 'acceptUtils', function() {
+        return require('AcceptHeaderUtils');
+    });
     function addAccept() {
         var host = {}, mode = {
             value: !prefBranch.get('acceptHeader.json', 'boolean')
         };
         while(Services.prompt.prompt(null, 'Add host override', 'Enter a valid host name for which the default HTTP Accept setting should be overridden:', host, 'Send "application/json" in the HTTP Accept header for this host', mode)) {
-            try {
-                let testHost = lazy.idnService.normalize(host.value);
-                testHost = Services.io.newURI('http://' + testHost + '/', null, null).host;
-                if(testHost !== host.value) {
-                    throw "Given host doesn't match normalised host.";
-                }
-            } catch(e) {
-                require('log').error(e);
+            if(!lazy.acceptUtils.validHost(host.value)) {
                 Services.prompt.alert(null, 'Bad host', "The specified host name didn't look right.");
                 continue;
             }
@@ -64,41 +56,36 @@
                     value: '1'
                 };
                 while(Services.prompt.prompt(null, 'Specify q-value', 'Enter the quality factor to attach to the JSON MIME type in the Accept header (greater than 0, up to and including 1, no more than 3 decimal digits):', q, null, {})) {
-                    if(!q.value.length) {
-                        continue;
-                    } else if(/^(?:1(?:\.0{1,3})?|0(?:\.\d{1,3})?)$/.test(q.value)) {
-                        let temp = parseFloat(q.value);
-                        if(temp > 0) {
-                            q = temp;
-                            break;
-                        }
+                    if(lazy.acceptUtils.validQ(q.value)) {
+                        q = parseFloat(q.value); // silently allow 0 here even though user could have just unticked box on 1st prompt
+                        break;
                     }
                     Services.prompt.alert(null, 'Bad q-value', "The specified quality factor didn't look right.");
                 }
                 if(typeof q === 'object') {
-                    continue;
+                    continue; // q-value prompt cancelled, go back to host prompt
                 } else {
                     mode = q;
                 }
             } else {
                 mode = 0;
             }
-            Services.contentPrefs.setPref(host.value, ADDON_PREFROOT + '.acceptHeader.json', mode);
+            prefBranch.set('acceptHeaderOverride.json.' + host.value, 'string-ascii', mode);
             return;
         }
     }
 
     function removeAccept() {
-        var overrides = [], overrideHosts = [], overridesEnum = Services.contentPrefs.getPrefsByName(ADDON_PREFROOT + '.acceptHeader.json').enumerator, selected = {};
-        while(overridesEnum.hasMoreElements()) {
-            let property = overridesEnum.getNext().QueryInterface(Components.interfaces.nsIProperty);
-            overrides.push('[q=' + property.value + ']: ' + property.name);
-            overrideHosts.push(property.name);
+        var overrideBranch = prefs(ADDON_PREFROOT + '.acceptHeaderOverride.json'),
+        overrideHosts = overrideBranch.getChildList(),
+        overrides = [], selected = {};
+        for(let i = 0; i < overrideHosts.length; i++) {
+            overrides.push('[q=' + overrideBranch.get(overrideHosts[i], 'string-ascii') + ']: ' + overrideHosts[i]);
         }
         if(overrides.length == 0) {
             Services.prompt.alert(null, 'Remove host override', 'No host names are currently set to override the default HTTP Accept header setting.');
         } else if(Services.prompt.select(null, 'Remove host override', 'Select 1 host name that should no longer override the default HTTP Accept header setting:', overrides.length, overrides, selected)) {
-            Services.contentPrefs.removePref(overrideHosts[selected.value], ADDON_PREFROOT + '.acceptHeader.json');
+            overrideBranch.unset(overrideHosts[selected.value]);
         }
     }
 
@@ -177,12 +164,21 @@
         }
     }
 
-    exports.observe = function observeOptions() {
+    /**
+     * Dynamically add functionality to buttons on inline options
+     *
+     * @param branch <object>  Reference to the branch object for the appropriate preferences,
+     *                         require('prefs').branch(<branch>) - optional, provide it if
+     *                         you're already using the branch to save mem.
+     */
+    exports.observe = function observeOptions(branch) {
         if(!observing) {
+            prefBranch = branch || prefs(ADDON_PREFROOT);
             Services.obs.addObserver(observer, 'addon-options-displayed', false);
             observing = true;
             require('unload').unload(function(){
                 Services.obs.removeObserver(observer, 'addon-options-displayed');
+                prefBranch = null;
                 observing = false;
             });
         }

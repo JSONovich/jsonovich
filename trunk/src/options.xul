@@ -6,7 +6,7 @@
              pref="extensions.jsonovich.acceptHeader.json"/>
     <setting type="control"
              title="Host-specific HTTP Accept header"
-             desc="Override the default setting above for specific host names.">
+             desc="Override the default setting above for specific host names. Add too many at your own risk of performance degradation.">
         <button id="jsonovich-pref-accept-add" label="Add..."/>
         <button id="jsonovich-pref-accept-rem" label="Remove..."/>
     </setting>
