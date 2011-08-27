@@ -51,8 +51,15 @@ exports.branch = function selectBranch(name, defaults) {
                 callbacks: {},
                 listening: false,
                 observe: function(subject, topic, data) {
-                    if(subject == branch && topic == NS_PREFBRANCH_PREFCHANGE_TOPIC_ID && listener.callbacks.hasOwnProperty(data)) {
-                        listener.callbacks[data](returnObj, data);
+                    if(subject == branch && topic == NS_PREFBRANCH_PREFCHANGE_TOPIC_ID) {
+                        if(listener.callbacks.hasOwnProperty(data)) {
+                            listener.callbacks[data](returnObj, data);
+                        }
+                        if(listener.callbacks.hasOwnProperty('')) {
+                            for (let c in listener.callbacks['']) {
+                                c(returnObj, data);
+                            }
+                        }
                     }
                 },
                 start: function() {
@@ -113,24 +120,42 @@ exports.branch = function selectBranch(name, defaults) {
          *                       The requested value, or the default if not set, or throw exception if default not set.
          */
         returnObj.get = function getPref(pref, type) {
-            switch(type) {
-                case 'boolean':
-                    return branch.getBoolPref(pref);
-                case 'integer':
-                    return branch.getIntPref(pref);
-                case 'string-ascii':
-                    return branch.getCharPref(pref);
-                case 'string-unicode':
-                    return branch.getComplexType(pref, Ci.nsISupportsString).data;
-                case 'string-locale':
-                    return branch.getComplexType(pref, Ci.nsIPrefLocalizedString).data;
-                case 'file-abs':
-                    return branch.getComplexType(pref, Ci.nsILocalFile).data;
-                case 'file-rel':
-                    return branch.getComplexType(pref, Ci.nsIRelativeFilePref).data;
-                default:
-                    log('Unexpected pref type "' + type + '" in getPref.');
-                    return null;
+            try {
+                switch(type) {
+                    case 'boolean':
+                        return branch.getBoolPref(pref);
+                    case 'integer':
+                        return branch.getIntPref(pref);
+                    case 'string-ascii':
+                        return branch.getCharPref(pref);
+                    case 'string-unicode':
+                        return branch.getComplexType(pref, Ci.nsISupportsString).data;
+                    case 'string-locale':
+                        return branch.getComplexType(pref, Ci.nsIPrefLocalizedString).data;
+                    case 'file-abs':
+                        return branch.getComplexType(pref, Ci.nsILocalFile).data;
+                    case 'file-rel':
+                        return branch.getComplexType(pref, Ci.nsIRelativeFilePref).data;
+                    default:
+                        require('log').error('Unexpected pref type "' + type + '" in getPref.');
+                        return null;
+                }
+            } catch(e) {
+                if(e.name != 'NS_ERROR_UNEXPECTED') {
+                    require('log').debug(e);
+                }
+                return null;
+            }
+        };
+
+        returnObj.getChildList = function getChildPrefsList() {
+            return branch.getChildList('', {});
+        };
+
+        returnObj.unset = function clearPref(pref) {
+            try {
+                branch.clearUserPref(pref);
+            } catch(e) { // throws if pref non-existant in Gecko<6
             }
         };
     }
@@ -183,7 +208,7 @@ exports.branch = function selectBranch(name, defaults) {
                 prefs.setComplexValue(pref, Ci.nsIRelativeFilePref, value);
                 break;
             default:
-                log('Unexpected pref type "' + type + '" in setPref.');
+                require('log').error('Unexpected pref type "' + type + '" in setPref.');
                 break;
         }
     };
