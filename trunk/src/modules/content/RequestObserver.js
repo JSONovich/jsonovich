@@ -51,7 +51,7 @@
                                 httpChannel.setRequestHeader('Accept', accept.join(','), false);
                             }
                         } catch(e) {
-                            log.error(e);
+                            require('log').error(e);
                         }
                     }
                 }
