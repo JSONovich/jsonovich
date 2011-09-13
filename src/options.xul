@@ -6,13 +6,13 @@
              pref="extensions.jsonovich.acceptHeader.json"/>
     <setting type="control"
              title="Host-specific HTTP Accept header"
-             desc="Override the default setting above for specific host names. Add too many at your own risk of performance degradation.">
+             desc="Override the default setting above for specific host names. Adding too many may degrade performance.">
         <button id="jsonovich-pref-accept-add" label="Add..."/>
         <button id="jsonovich-pref-accept-rem" label="Remove..."/>
     </setting>
     <setting type="control"
              title="MIME types"
-             desc="Control MIME types to be intercepted and treated as JSON. Currently this should only include MIME types for which a download dialog would normally appear.">
+             desc="Control MIME types to be intercepted and treated as JSON. Wildcards aren't supported, only exact matches.">
         <button id="jsonovich-pref-mime-add" label="Add..."/>
         <button id="jsonovich-pref-mime-rem" label="Remove..."/>
     </setting>
