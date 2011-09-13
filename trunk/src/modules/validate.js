@@ -20,6 +20,7 @@ var reg_q = /^(?:1(?:\.0{1,3})?|0(?:\.\d{1,3})?)$/; // compile once
 
 XPCOMUtils.defineLazyServiceGetter(this, 'idnService', '@mozilla.org/network/idn-service;1', 'nsIIDNService');
 
+exports.explainHost = 'Host must be fewer than 254 characters and be IDN-normalised.';
 exports.host = function isValidHost(host) {
     if(host && host.length && host.length < 254) {
         try {
@@ -35,10 +36,12 @@ exports.host = function isValidHost(host) {
     return false;
 };
 
+exports.explainQ = 'Q-factor must be a number between 0 and 1 with up to 3 decimal places, the period character "." must be used as the decimal separator if present.';
 exports.q = function isValidQFactor(q) {
     return (q && q.length && q.length < 6 && reg_q.test(q));
 };
 
+exports.explainMime = 'MIME type must be fewer than 80 characters, type must be application or text, sub-type must mention "json, "javascript" or "ecmascript" and there must be no wildcards.';
 exports.mime = function isValidMimeType(mime) {
     if(mime && mime.length && mime.length < 81) {
         let parts = mime.split('/', 3);
@@ -50,6 +53,7 @@ exports.mime = function isValidMimeType(mime) {
     return false;
 };
 
+exports.explainFileExt = 'Extension must be fewer than 10 characters and not contain wildcards, "." or "/".';
 exports.fileExt = function isValidFileExtension(ext) {
     return (ext && ext.length && ext.length < 11
         && ext.indexOf('/') === -1 && ext.indexOf('.') === -1

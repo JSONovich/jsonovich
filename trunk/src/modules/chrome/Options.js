@@ -47,7 +47,7 @@ function addAccept() {
     };
     while(Services.prompt.prompt(null, 'Add host override', 'Enter a valid host name for which the default HTTP Accept setting should be overridden:', host, 'Send "application/json" in the HTTP Accept header for this host', mode)) {
         if(!valid.host(host.value)) {
-            Services.prompt.alert(null, 'Bad host', "The specified host name didn't look right.");
+            Services.prompt.alert(null, 'Bad host', "The specified host name didn't look right." + valid.explainHost);
             continue;
         }
         if(mode.value) {
@@ -59,7 +59,7 @@ function addAccept() {
                     q = parseFloat(q.value); // silently allow 0 here even though user could have just unticked box on 1st prompt
                     break;
                 }
-                Services.prompt.alert(null, 'Bad q-value', "The specified quality factor didn't look right.");
+                Services.prompt.alert(null, 'Bad q-value', "The specified quality factor didn't look right." + valid.explainQ);
             }
             if(typeof q === 'object') {
                 continue; // q-value prompt cancelled, go back to host prompt
@@ -90,9 +90,9 @@ function removeAccept() {
 
 function addMime() {
     var mime = {};
-    while(Services.prompt.prompt(null, 'Add MIME type', 'Enter a valid MIME type that ' + ADDON_NAME + ' should intercept (only the application/ and text/ types are allowed):', mime, null, {})) {
+    while(Services.prompt.prompt(null, 'Add MIME type', 'Enter a valid MIME type that ' + ADDON_NAME + ' should intercept:', mime, null, {})) {
         if(!valid.mime(mime.value)) {
-            Services.prompt.alert(null, 'Bad MIME type', "The specified MIME type didn't look right.");
+            Services.prompt.alert(null, 'Bad MIME type', "The specified MIME type didn't look right. " + valid.explainMime);
             continue;
         }
         var conversions = prefBranch.get('mime.conversions', 'string-ascii').split('|');
@@ -121,7 +121,7 @@ function addExtMap() {
     var ext = {}, mime = {};
     while(Services.prompt.prompt(null, 'Add file extension', 'Enter a valid file extension that ' + ADDON_NAME + ' should handle:', ext, null, {})) {
         if(!valid.fileExt(ext.value)) {
-            Services.prompt.alert(null, 'Bad file extension', "The specified file extension didn't look right.");
+            Services.prompt.alert(null, 'Bad file extension', "The specified file extension didn't look right." + valid.explainFileExt);
             continue;
         }
         var extensions = [], mappings = prefBranch.get('mime.extensionMap', 'string-ascii').split('|');
@@ -134,7 +134,7 @@ function addExtMap() {
         } else {
             while(Services.prompt.prompt(null, 'Add MIME type', 'Enter a valid MIME type that ' + ADDON_NAME + ' should map to the "' + ext.value + '" extension:', mime, null, {})) {
                 if(!valid.mime(mime.value)) {
-                    Services.prompt.alert(null, 'Bad MIME type', "The specified MIME type didn't look right.");
+                    Services.prompt.alert(null, 'Bad MIME type', "The specified MIME type didn't look right." + valid.explainMime);
                     continue;
                 }
                 var conversions = prefBranch.get('mime.conversions', 'string-ascii').split('|');
