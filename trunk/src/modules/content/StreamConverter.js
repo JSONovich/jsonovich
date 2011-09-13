@@ -12,7 +12,9 @@
 'use strict';
 
 let classID = exports.classID = Components.ID('{dcc31be0-c861-11dd-ad8b-0800200c9a66}'),
-prefName = 'mime.conversions';
+prefName = 'mime.conversions',
+catName = 'Gecko-Content-Viewers',
+dlf = '@mozilla.org/content/document-loader-factory;1';
 
 /**
  * Dynamically register converters
@@ -21,9 +23,10 @@ prefName = 'mime.conversions';
  *                               branch, require('prefs').branch(<branch>).listen
  */
 exports.register = function registerConversions(listenPref) {
-    let webNavInfo = null,
+    let aCatMgr = Cc['@mozilla.org/categorymanager;1'].getService(Ci.nsICategoryManager),
     aCompMgr = Cm.QueryInterface(Ci.nsIComponentRegistrar),
     factory = require('content/jsonStreamConverter').factory, // TODO: switch to JSON2JSFactory when we can listen to page-load DOM events and handle JSON from there
+    backup = [],
     valid = require('validate'),
     unregister = function() {
         try {
@@ -33,6 +36,10 @@ exports.register = function registerConversions(listenPref) {
                 require('log').error(e);
             }
         }
+        for(let i = 0; i < backup.length; i++) {
+            aCatMgr.addCategoryEntry(catName, backup[i], dlf, false, true);
+        }
+        backup = [];
     };
     listenPref(prefName, function(branch, pref) {
         let tmpFactory = factory,
@@ -49,10 +56,18 @@ exports.register = function registerConversions(listenPref) {
                     require('log').debug('Invalid MIME type conversion "' + conversions[i] + '".');
                     continue;
                 }
-                // slow, don't check on 1st pass (assume preference valid on startup)
-                if(webNavInfo && webNavInfo.UNSUPPORTED != webNavInfo.isTypeSupported(conversions[i], null)) {
-                    require('log').debug('Invalid MIME type conversion: "' + conversions[i] + '" is already handled by the browser, cannot override.')
-                    continue;
+                try {
+                    existing = aCatMgr.getCategoryEntry(catName, conversions[i]);
+                } catch(e) {
+                    if(e.name == 'NS_ERROR_NOT_AVAILABLE') {
+                        existing = null;
+                    } else {
+                        throw e;
+                    }
+                }
+                if(existing == dlf) {
+                    aCatMgr.deleteCategoryEntry(catName, conversions[i], false);
+                    backup.push(conversions[i]);
                 }
                 try {
                     aCompMgr.registerFactory(classID, ADDON_NAME, '@mozilla.org/streamconv;1?from=' + conversions[i] + '&to=*/*', tmpFactory);
@@ -75,6 +90,5 @@ exports.register = function registerConversions(listenPref) {
         } finally {
             require('unload').unload(unregister);
         }
-        webNavInfo = Cc["@mozilla.org/webnavigation-info;1"].getService(Ci.nsIWebNavigationInfo);
     });
 }

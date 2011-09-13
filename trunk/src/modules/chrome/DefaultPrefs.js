@@ -27,7 +27,15 @@ var defaults = {
         'text/json',                       // legacy, officially application/json
         'text/x-json',                     // legacy, officially application/json
         'application/rdf+json',            // legacy, officially application/json
-        'application/jsonml+json'          // unofficial, http://jsonml.org/
+        'application/jsonml+json',         // unofficial, http://jsonml.org/
+        'application/javascript',          // standard, http://www.ietf.org/rfc/rfc4329.txt
+        'application/ecmascript',          // standard, http://www.ietf.org/rfc/rfc4329.txt
+        'text/javascript',                 // obsolete, http://www.ietf.org/rfc/rfc4329.txt
+        'text/ecmascript',                 // obsolete, http://www.ietf.org/rfc/rfc4329.txt
+        'application/x-javascript',        // legacy, officially application/javascript
+        'application/x-ecmascript',        // legacy, officially application/ecmascript
+        'text/x-javascript',               // legacy, officially application/javascript
+        'text/x-ecmascript'                // legacy, officially application/ecmascript
         ].join('|'),
 
         'mime.extensionMap': [
