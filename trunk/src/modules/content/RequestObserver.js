@@ -8,53 +8,50 @@
  * [2011-08] - Created request observer for per-domain Accept header overrides
  */
 
-(function() {
-    'use strict';
+'use strict';
 
-    var lazy = {},
-    modes = {
-        'json': {
-            mime: 'application/json'
-        }
-    };
+var modes = {
+    'json': {
+        mime: 'application/json'
+    }
+};
 
-    XPCOMUtils.defineLazyGetter(lazy, 'acceptUtils', function() {
-        return require('AcceptHeaderUtils');
-    });
+XPCOMUtils.defineLazyGetter(this, 'generateAcceptHeader', function() {
+    return require('chrome/AcceptHeader').generate;
+});
 
-    /**
-     * Dynamically register an HTTP request observer for the given type
-     *
-     * @param mode <string>  A string matching an entry in this module's private observers object.
-     */
-    exports.register = function registerRequestObserver(mode) {
-        if(modes[mode] && typeof modes[mode].observer != 'object') {
-            modes[mode].overrideBranch = require('prefs').branch(ADDON_PREFROOT + '.acceptHeaderOverride.' + mode);
-            modes[mode].observer = {
-                observe: function(aSubject, aTopic, aData) {
-                    if(aTopic == 'http-on-modify-request') {
-                        try {
-                            aSubject.QueryInterface(Ci.nsIHttpChannel);
-                            let q = (aSubject.loadFlags & aSubject.LOAD_DOCUMENT_URI) ? modes[mode].overrideBranch.get(aSubject.originalURI.host, 'string-ascii') : null;
-                            if(q !== null) {
-                                let acceptOrig = aSubject.getRequestHeader('Accept'),
-                                accept = lazy.acceptUtils.modifyAccept(acceptOrig, modes[mode].mime, parseFloat(q));
-                                if(acceptOrig != accept) {
-                                    aSubject.setRequestHeader('Accept', accept, false);
-                                }
+/**
+ * Dynamically register an HTTP request observer for the given type
+ *
+ * @param mode <string>  A string matching an entry in this module's private observers object.
+ */
+exports.register = function registerRequestObserver(mode) {
+    if(modes[mode] && typeof modes[mode].observer != 'object') {
+        modes[mode].overrideBranch = require('prefs').branch(ADDON_PREFROOT + '.acceptHeaderOverride.' + mode);
+        modes[mode].observer = {
+            observe: function(aSubject, aTopic, aData) {
+                if(aTopic == 'http-on-modify-request') {
+                    try {
+                        aSubject.QueryInterface(Ci.nsIHttpChannel);
+                        let q = (aSubject.loadFlags & aSubject.LOAD_DOCUMENT_URI) ? modes[mode].overrideBranch.get(aSubject.originalURI.host, 'string-ascii') : null;
+                        if(q !== null) {
+                            let acceptOrig = aSubject.getRequestHeader('Accept'),
+                            accept = generateAcceptHeader(acceptOrig, modes[mode].mime, parseFloat(q));
+                            if(acceptOrig != accept) {
+                                aSubject.setRequestHeader('Accept', accept, false);
                             }
-                        } catch(e) {
-                            require('log').error(e);
                         }
+                    } catch(e) {
+                        require('log').error(e);
                     }
                 }
-            };
-            Services.obs.addObserver(modes[mode].observer, 'http-on-modify-request', false);
-            require('unload').unload(function(){
-                Services.obs.removeObserver(modes[mode].observer, 'http-on-modify-request');
-                delete modes[mode].observer;
-                delete modes[mode].overrideBranch;
-            });
-        }
-    };
-})();
+            }
+        };
+        Services.obs.addObserver(modes[mode].observer, 'http-on-modify-request', false);
+        require('unload').unload(function(){
+            Services.obs.removeObserver(modes[mode].observer, 'http-on-modify-request');
+            delete modes[mode].observer;
+            delete modes[mode].overrideBranch;
+        });
+    }
+};
