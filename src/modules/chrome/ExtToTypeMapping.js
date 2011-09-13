@@ -10,6 +10,9 @@
 
 'use strict';
 
+let catName = 'ext-to-type-mapping',
+prefName = 'mime.extensionMap';
+
 /**
  * Dynamically register filetype mapping
  *
@@ -18,16 +21,15 @@
  */
 exports.register = function registerExtMap(listenPref) {
     let mimeSvc = null,
-    aCatMgr = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager),
-    what = 'extension to MIME type mapping',
-    validExt = /^[a-z0-9]+$/i,
+    aCatMgr = Cc['@mozilla.org/categorymanager;1'].getService(Ci.nsICategoryManager),
     registered = [],
+    valid = require('validate'),
     unregister = function() {
         for(let i = 0; i < registered.length; i++) {
-            aCatMgr.deleteCategoryEntry('ext-to-type-mapping', registered[i], false);
+            aCatMgr.deleteCategoryEntry(catName, registered[i], false);
         }
     };
-    listenPref('mime.extensionMap', function(branch, pref) {
+    listenPref(prefName, function(branch, pref) {
         let orig = branch.get(pref, 'string-ascii'),
         extensions = orig.split('|');
         if(!extensions.length) {
@@ -40,15 +42,19 @@ exports.register = function registerExtMap(listenPref) {
             for(let i = 0; i < extensions.length; i++) {
                 ext = extensions[i].split(':');
                 if(ext.length != 2) {
-                    debugInvalid(what, '"' + extensions[i] + '"');
+                    require('log').debug('Invalid file extension to MIME type mapping "' + extensions[i] + '".');
                     continue;
                 }
-                if(!validExt.test(ext[0])) {
-                    debugInvalid(what, '"' + ext[0] + '" doesn\'t look like a file extension');
+                if(!valid.fileExt(ext[0])) {
+                    require('log').debug('Invalid file extension "' + ext[0] + '" for mapping "' + extensions[i] + '".');
+                    continue;
+                }
+                if(!valid.mime(ext[1])) {
+                    require('log').debug('Invalid MIME type "' + ext[1] + '" for mapping "' + extensions[i] + '".');
                     continue;
                 }
                 if(conversions.indexOf(ext[1]) == -1) { // only register if we handle the MIME type
-                    debugInvalid(what, '"' + ext[1] + '" isn\'t registered to ' + ADDON_NAME);
+                    require('log').debug('MIME type "' + ext[1] + '" isn\'t registered to ' + ADDON_NAME + ' for mapping "' + extensions[i] + '".');
                     continue;
                 }
                 if(mimeSvc) { // slow, don't check on 1st pass (assume preference valid on startup)
@@ -62,11 +68,11 @@ exports.register = function registerExtMap(listenPref) {
                         }
                     }
                     if(existing) {
-                        debugInvalid(what, '"' + ext[0] + '" is already mapped to ' + existing + ', not overriding');
+                        require('log').debug('MIME type "' + ext[1] + '" is already mapped to "' + existing + '", not overriding for mapping "' + extensions[i] + '".');
                         continue;
                     }
                 }
-                aCatMgr.addCategoryEntry('ext-to-type-mapping', ext[0], ext[1], false, true);
+                aCatMgr.addCategoryEntry(catName, ext[0], ext[1], false, true);
                 registered.push(ext[0]);
                 validMappings.push(extensions[i]);
             }
@@ -79,6 +85,6 @@ exports.register = function registerExtMap(listenPref) {
         } finally {
             require('unload').unload(unregister);
         }
-        mimeSvc = Cc["@mozilla.org/mime;1"].getService(Ci.nsIMIMEService);
+        mimeSvc = Cc['@mozilla.org/mime;1'].getService(Ci.nsIMIMEService);
     });
 }
