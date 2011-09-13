@@ -16,6 +16,8 @@
 
 'use strict';
 
+var reg_q = /^(?:1(?:\.0{1,3})?|0(?:\.\d{1,3})?)$/; // compile once
+
 XPCOMUtils.defineLazyServiceGetter(this, 'idnService', '@mozilla.org/network/idn-service;1', 'nsIIDNService');
 
 exports.host = function isValidHost(host) {
@@ -34,17 +36,22 @@ exports.host = function isValidHost(host) {
 };
 
 exports.q = function isValidQFactor(q) {
-    return (q && q.length && q.length < 6 && (/^(?:1(?:\.0{1,3})?|0(?:\.\d{1,3})?)$/).test(q));
+    return (q && q.length && q.length < 6 && reg_q.test(q));
 };
 
 exports.mime = function isValidMimeType(mime) {
-    if(mime && mime.length && mime.length < 81 && (mime.lastIndexOf('application/') === 0 || mime.lastIndexOf('text/') === 0)) {
-        let parts = mime.split('/');
-        return (parts.length === 2 && (parts[1].indexOf('json') !== -1 || parts[1].indexOf('javascript') !== -1 || parts[1].indexOf('ecmascript') !== -1));
+    if(mime && mime.length && mime.length < 81) {
+        let parts = mime.split('/', 3);
+        return (parts.length === 2
+            && (parts[0] == 'application' || parts[0] == 'text')
+            && parts[1].indexOf('*') === -1 && parts[1].indexOf('?') === -1
+            && (parts[1].indexOf('json') !== -1 || parts[1].indexOf('javascript') !== -1 || parts[1].indexOf('ecmascript') !== -1));
     }
     return false;
 };
 
 exports.fileExt = function isValidFileExtension(ext) {
-    return (ext && ext.length && ext.length < 11 && ext.indexOf('/') === -1 && ext.indexOf('.') === -1);
+    return (ext && ext.length && ext.length < 11
+        && ext.indexOf('/') === -1 && ext.indexOf('.') === -1
+        && ext.indexOf('*') === -1 && ext.indexOf('?') === -1);
 };
