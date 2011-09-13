@@ -133,20 +133,20 @@ function addExtMap() {
             Services.prompt.alert(null, 'Bad file extension', 'The specified file extension is already handled by ' + ADDON_NAME + '.');
         } else {
             while(Services.prompt.prompt(null, 'Add MIME type', 'Enter a valid MIME type that ' + ADDON_NAME + ' should map to the "' + ext.value + '" extension:', mime, null, {})) {
-                if(mime.value.length > 80 || (mime.value.lastIndexOf('application/') !== 0 && mime.value.lastIndexOf('text/') !== 0) || mime.value.split('/').length !== 2 || mime.value.indexOf('json', 5) === -1) {
+                if(!valid.mime(mime.value)) {
                     Services.prompt.alert(null, 'Bad MIME type', "The specified MIME type didn't look right.");
+                    continue;
+                }
+                var conversions = prefBranch.get('mime.conversions', 'string-ascii').split('|');
+                mime.value = mime.value.toLowerCase();
+                if(conversions.indexOf(mime.value) === -1) {
+                    Services.prompt.alert(null, 'Bad MIME type', 'The specified MIME type is not intercepted by ' + ADDON_NAME + '.');
+                } else if(mappings.indexOf(ext.value + ':' + mime.value) !== -1) {
+                    Services.prompt.alert(null, 'Bad MIME type', 'The specified file extension to MIME type mapping already exists.');
                 } else {
-                    var conversions = prefBranch.get('mime.conversions', 'string-ascii').split('|');
-                    mime.value = mime.value.toLowerCase();
-                    if(conversions.indexOf(mime.value) === -1) {
-                        Services.prompt.alert(null, 'Bad MIME type', 'The specified MIME type is not intercepted by ' + ADDON_NAME + '.');
-                    } else if(mappings.indexOf(ext.value + ':' + mime.value) !== -1) {
-                        Services.prompt.alert(null, 'Bad MIME type', 'The specified file extension to MIME type mapping already exists.');
-                    } else {
-                        mappings.push(ext.value + ':' + mime.value);
-                        prefBranch.set('mime.extensionMap', 'string-ascii', mappings.join('|'));
-                        return;
-                    }
+                    mappings.push(ext.value + ':' + mime.value);
+                    prefBranch.set('mime.extensionMap', 'string-ascii', mappings.join('|'));
+                    return;
                 }
             }
         }

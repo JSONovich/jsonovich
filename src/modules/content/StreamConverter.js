@@ -7,6 +7,7 @@
  * Changelog:
  * [2011-07] - Created new simple stream converter to force me to implement support for Javascript MIME type
  *           - Registration function merged to ease support for Electrolysis
+ * [2011-09] - Hacked in support for JavaScript MIME types using existing stream converter
  */
 
 'use strict';
