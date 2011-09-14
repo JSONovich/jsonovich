@@ -24,7 +24,7 @@ dlf = '@mozilla.org/content/document-loader-factory;1';
  *                               branch, require('prefs').branch(<branch>).listen
  */
 exports.register = function registerConversions(listenPref) {
-    let aCatMgr = Cc['@mozilla.org/categorymanager;1'].getService(Ci.nsICategoryManager),
+    let aCatMgr = XPCOMUtils.categoryManager,
     aCompMgr = Cm.QueryInterface(Ci.nsIComponentRegistrar),
     factory = require('content/jsonStreamConverter').factory, // TODO: switch to JSON2JSFactory when we can listen to page-load DOM events and handle JSON from there
     backup = [],

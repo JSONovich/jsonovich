@@ -8,8 +8,6 @@
  * [2011-05] - Created FF4 restartless bootstrap for JSONovich extension
  */
 
-'use strict';
-
 Components.utils['import']("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils['import']("resource://gre/modules/Services.jsm");
 
@@ -122,7 +120,6 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
         electrolyte = null;
     };
 
-    global.install = function install() {};
-    global.uninstall = function uninstall() {};
+    global.install = global.uninstall = function() {};
     TS['Bootstrap'].push(Date.now());
 })(this);
