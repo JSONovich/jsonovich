@@ -30,20 +30,21 @@ exports.register = function registerRequestObserver(mode) {
         modes[mode].overrideBranch = require('prefs').branch(ADDON_PREFROOT + '.acceptHeaderOverride.' + mode);
         modes[mode].observer = {
             observe: function(aSubject, aTopic, aData) {
-                if(aTopic == 'http-on-modify-request') {
-                    try {
-                        aSubject.QueryInterface(Ci.nsIHttpChannel);
-                        let q = (aSubject.loadFlags & aSubject.LOAD_DOCUMENT_URI) ? modes[mode].overrideBranch.get(aSubject.originalURI.host, 'string-ascii') : null;
-                        if(q !== null) {
-                            let acceptOrig = aSubject.getRequestHeader('Accept'),
-                            accept = generateAcceptHeader(acceptOrig, modes[mode].mime, parseFloat(q));
-                            if(acceptOrig != accept) {
-                                aSubject.setRequestHeader('Accept', accept, false);
-                            }
+                if(aTopic != 'http-on-modify-request') {
+                    return;
+                }
+                try {
+                    aSubject.QueryInterface(Ci.nsIHttpChannel);
+                    let q = (aSubject.loadFlags & aSubject.LOAD_DOCUMENT_URI) ? modes[mode].overrideBranch.get(aSubject.originalURI.host, 'string-ascii') : null;
+                    if(q !== null) {
+                        let acceptOrig = aSubject.getRequestHeader('Accept'),
+                        accept = generateAcceptHeader(acceptOrig, modes[mode].mime, parseFloat(q));
+                        if(acceptOrig != accept) {
+                            aSubject.setRequestHeader('Accept', accept, false);
                         }
-                    } catch(e) {
-                        require('log').error(e);
                     }
+                } catch(e) {
+                    require('log').error(e);
                 }
             }
         };

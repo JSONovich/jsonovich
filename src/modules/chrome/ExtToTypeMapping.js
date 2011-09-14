@@ -21,7 +21,7 @@ prefName = 'mime.extensionMap';
  */
 exports.register = function registerExtMap(listenPref) {
     let mimeSvc = null,
-    aCatMgr = Cc['@mozilla.org/categorymanager;1'].getService(Ci.nsICategoryManager),
+    aCatMgr = XPCOMUtils.categoryManager,
     registered = [],
     valid = require('validate'),
     unregister = function() {
@@ -85,6 +85,8 @@ exports.register = function registerExtMap(listenPref) {
         } finally {
             require('unload').unload(unregister);
         }
-        mimeSvc = Cc['@mozilla.org/mime;1'].getService(Ci.nsIMIMEService);
+        if(!mimeSvc) {
+            mimeSvc = Cc['@mozilla.org/mime;1'].getService(Ci.nsIMIMEService);
+        }
     });
 }

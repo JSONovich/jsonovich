@@ -53,6 +53,9 @@ if(!XPCOMUtils.defineLazyServiceGetter) { // emulate XPCOMUtils.defineLazyServic
 }
 let Services = {}; // emulate Services.jsm (introduced in Gecko 2/FF4)
 // @see http://hg.mozilla.org/mozilla-central/diff/78e5543c0bc4/toolkit/content/Services.jsm
+XPCOMUtils.defineLazyGetter(Services, "prefs", function () {
+    return Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).QueryInterface(Ci.nsIPrefBranch2);
+});
 XPCOMUtils.defineLazyServiceGetter(Services, "obs", "@mozilla.org/observer-service;1", "nsIObserverService");
 XPCOMUtils.defineLazyServiceGetter(Services, "io", "@mozilla.org/network/io-service;1", "nsIIOService2");
 // @see http://hg.mozilla.org/mozilla-central/diff/365acfca64dc/toolkit/content/Services.jsm
@@ -61,6 +64,8 @@ XPCOMUtils.defineLazyGetter(Services, "appinfo", function () {
 });
 XPCOMUtils.defineLazyServiceGetter(Services, "vc", "@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 XPCOMUtils.defineLazyServiceGetter(Services, "scriptloader", "@mozilla.org/moz/jssubscript-loader;1", "mozIJSSubScriptLoader");
+// @see http://hg.mozilla.org/mozilla-central/diff/b264a7e3c0f5/toolkit/content/Services.jsm
+XPCOMUtils.defineLazyServiceGetter(Services, "console", "@mozilla.org/consoleservice;1", "nsIConsoleService");
 
 function startup() {
     electrolyte = {};
