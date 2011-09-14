@@ -12,8 +12,14 @@
 
 function startup() {
     TS['PrepareAsyncLoad'] = [Date.now()];
-    let timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-    timer.init({ // async load
+    let async = {
+        timer: Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer),
+        done: require('unload').unload(function() {
+            async.timer.cancel();
+            async = null;
+        })
+    };
+    async.timer.init({ // async load
         observe: function() {
             let prefs = require('prefs').branch,
             listenPref = prefs('extensions.' + ADDON_LNAME).listen;
@@ -49,9 +55,10 @@ function startup() {
                     }
                 }
             });
-            timer = null; // "Users of instances of nsITimer should keep a reference to the timer until it is no longer needed in order to assure the timer is fired."
+            async.done();
+            async = null; // "Users of instances of nsITimer should keep a reference to the timer until it is no longer needed in order to assure the timer is fired."
         }
-    }, 500, timer.TYPE_ONE_SHOT);
+    }, 500, async.timer.TYPE_ONE_SHOT);
     TS['PrepareAsyncLoad'].push(Date.now());
 }
 
