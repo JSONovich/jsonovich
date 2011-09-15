@@ -29,8 +29,4 @@ function startup(once) {
     } else {
         init();
     }
-
-// TODO: listen for document load event, prettify json
-/*addEventListener("DOMContentLoaded", function() {
-}, false);*/
 }

@@ -15,7 +15,8 @@ var modes = {
     'json': {
         mime: 'application/json'
     }
-};
+},
+reg_separator = /\s*,\s*/;
 
 XPCOMUtils.defineLazyGetter(this, 'valid', function() {
     return require('validate');
@@ -77,7 +78,7 @@ exports.register = function registerAcceptHeader(mode, listenPref) {
 }
 
 function generateAcceptHeader(acceptString, mime, q) {
-    let cleanAccept = acceptString.split(/\s*,\s*/).filter(function(value) {
+    let cleanAccept = acceptString.split(reg_separator).filter(function(value) {
         return (value.indexOf(mime) != 0
             || (value.length > mime.length
                 && (value[mime.length] == ' '

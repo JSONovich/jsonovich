@@ -54,7 +54,7 @@ function addAccept() {
             let q = {
                 value: '1'
             };
-            while(Services.prompt.prompt(null, 'Specify q-value', 'Enter the quality factor to attach to the JSON MIME type in the Accept header (greater than 0, up to and including 1, no more than 3 decimal digits):', q, null, {})) {
+            while(Services.prompt.prompt(null, 'Specify q-value', 'Enter the quality factor to attach to the JSON MIME type in the Accept header:', q, null, {})) {
                 if(valid.q(q.value)) {
                     q = parseFloat(q.value); // silently allow 0 here even though user could have just unticked box on 1st prompt
                     break;
