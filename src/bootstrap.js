@@ -84,7 +84,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
         // https://bugzilla.mozilla.org/show_bug.cgi?id=681206 cannot be avoided in Fennec
         // TODO: manually add frame script to each existing and future tab's message manager instead of using global message manager
         // ref: http://adblockplus.org/jsdoc/adblockplus/symbols/src/modules_AppIntegrationFennec.jsm.html
-        } else { // avoid IPC system, performance of not sending messages is obviously better without multi-process
+        } else { // avoid IPC system, performance in a single process is obviously better if not sending messages
             electrolyte.IN_CONTENT = true;
             messages = null;
         }
