@@ -32,6 +32,7 @@ function startup() {
                         'Bootstrap': 'time taken to execute bootstrap script',
                         'E10SBootstrap': 'time taken to execute content process bootstrap script',
                         'Startup': 'time between us receiving startup event and leaving event listener during browser startup',
+                        'E10SStartup': 'time between us receiving startup event in content process and leaving event listener during browser startup',
                         'Install': 'time between us receiving startup event and leaving event listener during user-initiated install',
                         'Restart': 'time between us receiving startup event and leaving event listener after user-initiated enable',
                         'StartRequest': 'time spent in the most recent call to the stream converter\'s onStartRequest function',
