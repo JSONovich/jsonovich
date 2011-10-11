@@ -24,7 +24,8 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
     once = null,
     installPath = null;
 
-    function startup() {
+    function startup(startupConsts) {
+        TS['E10SStartup'] = [Date.now()];
         function getResourceURI(aPath) { // @see http://mxr.mozilla.org/mozilla-central/source/toolkit/mozapps/extensions/XPIProvider.jsm
             let doJar = false, bundle = installPath.clone();
             if(aPath) {
@@ -46,14 +47,6 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
         function getResourceURISpec(path) {
             return getResourceURI(path).spec;
         }
-
-        var startupConsts = (function() {
-            var reply;
-            while(!(reply = sendSyncMessage(ADDON_LNAME + ':getStartupConstants', {})).length) {
-            // spin until parent listener is there? i get occasional errors without this loop
-            }
-            return reply[0];
-        })();
 
         electrolyte = {
             TS: TS,
@@ -85,6 +78,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
         if(electrolyte.startup) {
             electrolyte.startup(once);
         }
+        TS['E10SStartup'].push(Date.now());
     }
 
     function shutdown() {
@@ -101,6 +95,21 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
         electrolyte = null;
     }
 
-    startup();
+    function ensureStartupConstants() {
+        var reply = sendSyncMessage(ADDON_LNAME + ':getStartupConstants', {});
+        if(reply.length) {
+            startup(reply[0]);
+        } else {
+            scheduleSyncMessage();
+        }
+    }
+
+    function scheduleSyncMessage() {
+        Services.tm.mainThread.dispatch({
+            run: ensureStartupConstants
+        }, Components.interfaces.nsIThread.DISPATCH_NORMAL);
+    }
+
+    scheduleSyncMessage();
     TS['E10SBootstrap'].push(Date.now());
 })(this);
