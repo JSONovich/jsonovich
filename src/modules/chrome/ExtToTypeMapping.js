@@ -10,8 +10,9 @@
 
 'use strict';
 
-let catName = 'ext-to-type-mapping',
-prefName = 'mime.extensionMap';
+var catName = 'ext-to-type-mapping',
+prefName = 'mime.extensionMap',
+mapped = null;
 
 /**
  * Dynamically register filetype mapping
@@ -20,7 +21,10 @@ prefName = 'mime.extensionMap';
  *                               branch, require('prefs').branch(<branch>).listen
  */
 exports.register = function registerExtMap(listenPref) {
-    let mimeSvc = null,
+    if(mapped) {
+        mapped();
+    }
+    var mimeSvc = null,
     aCatMgr = XPCOMUtils.categoryManager,
     registered = [],
     valid = require('validate'),
@@ -28,13 +32,11 @@ exports.register = function registerExtMap(listenPref) {
         for(let i = 0; i < registered.length; i++) {
             aCatMgr.deleteCategoryEntry(catName, registered[i], false);
         }
+        mapped = null;
     };
     listenPref(prefName, function(branch, pref) {
-        let orig = branch.get(pref, 'string-ascii'),
+        var orig = branch.get(pref, 'string-ascii') || '',
         extensions = orig.split('|');
-        if(!extensions.length) {
-            return;
-        }
         unregister();
         try {
             let validMappings = [], ext, existing,
@@ -83,7 +85,7 @@ exports.register = function registerExtMap(listenPref) {
         } catch(e) {
             require('log').error('Uncaught exception in "' + pref + '" listener - ' + e);
         } finally {
-            require('unload').unload(unregister);
+            mapped = require('unload').unload(unregister);
         }
         if(!mimeSvc) {
             mimeSvc = Cc['@mozilla.org/mime;1'].getService(Ci.nsIMIMEService);
