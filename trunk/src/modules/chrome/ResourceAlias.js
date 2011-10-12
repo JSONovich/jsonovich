@@ -10,6 +10,12 @@
 
 'use strict';
 
+var aliases = {};
+
+XPCOMUtils.defineLazyGetter(this, 'proto', function() {
+    return Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler);
+});
+
 /**
  * Dynamically register a resource:// alias
  *
@@ -17,9 +23,12 @@
  * @param target <nsIURI>  Path to point alias at.
  */
 exports.register = function registerResourceAlias(alias, target) {
-    let proto = Services.io.getProtocolHandler('resource').QueryInterface(Ci.nsIResProtocolHandler);
+    if(aliases[alias]) {
+        aliases[alias]();
+    }
     proto.setSubstitution(alias, target);
-    require('unload').unload(function() {
+    aliases[alias] = require('unload').unload(function() {
         proto.setSubstitution(alias, null);
+        delete aliases[alias];
     });
 }
