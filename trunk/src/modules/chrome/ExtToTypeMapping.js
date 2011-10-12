@@ -12,6 +12,7 @@
 
 var catName = 'ext-to-type-mapping',
 prefName = 'mime.extensionMap',
+undoUnload = null,
 mapped = null;
 
 /**
@@ -33,6 +34,10 @@ exports.register = function registerExtMap(listenPref) {
             aCatMgr.deleteCategoryEntry(catName, registered[i], false);
         }
         mapped = null;
+        if(undoUnload) {
+            undoUnload();
+            undoUnload = null;
+        }
     };
     listenPref(prefName, function(branch, pref) {
         var orig = branch.get(pref, 'string-ascii') || '',
@@ -85,7 +90,8 @@ exports.register = function registerExtMap(listenPref) {
         } catch(e) {
             require('log').error('Uncaught exception in "' + pref + '" listener - ' + e);
         } finally {
-            mapped = require('unload').unload(unregister);
+            undoUnload = require('unload').unload(unregister);
+            mapped = unregister;
         }
         if(!mimeSvc) {
             mimeSvc = Cc['@mozilla.org/mime;1'].getService(Ci.nsIMIMEService);
