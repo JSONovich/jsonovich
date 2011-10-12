@@ -134,14 +134,13 @@ exports.branch = function selectBranch(name, defaults) {
                         return branch.getComplexType(pref, Ci.nsIRelativeFilePref).data;
                     default:
                         require('log').error('Unexpected pref type "' + type + '" in getPref.');
-                        return null;
                 }
             } catch(e) {
                 if(e.name != 'NS_ERROR_UNEXPECTED') {
                     require('log').debug(e);
                 }
-                return null;
             }
+            return null;
         };
 
         returnObj.getChildList = function getChildPrefsList() {

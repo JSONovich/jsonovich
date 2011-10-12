@@ -44,7 +44,7 @@ exports.register = function registerConversions(listenPref) {
     };
     listenPref(prefName, function(branch, pref) {
         let tmpFactory = factory,
-        orig = branch.get(pref, 'string-ascii'),
+        orig = branch.get(pref, 'string-ascii') || '',
         conversions = orig.split('|');
         if(!conversions.length) {
             return;
