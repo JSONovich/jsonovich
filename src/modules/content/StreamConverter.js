@@ -16,6 +16,7 @@ var classID = exports.classID = Components.ID('{dcc31be0-c861-11dd-ad8b-0800200c
 prefName = 'mime.conversions',
 catName = 'Gecko-Content-Viewers',
 dlf = '@mozilla.org/content/document-loader-factory;1',
+undoUnload = null,
 converting = null;
 
 /**
@@ -46,6 +47,10 @@ exports.register = function registerConversions(listenPref) {
         }
         backup = [];
         converting = null;
+        if(undoUnload) {
+            undoUnload();
+            undoUnload = null;
+        }
     };
     listenPref(prefName, function(branch, pref) {
         var tmpFactory = factory,
@@ -91,7 +96,8 @@ exports.register = function registerConversions(listenPref) {
         } catch(e) {
             require('log').error('Uncaught exception in "' + pref + '" listener - ' + e);
         } finally {
-            converting = require('unload').unload(unregister);
+            undoUnload = require('unload').unload(unregister);
+            converting = unregister;
         }
     });
 }
