@@ -67,11 +67,11 @@ exports.register = function registerAcceptHeader(mode, listenPref) {
         var overrides = require('prefs').branch(ADDON_PREFROOT + '.acceptHeaderOverride.' + mode),
         startupCount = overrides.getChildList().length;
         overrides.listen('', function(branch, pref) {
+            if((startupCount == 0 && !valid.host(pref)) || !valid.q(branch.get(pref, 'string-ascii'))) {
+                branch.unset(pref);
+            }
             if(startupCount > 0) {
                 startupCount--;
-            }
-            if(!(startupCount > 0 || valid.host(pref)) || !valid.q(branch.get(pref, 'string-ascii'))) {
-                branch.unset(pref);
             }
         });
     }
