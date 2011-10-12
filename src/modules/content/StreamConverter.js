@@ -12,10 +12,11 @@
 
 'use strict';
 
-let classID = exports.classID = Components.ID('{dcc31be0-c861-11dd-ad8b-0800200c9a66}'),
+var classID = exports.classID = Components.ID('{dcc31be0-c861-11dd-ad8b-0800200c9a66}'),
 prefName = 'mime.conversions',
 catName = 'Gecko-Content-Viewers',
-dlf = '@mozilla.org/content/document-loader-factory;1';
+dlf = '@mozilla.org/content/document-loader-factory;1',
+converting = null;
 
 /**
  * Dynamically register converters
@@ -24,7 +25,10 @@ dlf = '@mozilla.org/content/document-loader-factory;1';
  *                               branch, require('prefs').branch(<branch>).listen
  */
 exports.register = function registerConversions(listenPref) {
-    let aCatMgr = XPCOMUtils.categoryManager,
+    if(converting) {
+        converting();
+    }
+    var aCatMgr = XPCOMUtils.categoryManager,
     aCompMgr = Cm.QueryInterface(Ci.nsIComponentRegistrar),
     factory = require('content/jsonStreamConverter').factory, // TODO: switch to JSON2JSFactory when we can listen to page-load DOM events and handle JSON from there
     backup = [],
@@ -41,14 +45,12 @@ exports.register = function registerConversions(listenPref) {
             aCatMgr.addCategoryEntry(catName, backup[i], dlf, false, true);
         }
         backup = [];
+        converting = null;
     };
     listenPref(prefName, function(branch, pref) {
-        let tmpFactory = factory,
+        var tmpFactory = factory,
         orig = branch.get(pref, 'string-ascii') || '',
         conversions = orig.split('|');
-        if(!conversions.length) {
-            return;
-        }
         unregister();
         try {
             let validConversions = [], existing;
@@ -89,7 +91,7 @@ exports.register = function registerConversions(listenPref) {
         } catch(e) {
             require('log').error('Uncaught exception in "' + pref + '" listener - ' + e);
         } finally {
-            require('unload').unload(unregister);
+            converting = require('unload').unload(unregister);
         }
     });
 }
