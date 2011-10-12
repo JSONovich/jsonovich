@@ -95,7 +95,7 @@ function addMime() {
             Services.prompt.alert(null, 'Bad MIME type', "The specified MIME type didn't look right. " + valid.explainMime);
             continue;
         }
-        var conversions = prefBranch.get('mime.conversions', 'string-ascii').split('|');
+        let conversions = (prefBranch.get('mime.conversions', 'string-ascii') || '').split('|');
         mime.value = mime.value.toLowerCase();
         if(conversions.indexOf(mime.value) !== -1) {
             Services.prompt.alert(null, 'Bad MIME type', 'The specified MIME type is already intercepted by ' + ADDON_NAME + '.');
@@ -108,7 +108,7 @@ function addMime() {
 }
 
 function removeMime() {
-    var conversions = prefBranch.get('mime.conversions', 'string-ascii').split('|'), selected = {};
+    var conversions = (prefBranch.get('mime.conversions', 'string-ascii') || '').split('|'), selected = {};
     if(conversions.length == 1 && conversions[0].length == 0) {
         Services.prompt.alert(null, 'Remove MIME type', 'No MIME types are currently set to be intercepted.');
     } else if(Services.prompt.select(null, 'Remove MIME type', 'Select 1 MIME type that ' + ADDON_NAME + ' should no longer intercept:', conversions.length, conversions, selected)) {
@@ -124,7 +124,7 @@ function addExtMap() {
             Services.prompt.alert(null, 'Bad file extension', "The specified file extension didn't look right." + valid.explainFileExt);
             continue;
         }
-        var extensions = [], mappings = prefBranch.get('mime.extensionMap', 'string-ascii').split('|');
+        let extensions = [], mappings = (prefBranch.get('mime.extensionMap', 'string-ascii') || '').split('|');
         mappings.map(function(v) {
             extensions.push(v.split(':')[0]);
         });
@@ -137,7 +137,7 @@ function addExtMap() {
                     Services.prompt.alert(null, 'Bad MIME type', "The specified MIME type didn't look right." + valid.explainMime);
                     continue;
                 }
-                var conversions = prefBranch.get('mime.conversions', 'string-ascii').split('|');
+                let conversions = (prefBranch.get('mime.conversions', 'string-ascii') || '').split('|');
                 mime.value = mime.value.toLowerCase();
                 if(conversions.indexOf(mime.value) === -1) {
                     Services.prompt.alert(null, 'Bad MIME type', 'The specified MIME type is not intercepted by ' + ADDON_NAME + '.');
@@ -154,7 +154,7 @@ function addExtMap() {
 }
 
 function removeExtMap() {
-    var mappings = prefBranch.get('mime.extensionMap', 'string-ascii').split('|'), selected = {};
+    var mappings = (prefBranch.get('mime.extensionMap', 'string-ascii') || '').split('|'), selected = {};
     if(mappings.length == 1 && mappings[0].length == 0) {
         Services.prompt.alert(null, 'Remove file extension mapping', 'No mappings from file extensions to MIME types currently exist.');
     } else if(Services.prompt.select(null, 'Remove file extension mapping', 'Select 1 file extension mapping that ' + ADDON_NAME + ' should remove:', mappings.length, mappings, selected)) {
@@ -171,14 +171,15 @@ function removeExtMap() {
  *                         you're already using the branch to save mem.
  */
 exports.observe = function observeOptions(branch) {
-    if(!observing) {
-        prefBranch = branch || prefs(ADDON_PREFROOT);
-        Services.obs.addObserver(observer, 'addon-options-displayed', false);
-        observing = true;
-        require('unload').unload(function(){
-            Services.obs.removeObserver(observer, 'addon-options-displayed');
-            prefBranch = null;
-            observing = false;
-        });
+    prefBranch = branch || prefs(ADDON_PREFROOT);
+    if(observing) {
+        return;
     }
+    Services.obs.addObserver(observer, 'addon-options-displayed', false);
+    observing = true;
+    require('unload').unload(function(){
+        Services.obs.removeObserver(observer, 'addon-options-displayed');
+        prefBranch = null;
+        observing = false;
+    });
 };
