@@ -23,8 +23,8 @@ exports.branch = function selectBranch(name, defaults) {
     if(name.charAt(name.length-1)!='.') {
         name += '.';
     }
-    let branch = defaults ? Services.prefs.getDefaultBranch(name) : Services.prefs.getBranch(name);
-    let returnObj = {};
+    var branch = defaults ? Services.prefs.getDefaultBranch(name) : Services.prefs.getBranch(name),
+    returnObj = {};
 
     if(defaults) {
         /**
@@ -36,7 +36,7 @@ exports.branch = function selectBranch(name, defaults) {
         };
     } else {
         (function() {
-            let listener = {
+            var listener = {
                 callbacks: {},
                 listening: false,
                 observe: function(subject, topic, data) {
@@ -97,12 +97,9 @@ exports.branch = function selectBranch(name, defaults) {
                     }
                 } else {
                     delete listener.callbacks[pref];
-                    for(let p in listener.callbacks) { // why is there no easier way to do this? :(
-                        if(listener.callbacks.hasOwnProperty(p)) {
-                            return; // still listening to another preference, don't stop
-                        }
+                    if(isEmpty(listener.callbacks)) {
+                        listener.stop();
                     }
-                    listener.stop();
                 }
             };
         })();
@@ -113,7 +110,7 @@ exports.branch = function selectBranch(name, defaults) {
          *                       string-unicode, string-locale, file-abs, file-rel)
          * @return <bool|int|string|nsISupportsString|nsIPrefLocalizedString
          *              |nsILocalFile|nsIRelativeFilePref>
-         *                       The requested value, or the default if not set, or throw exception if default not set.
+         *                       The requested value, or the default if not set, or null if default not set.
          */
         returnObj.get = function getPref(pref, type) {
             try {

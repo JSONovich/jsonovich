@@ -64,6 +64,7 @@ function require(path) {
             Cu: Cu,
             getResourceURI: getResourceURI,
             getResourceURISpec: getResourceURISpec,
+            isEmpty: isEmpty,
             require: require,
             exports: registry[path],
             module: {
