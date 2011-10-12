@@ -30,11 +30,10 @@ exports.register = function registerRequestObserver(mode) {
         modes[mode].overrideBranch = require('prefs').branch(ADDON_PREFROOT + '.acceptHeaderOverride.' + mode);
         modes[mode].observer = {
             observe: function(aSubject, aTopic, aData) {
-                if(aTopic != 'http-on-modify-request') {
+                if(aTopic != 'http-on-modify-request' || !(aSubject instanceof Ci.nsIHttpChannel)) {
                     return;
                 }
                 try {
-                    aSubject.QueryInterface(Ci.nsIHttpChannel);
                     let q = (aSubject.loadFlags & aSubject.LOAD_DOCUMENT_URI) ? modes[mode].overrideBranch.get(aSubject.originalURI.host, 'string-ascii') : null;
                     if(q !== null) {
                         let acceptOrig = aSubject.getRequestHeader('Accept'),
