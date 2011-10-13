@@ -27,15 +27,14 @@ converting = null;
  */
 exports.register = function registerConversions(listenPref) {
     if(converting) {
-        converting();
+        converting(false, true);
     }
     var aCatMgr = XPCOMUtils.categoryManager,
     aCompMgr = Cm.QueryInterface(Ci.nsIComponentRegistrar),
     factory = require('content/jsonStreamConverter').factory, // TODO: switch to JSON2JSFactory when we can listen to page-load DOM events and handle JSON from there
     backup = [],
     valid = require('validate'),
-    undoUnload = null,
-    unregister = function() {
+    unregister = function(stayListening, manualUnload) {
         try {
             aCompMgr.unregisterFactory(classID, factory);
         } catch(e) {
@@ -48,14 +47,19 @@ exports.register = function registerConversions(listenPref) {
         }
         backup = [];
         converting = null;
-        if(undoUnload) {
+        if(!stayListening && undoListen) {
+            undoListen();
+            undoListen = null;
+        }
+        if(manualUnload && undoUnload) {
             undoUnload();
             undoUnload = null;
         }
-    };
-    listenPref(prefName, function(branch, pref) {
+    },
+    undoUnload = null,
+    undoListen = listenPref(prefName, function(branch, pref) {
         var tmpFactory = factory;
-        unregister();
+        unregister(true);
         prefUtils.stringSet(branch, pref, '|', function(entry) {
             var existing, tryagain = false;
             if(!valid.mime(entry)) {
