@@ -38,7 +38,7 @@ exports.branch = function selectBranch(name, defaults) {
         (function() {
             var listener = {
                 callbacks: {},
-                listening: false,
+                listening: null,
                 observe: function(subject, topic, data) {
                     if(subject != branch || topic != NS_PREFBRANCH_PREFCHANGE_TOPIC_ID) {
                         return;
@@ -60,17 +60,19 @@ exports.branch = function selectBranch(name, defaults) {
                     }
                 },
                 start: function() {
-                    listener.listening = true;
                     branch.QueryInterface(Ci.nsIPrefBranch2);
                     branch.addObserver('', listener, false);
-                    require('unload').unload(listener.stop);
+                    listener.listening = require('unload').unload(listener.stop);
                 },
-                stop: function() {
+                stop: function(manual) {
                     if(branch) {
                         branch.removeObserver('', listener);
                     }
                     listener.callbacks = {};
-                    listener.listening = false;
+                    if(manual) {
+                        listener.listening();
+                    }
+                    listener.listening = null;
                 }
             };
 
@@ -110,8 +112,8 @@ exports.branch = function selectBranch(name, defaults) {
                     }
                 } else {
                     delete listener.callbacks[pref];
-                    if(isEmpty(listener.callbacks)) {
-                        listener.stop();
+                    if(listener.listening && isEmpty(listener.callbacks)) {
+                        listener.stop(true);
                     }
                 }
             };
