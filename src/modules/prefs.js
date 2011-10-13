@@ -83,9 +83,12 @@ exports.branch = function selectBranch(name, defaults) {
              */
             returnObj.listen = function listenPref(pref, callback) {
                 if(callback) {
-                    if(pref === '') {
-                        let prefs = branch.getChildList('', {});
+                    if(pref === '' || pref[pref.length-1] === '.') {
+                        let prefs = branch.getChildList(pref, {});
                         for(let i = 0; i < prefs.length; i++) {
+                            if(prefs[i].indexOf(pref) != 0) {
+                                break;
+                            }
                             callback(returnObj, prefs[i]);
                         }
                     } else {
