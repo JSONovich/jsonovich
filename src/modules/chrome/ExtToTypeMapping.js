@@ -23,25 +23,29 @@ mapped = null;
  */
 exports.register = function registerExtMap(listenPref) {
     if(mapped) {
-        mapped();
+        mapped(false, true);
     }
     var mimeSvc = null,
     aCatMgr = XPCOMUtils.categoryManager,
     registered = [],
     valid = require('validate'),
-    undoUnload = null,
-    unregister = function() {
+    unregister = function(stayListening, manualUnload) {
         for(let i = 0; i < registered.length; i++) {
             aCatMgr.deleteCategoryEntry(catName, registered[i], false);
         }
         mapped = null;
-        if(undoUnload) {
+        if(!stayListening && undoListen) {
+            undoListen();
+            undoListen = null;
+        }
+        if(manualUnload && undoUnload) {
             undoUnload();
             undoUnload = null;
         }
-    };
-    listenPref(prefName, function(branch, pref) {
-        unregister();
+    },
+    undoUnload = null,
+    undoListen = listenPref(prefName, function(branch, pref) {
+        unregister(true);
         var conversions = (branch.get('mime.conversions', 'string-ascii') || '').split('|');
         prefUtils.stringMap(branch, pref, '|', ':', function(entry, parts) {
             if(parts.length != 2) {
