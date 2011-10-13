@@ -12,11 +12,11 @@
 
 'use strict';
 
-var classID = exports.classID = Components.ID('{dcc31be0-c861-11dd-ad8b-0800200c9a66}'),
+var prefUtils = require('prefUtils'),
+classID = exports.classID = Components.ID('{dcc31be0-c861-11dd-ad8b-0800200c9a66}'),
 prefName = 'mime.conversions',
 catName = 'Gecko-Content-Viewers',
 dlf = '@mozilla.org/content/document-loader-factory;1',
-undoUnload = null,
 converting = null;
 
 /**
@@ -34,6 +34,7 @@ exports.register = function registerConversions(listenPref) {
     factory = require('content/jsonStreamConverter').factory, // TODO: switch to JSON2JSFactory when we can listen to page-load DOM events and handle JSON from there
     backup = [],
     valid = require('validate'),
+    undoUnload = null,
     unregister = function() {
         try {
             aCompMgr.unregisterFactory(classID, factory);
@@ -53,51 +54,43 @@ exports.register = function registerConversions(listenPref) {
         }
     };
     listenPref(prefName, function(branch, pref) {
-        var tmpFactory = factory,
-        orig = branch.get(pref, 'string-ascii') || '',
-        conversions = orig.split('|');
+        var tmpFactory = factory;
         unregister();
-        try {
-            let validConversions = [], existing;
-            for(let i = 0; i < conversions.length; i++) {
-                if(!valid.mime(conversions[i])) {
-                    require('log').debug('Invalid MIME type conversion "' + conversions[i] + '".');
-                    continue;
+        prefUtils.stringSet(branch, pref, '|', function(entry) {
+            var existing, tryagain = false;
+            if(!valid.mime(entry)) {
+                require('log').debug('Invalid MIME type conversion "' + entry + '".');
+                return false;
+            }
+            try {
+                existing = aCatMgr.getCategoryEntry(catName, entry);
+            } catch(e) {
+                if(e.name == 'NS_ERROR_NOT_AVAILABLE') {
+                    existing = null;
+                } else {
+                    throw e;
                 }
+            }
+            if(existing == dlf) {
+                aCatMgr.deleteCategoryEntry(catName, entry, false);
+                backup.push(entry);
+            }
+            do {
                 try {
-                    existing = aCatMgr.getCategoryEntry(catName, conversions[i]);
+                    aCompMgr.registerFactory(classID, ADDON_NAME, '@mozilla.org/streamconv;1?from=' + entry + '&to=*/*', tmpFactory);
+                    return true;
                 } catch(e) {
-                    if(e.name == 'NS_ERROR_NOT_AVAILABLE') {
-                        existing = null;
-                    } else {
-                        throw e;
-                    }
-                }
-                if(existing == dlf) {
-                    aCatMgr.deleteCategoryEntry(catName, conversions[i], false);
-                    backup.push(conversions[i]);
-                }
-                try {
-                    aCompMgr.registerFactory(classID, ADDON_NAME, '@mozilla.org/streamconv;1?from=' + conversions[i] + '&to=*/*', tmpFactory);
-                    validConversions.push(conversions[i]);
-                } catch(e) {
-                    if(e.name == 'NS_ERROR_FACTORY_EXISTS') { // this only happens in Gecko 2+...
+                    if(tmpFactory && e.name == 'NS_ERROR_FACTORY_EXISTS') { // this only happens in Gecko 2+...
                         tmpFactory = null; // set null to avoid factory exists warning
-                        i--; // and try again
+                        tryagain = true; // and try again
                     } else {
                         throw e;
                     }
                 }
-            }
-            validConversions = validConversions.join('|');
-            if(orig != validConversions) { // some conversions were invalid, let's remove them from prefs
-                branch.set(pref, 'string-ascii', validConversions);
-            }
-        } catch(e) {
-            require('log').error('Uncaught exception in "' + pref + '" listener - ' + e);
-        } finally {
-            undoUnload = require('unload').unload(unregister);
-            converting = unregister;
-        }
+            } while(tryagain);
+            return false;
+        });
+        undoUnload = require('unload').unload(unregister);
+        converting = unregister;
     });
 }
