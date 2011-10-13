@@ -39,25 +39,24 @@ exports.branch = function selectBranch(name, defaults) {
             var listener = {
                 callbacks: {},
                 listening: null,
+                notify: function(pref, data) {
+                    if(listener.callbacks.hasOwnProperty(pref)) {
+                        listener.callbacks[pref].forEach(function(callback) {
+                            callback(returnObj, data);
+                        });
+                    }
+                },
                 observe: function(subject, topic, data) {
                     if(subject != branch || topic != NS_PREFBRANCH_PREFCHANGE_TOPIC_ID) {
                         return;
                     }
-                    if(listener.callbacks.hasOwnProperty(data)) {
-                        listener.callbacks[data](returnObj, data);
-                    }
-                    var dataSplit = data.split('.'),
-                    dataPartial;
+                    listener.notify(data, data);
+                    var dataSplit = data.split('.');
                     while(dataSplit.length > 1) {
                         dataSplit.pop();
-                        dataPartial = dataSplit.join('.') + '.';
-                        if(listener.callbacks.hasOwnProperty(dataPartial)) {
-                            listener.callbacks[dataPartial](returnObj, data);
-                        }
+                        listener.notify(dataSplit.join('.') + '.', data);
                     }
-                    if(listener.callbacks.hasOwnProperty('')) {
-                        listener.callbacks[''](returnObj, data);
-                    }
+                    listener.notify('', data);
                 },
                 start: function() {
                     branch.QueryInterface(Ci.nsIPrefBranch2);
@@ -94,25 +93,35 @@ exports.branch = function selectBranch(name, defaults) {
              * @param pref <string>  The preference to stop observing for changes.
              */
             returnObj.listen = function listenPref(pref, callback) {
-                if(callback) {
-                    if(pref === '' || pref[pref.length-1] === '.') {
-                        let prefs = branch.getChildList(pref, {});
-                        for(let i = 0; i < prefs.length; i++) {
-                            callback(returnObj, prefs[i]);
-                        }
-                    } else {
-                        callback(returnObj, pref);
-                    }
-                    listener.callbacks[pref] = callback;
-                    if(!listener.listening) {
-                        listener.start();
-                    }
-                } else {
-                    delete listener.callbacks[pref];
-                    if(listener.listening && isEmpty(listener.callbacks)) {
-                        listener.stop(true);
-                    }
+                if(!callback) {
+                    return undefined;
                 }
+                if(pref === '' || pref[pref.length-1] === '.') {
+                    branch.getChildList(pref, {}).forEach(function(name) {
+                        callback(returnObj, name);
+                    });
+                } else {
+                    callback(returnObj, pref);
+                }
+                if(!listener.callbacks[pref]) {
+                    listener.callbacks[pref] = [];
+                }
+                listener.callbacks[pref].push(callback);
+                if(!listener.listening) {
+                    listener.start();
+                }
+                return function undo() {
+                    var i = listener.callbacks[pref].indexOf(callback);
+                    if(i > -1) {
+                        listener.callbacks[pref].splice(i, 1);
+                        if(!listener.callbacks[pref].length) {
+                            delete listener.callbacks[pref];
+                            if(listener.listening && isEmpty(listener.callbacks)) {
+                                listener.stop(true);
+                            }
+                        }
+                    }
+                };
             };
         })();
 
