@@ -98,9 +98,6 @@ exports.branch = function selectBranch(name, defaults) {
                     if(pref === '' || pref[pref.length-1] === '.') {
                         let prefs = branch.getChildList(pref, {});
                         for(let i = 0; i < prefs.length; i++) {
-                            if(prefs[i].indexOf(pref) != 0) {
-                                break;
-                            }
                             callback(returnObj, prefs[i]);
                         }
                     } else {
