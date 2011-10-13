@@ -40,13 +40,23 @@ exports.branch = function selectBranch(name, defaults) {
                 callbacks: {},
                 listening: false,
                 observe: function(subject, topic, data) {
-                    if(subject == branch && topic == NS_PREFBRANCH_PREFCHANGE_TOPIC_ID) {
-                        if(listener.callbacks.hasOwnProperty(data)) {
-                            listener.callbacks[data](returnObj, data);
+                    if(subject != branch || topic != NS_PREFBRANCH_PREFCHANGE_TOPIC_ID) {
+                        return;
+                    }
+                    if(listener.callbacks.hasOwnProperty(data)) {
+                        listener.callbacks[data](returnObj, data);
+                    }
+                    var dataSplit = data.split('.'),
+                    dataPartial;
+                    while(dataSplit.length > 1) {
+                        dataSplit.pop();
+                        dataPartial = dataSplit.join('.') + '.';
+                        if(listener.callbacks.hasOwnProperty(dataPartial)) {
+                            listener.callbacks[dataPartial](returnObj, data);
                         }
-                        if(listener.callbacks.hasOwnProperty('')) {
-                            listener.callbacks[''](returnObj, data);
-                        }
+                    }
+                    if(listener.callbacks.hasOwnProperty('')) {
+                        listener.callbacks[''](returnObj, data);
                     }
                 },
                 start: function() {
