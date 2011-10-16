@@ -97,7 +97,7 @@ exports.branch = function selectBranch(name, defaults) {
                     return undefined;
                 }
                 if(pref === '' || pref[pref.length-1] === '.') {
-                    branch.getChildList(pref, {}).forEach(function(name) {
+                    returnObj.getChildList(pref).forEach(function(name) {
                         callback(returnObj, name);
                     });
                 } else {
@@ -161,8 +161,8 @@ exports.branch = function selectBranch(name, defaults) {
             return null;
         };
 
-        returnObj.getChildList = function getChildPrefsList() {
-            return branch.getChildList('', {});
+        returnObj.getChildList = function getChildPrefsList(prefix) {
+            return branch.getChildList(prefix || '', {});
         };
 
         returnObj.unset = function clearPref(pref) {
