@@ -86,7 +86,9 @@ JSON2HTML = function() {
       data.currentLine.indentInc(data);
       try {
         for(;;) {
-          data.currentLine.addElement(new Element(memb, "key"));
+          data.currentLine.addElement(new Element(delim_string, "key delimiter"));
+          data.currentLine.addElement(new Element(encodeHTML(memb), "key"));
+          data.currentLine.addElement(new Element(delim_string, "key delimiter"));
           data.currentLine.addElement(new Element(sep_object_property_kv, "object property separator"));
           formatRecursively(data, obj[memb]);
           memb = it.next();
