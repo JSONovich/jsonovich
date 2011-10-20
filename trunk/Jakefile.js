@@ -17,15 +17,16 @@ path     = require('path'),
 BASE_DIR            = process.cwd(),
 SRC_DIR             = path.existsSync('src') ? 'src' : null,
 install_rdf_path    = path.join(SRC_DIR, 'install.rdf'),
-[PKG_NAME, PKG_VER] = (function() {
-    var install_rdf = fs.readFileSync(install_rdf_path, 'utf8');
-    return [
-    (/name>([^<]+)<\//).exec(install_rdf)[1],
-    (/version>([^<]+)<\//).exec(install_rdf)[1]
-    ];
+PKG                 = (function() {
+    var install_rdf = fs.readFileSync(install_rdf_path, 'utf8'),
+    PKG = {
+        NAME: (/name>([^<]+)<\//).exec(install_rdf)[1],
+        VER: (/version>([^<]+)<\//).exec(install_rdf)[1]
+    };
+    PKG.LNAME = PKG.NAME.toLowerCase();
+    return PKG;
 })(),
-PKG_LNAME          = PKG_NAME.toLowerCase(),
-XPI_PATH           = 'build/' + PKG_LNAME + '.xpi',
+XPI_PATH           = 'build/' + PKG.LNAME + '.xpi',
 
 required_xpi_files = [install_rdf_path, path.join(SRC_DIR, 'chrome.manifest')],
 source_files       = getFilesRecursivelySync(SRC_DIR),
@@ -34,7 +35,7 @@ reg_srcdir         = new RegExp('^' + SRC_DIR);
 
 ////////////////////
 
-console.log(PKG_NAME + ' ' + PKG_VER);
+console.log(PKG.NAME + ' ' + PKG.VER);
 
 desc('Default task');
 task('default', ['package']);
