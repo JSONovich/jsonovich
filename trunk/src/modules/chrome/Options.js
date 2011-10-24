@@ -10,16 +10,16 @@
 
 'use strict';
 
-var observer = {
+var prefNameConv = 'mime.conversions',
+prefNameExt = 'mime.extensionMap',
+events = {},
+observer = {
     observe: function(aSubject, aTopic, aData) {
-        if(aTopic == 'addon-options-displayed' && aData == ADDON_LNAME + '@' + ADDON_DOMAIN) {
-            aSubject.getElementById(ADDON_LNAME + '-pref-reset').addEventListener('click', resetPrefs, false);
-            aSubject.getElementById(ADDON_LNAME + '-pref-accept-add').addEventListener('click', addAccept, false);
-            aSubject.getElementById(ADDON_LNAME + '-pref-accept-rem').addEventListener('click', removeAccept, false);
-            aSubject.getElementById(ADDON_LNAME + '-pref-mime-add').addEventListener('click', addMime, false);
-            aSubject.getElementById(ADDON_LNAME + '-pref-mime-rem').addEventListener('click', removeMime, false);
-            aSubject.getElementById(ADDON_LNAME + '-pref-ext-add').addEventListener('click', addExtMap, false);
-            aSubject.getElementById(ADDON_LNAME + '-pref-ext-rem').addEventListener('click', removeExtMap, false);
+        if(aTopic != 'addon-options-displayed' || aData != ADDON_LNAME + '@' + ADDON_DOMAIN) {
+            return;
+        }
+        for(var k in events) {
+            aSubject.getElementById(k).addEventListener('click', events[k], false);
         }
     }
 },
@@ -36,6 +36,7 @@ function resetPrefs() {
     clearPrefs();
     require('chrome/DefaultPrefs').set(prefs(ADDON_PREFROOT, true).set);
 }
+events[ADDON_LNAME + '-pref-reset'] = resetPrefs;
 
 XPCOMUtils.defineLazyGetter(this, 'valid', function() {
     return require('validate');
@@ -73,6 +74,7 @@ function addAccept() {
         return;
     }
 }
+events[ADDON_LNAME + '-pref-accept-add'] = addAccept;
 
 function removeAccept() {
     var overrideBranch = prefs(ADDON_PREFROOT + '.acceptHeaderOverride.json'),
@@ -87,6 +89,7 @@ function removeAccept() {
         overrideBranch.unset(overrideHosts[selected.value]);
     }
 }
+events[ADDON_LNAME + '-pref-accept-rem'] = removeAccept;
 
 function addMime() {
     var mime = {};
@@ -95,27 +98,29 @@ function addMime() {
             Services.prompt.alert(null, 'Bad MIME type', "The specified MIME type didn't look right. " + valid.explainMime);
             continue;
         }
-        let conversions = (prefBranch.get('mime.conversions', 'string-ascii') || '').split('|');
+        let conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|');
         mime.value = mime.value.toLowerCase();
         if(conversions.indexOf(mime.value) !== -1) {
             Services.prompt.alert(null, 'Bad MIME type', 'The specified MIME type is already intercepted by ' + ADDON_NAME + '.');
         } else {
             conversions.push(mime.value);
-            prefBranch.set('mime.conversions', 'string-ascii', conversions.join('|'));
+            prefBranch.set(prefNameConv, 'string-ascii', conversions.join('|'));
             return;
         }
     }
 }
+events[ADDON_LNAME + '-pref-mime-add'] = addMime;
 
 function removeMime() {
-    var conversions = (prefBranch.get('mime.conversions', 'string-ascii') || '').split('|'), selected = {};
+    var conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|'), selected = {};
     if(conversions.length == 1 && conversions[0].length == 0) {
         Services.prompt.alert(null, 'Remove MIME type', 'No MIME types are currently set to be intercepted.');
     } else if(Services.prompt.select(null, 'Remove MIME type', 'Select 1 MIME type that ' + ADDON_NAME + ' should no longer intercept:', conversions.length, conversions, selected)) {
         conversions.splice(selected.value, 1);
-        prefBranch.set('mime.conversions', 'string-ascii', conversions.join('|'));
+        prefBranch.set(prefNameConv, 'string-ascii', conversions.join('|'));
     }
 }
+events[ADDON_LNAME + '-pref-mime-rem'] = removeMime;
 
 function addExtMap() {
     var ext = {}, mime = {};
@@ -124,7 +129,7 @@ function addExtMap() {
             Services.prompt.alert(null, 'Bad file extension', "The specified file extension didn't look right." + valid.explainFileExt);
             continue;
         }
-        let extensions = [], mappings = (prefBranch.get('mime.extensionMap', 'string-ascii') || '').split('|');
+        let extensions = [], mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|');
         mappings.map(function(v) {
             extensions.push(v.split(':')[0]);
         });
@@ -137,7 +142,7 @@ function addExtMap() {
                     Services.prompt.alert(null, 'Bad MIME type', "The specified MIME type didn't look right." + valid.explainMime);
                     continue;
                 }
-                let conversions = (prefBranch.get('mime.conversions', 'string-ascii') || '').split('|');
+                let conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|');
                 mime.value = mime.value.toLowerCase();
                 if(conversions.indexOf(mime.value) === -1) {
                     Services.prompt.alert(null, 'Bad MIME type', 'The specified MIME type is not intercepted by ' + ADDON_NAME + '.');
@@ -145,23 +150,25 @@ function addExtMap() {
                     Services.prompt.alert(null, 'Bad MIME type', 'The specified file extension to MIME type mapping already exists.');
                 } else {
                     mappings.push(ext.value + ':' + mime.value);
-                    prefBranch.set('mime.extensionMap', 'string-ascii', mappings.join('|'));
+                    prefBranch.set(prefNameExt, 'string-ascii', mappings.join('|'));
                     return;
                 }
             }
         }
     }
 }
+events[ADDON_LNAME + '-pref-ext-add'] = addExtMap;
 
 function removeExtMap() {
-    var mappings = (prefBranch.get('mime.extensionMap', 'string-ascii') || '').split('|'), selected = {};
+    var mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|'), selected = {};
     if(mappings.length == 1 && mappings[0].length == 0) {
         Services.prompt.alert(null, 'Remove file extension mapping', 'No mappings from file extensions to MIME types currently exist.');
     } else if(Services.prompt.select(null, 'Remove file extension mapping', 'Select 1 file extension mapping that ' + ADDON_NAME + ' should remove:', mappings.length, mappings, selected)) {
         mappings.splice(selected.value, 1);
-        prefBranch.set('mime.extensionMap', 'string-ascii', mappings.join('|'));
+        prefBranch.set(prefNameExt, 'string-ascii', mappings.join('|'));
     }
 }
+events[ADDON_LNAME + '-pref-ext-rem'] = removeExtMap;
 
 /**
  * Dynamically add functionality to buttons on inline options
