@@ -40,7 +40,7 @@ exports.register = function registerAcceptHeader(mode, listenPref) {
         // global
         listenPref('acceptHeader.' + mode, function(branch, pref) {
             function setDefaultAccept(suffix) {
-                let acceptOrig = globalAccept.get('default', 'string-ascii'),
+                var acceptOrig = globalAccept.get('default', 'string-ascii'),
                 accept = generateAcceptHeader(acceptOrig, modes[mode].mime, suffix);
                 if(acceptOrig != accept) {
                     globalAccept.set('default', 'string-ascii', accept);
@@ -75,15 +75,14 @@ exports.register = function registerAcceptHeader(mode, listenPref) {
             }
         });
     }
-}
+};
 
 function generateAcceptHeader(acceptString, mime, q) {
-    let cleanAccept = acceptString.split(reg_separator).filter(function(value) {
+    var cleanAccept = acceptString.split(reg_separator).filter(function(value) {
         return (value.indexOf(mime) != 0
             || (value.length > mime.length
-                && (value[mime.length] == ' '
-                    || value[mime.length] == ';'
-                    )
+                && value[mime.length] != ' '
+                && value[mime.length] != ';'
                 )
             );
     });
