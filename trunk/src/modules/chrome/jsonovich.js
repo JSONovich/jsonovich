@@ -13,7 +13,7 @@
 'use strict';
 
 function startup() {
-    let prefs = require('prefs').branch,
+    var prefs = require('prefs').branch,
     prefBranch = prefs(ADDON_PREFROOT),
     listenPref = prefBranch.listen;
 

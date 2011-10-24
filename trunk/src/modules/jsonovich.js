@@ -12,7 +12,7 @@
 
 function startup() {
     TS['PrepareAsyncLoad'] = [Date.now()];
-    let async = {
+    var async = {
         timer: Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer),
         done: require('unload').unload(function() {
             async.timer.cancel();
@@ -21,11 +21,11 @@ function startup() {
     };
     async.timer.init({ // async load
         observe: function() {
-            let prefs = require('prefs').branch,
+            var prefs = require('prefs').branch,
             listenPref = prefs('extensions.' + ADDON_LNAME).listen;
             listenPref('debug', function(branch, pref) {
-                let debug = branch.get(pref, 'boolean');
-                let log = require('log');
+                var debug = branch.get(pref, 'boolean'),
+                log = require('log');
                 log.setDebug(debug);
                 if(debug) {
                     let desc = {
