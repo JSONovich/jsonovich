@@ -42,7 +42,7 @@ JSON2HTML = function() {
   r_amp = /&/g, r_lt = /</g, r_gt = />/g, r_quot = /\"/g,
 
   encodeHTML = function(aHtmlSource) {
-    return aHtmlSource.replace(r_amp, '&amp;').replace(r_lt, '&lt;').replace(r_gt, '&gt;').replace(r_quot, '&quot;');
+    return (aHtmlSource+'').replace(r_amp, '&amp;').replace(r_lt, '&lt;').replace(r_gt, '&gt;').replace(r_quot, '&quot;');
   },
 
   foldStart = function(data) {
