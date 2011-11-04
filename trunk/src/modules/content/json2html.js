@@ -45,6 +45,10 @@ JSON2HTML = function() {
     return (aHtmlSource+'').replace(r_amp, '&amp;').replace(r_lt, '&lt;').replace(r_gt, '&gt;').replace(r_quot, '&quot;');
   },
 
+  escapeString = function(str) {
+    return JSON.stringify(str).slice(1, -1);
+  },
+
   foldStart = function(data) {
     if(data.lines.length > 1) { // root object not collapsible
       data.currentLine.fold = ++data.numFolds;
@@ -87,7 +91,7 @@ JSON2HTML = function() {
       try {
         for(;;) {
           data.currentLine.addElement(new Element(delim_string, "key delimiter"));
-          data.currentLine.addElement(new Element(encodeHTML(memb), "key"));
+          data.currentLine.addElement(new Element(encodeHTML(escapeString(memb)), "key"));
           data.currentLine.addElement(new Element(delim_string, "key delimiter"));
           data.currentLine.addElement(new Element(sep_object_property_kv, "object property separator"));
           formatRecursively(data, obj[memb]);
@@ -128,7 +132,7 @@ JSON2HTML = function() {
         case "string":
           data.currentLine.addElement(new Element([
             new Element(delim_string, "delimiter"),
-            new Element(encodeHTML(thing), "content"),
+            new Element(encodeHTML(escapeString(thing)), "content"),
             new Element(delim_string, "delimiter")
             ], "string"));
           break;
