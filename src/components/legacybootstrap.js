@@ -67,6 +67,14 @@ XPCOMUtils.defineLazyServiceGetter(Services, "scriptloader", "@mozilla.org/moz/j
 // @see http://hg.mozilla.org/mozilla-central/diff/b264a7e3c0f5/toolkit/content/Services.jsm
 XPCOMUtils.defineLazyServiceGetter(Services, "console", "@mozilla.org/consoleservice;1", "nsIConsoleService");
 
+// emulate Array.isArray (introduced in JavaScript 1.8.5 with Gecko 2/FF4)
+//@see https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
+if(!Array.isArray) {
+    Array.isArray = function (arg) {
+        return Object.prototype.toString.call(arg) == '[object Array]';
+    };
+}
+
 function startup() {
     electrolyte = {};
     Services.scriptloader.loadSubScript(getResourceURISpec('modules/electrolyte.js'), electrolyte);
