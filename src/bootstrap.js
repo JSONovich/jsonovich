@@ -106,7 +106,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
             if(reason != APP_SHUTDOWN) {
                 if(messages) {
                     if('removeDelayedFrameScript' in messages.manager) {
-                        messages.manager.removeDelayedFrameScript(getResourceURISpec('modules/content/e10sbootstrap.js'));
+                        messages.manager.removeDelayedFrameScript(electrolyte.getResourceURISpec('modules/content/e10sbootstrap.js'));
                     }
                     messages.manager.sendAsyncMessage(ADDON_LNAME + ':shutdown', {});
                     messages.manager.removeMessageListener(ADDON_LNAME + ':getStartupConstants', messages.listener);
