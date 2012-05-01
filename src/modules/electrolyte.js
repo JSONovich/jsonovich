@@ -64,6 +64,8 @@ function require(path) {
             Cu: Cu,
             getResourceURI: getResourceURI,
             getResourceURISpec: getResourceURISpec,
+            Services: Services,
+            XPCOMUtils: XPCOMUtils,
             isEmpty: isEmpty,
             require: require,
             exports: registry[path],
