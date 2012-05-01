@@ -28,11 +28,10 @@ function startup() {
                 log = require('log');
                 log.setDebug(debug);
                 if(debug) {
-                    let desc = {
+                    let url = typeof content === 'object' && typeof content.document === 'object' && content.document.location ? content.document.location : 'chrome',
+                    desc = {
                         'Bootstrap': 'time taken to execute bootstrap script',
-                        'E10SBootstrap': 'time taken to execute content process bootstrap script',
-                        'Startup': 'time between us receiving startup event and leaving event listener during browser startup',
-                        'E10SStartup': 'time between us receiving startup event in content process and leaving event listener during browser startup',
+                        'Startup': 'time between us receiving startup event and leaving event listener',
                         'Install': 'time between us receiving startup event and leaving event listener during user-initiated install',
                         'Restart': 'time between us receiving startup event and leaving event listener after user-initiated enable',
                         'StartRequest': 'time spent in the most recent call to the stream converter\'s onStartRequest function',
@@ -51,7 +50,7 @@ function startup() {
                     };
                     for(let measure in TS) {
                         if(TS[measure].length>1) {
-                            log.info(measure + ' Performance: ' + (TS[measure][1]-TS[measure][0]) + 'ms' + (measure in desc ? ' (' + desc[measure] + ')' : ''));
+                            log.info('<' + url + '> ' + measure + ': ' + (TS[measure][1]-TS[measure][0]) + 'ms' + (measure in desc ? ' (' + desc[measure] + ')' : ''));
                         }
                     }
                 }

@@ -62,6 +62,7 @@
             ADDON_DOMAIN: ADDON_DOMAIN,
             IN_CHROME: PRIVILEDGED,
             IN_CONTENT: !PRIVILEDGED,
+            content: global.content,
             Cc: Components.classes,
             Ci: Components.interfaces,
             Cm: Components.manager,
