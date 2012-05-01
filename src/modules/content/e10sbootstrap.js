@@ -8,9 +8,6 @@
  * [2011-07] - Created content script bootstrap for JSONovich extension
  */
 
-Components.utils['import']("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils['import']("resource://gre/modules/Services.jsm");
-
 (function(global) {
     'use strict';
 
@@ -30,7 +27,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
             let doJar = false, bundle = installPath.clone();
             if(aPath) {
                 if(bundle.isDirectory()) {
-                    aPath.split("/").forEach(function(aPart) {
+                    aPath.split('/').forEach(function(aPart) {
                         bundle.append(aPart);
                     });
                 } else {
@@ -39,7 +36,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
             }
             bundle = Services.io.newFileURI(bundle);
             if(doJar) {
-                return Services.io.newURI("jar:" + bundle.spec + "!/" + aPath, null, null);
+                return Services.io.newURI('jar:' + bundle.spec + '!/' + aPath, null, null);
             }
             return bundle;
         }
@@ -65,7 +62,7 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
             messageManager: global
         };
 
-        installPath = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+        installPath = Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile);
         installPath.initWithPath(startupConsts.installPath);
 
         once = {
@@ -110,6 +107,11 @@ Components.utils['import']("resource://gre/modules/Services.jsm");
         }, Components.interfaces.nsIThread.DISPATCH_NORMAL);
     }
 
-    scheduleSyncMessage();
+    global.addEventListener('DOMContentLoaded', function load(event) {
+        global.removeEventListener('DOMContentLoaded', load, false);
+        Components.utils['import']('resource://gre/modules/Services.jsm');
+        Components.utils['import']('resource://gre/modules/XPCOMUtils.jsm');
+        scheduleSyncMessage();
+    }, false);
     TS['E10SBootstrap'].push(Date.now());
 })(this);
