@@ -142,28 +142,34 @@
     }
 
     function content_init() {
-        global.addEventListener('DOMContentLoaded', function load(event) {
-            function content_ensureStartupConstants() {
-                var reply = global.sendSyncMessage(ADDON_LNAME + ':getStartupConstants', {});
-                if(reply.length) {
-                    data.installPath.initWithPath(reply[0].installPath);
-                    startup(data, 'Startup');
-                } else {
-                    content_scheduleSyncMessage();
-                }
+        if(global.docShell && !global.docShell.loadType) {
+            global.addEventListener('DOMContentLoaded', content_load, false);
+        } else {
+            content_load();
+        }
+    }
+
+    function content_load() {
+        function content_ensureStartupConstants() {
+            var reply = global.sendSyncMessage(ADDON_LNAME + ':getStartupConstants', {});
+            if(reply.length) {
+                data.installPath.initWithPath(reply[0].installPath);
+                startup(data, 'Startup');
+            } else {
+                content_scheduleSyncMessage();
             }
-            function content_scheduleSyncMessage() {
-                Services.tm.mainThread.dispatch({
-                    run: content_ensureStartupConstants
-                }, Components.interfaces.nsIThread.DISPATCH_NORMAL);
-            }
-            var data = {
-                installPath: Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile)
-            };
-            global.removeEventListener('DOMContentLoaded', load, false);
-            Services = scopedImport('resource://gre/modules/Services.jsm').Services;
-            content_scheduleSyncMessage();
-        }, false);
+        }
+        function content_scheduleSyncMessage() {
+            Services.tm.mainThread.dispatch({
+                run: content_ensureStartupConstants
+            }, Components.interfaces.nsIThread.DISPATCH_NORMAL);
+        }
+        var data = {
+            installPath: Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile)
+        };
+        global.removeEventListener('DOMContentLoaded', content_load, false);
+        Services = scopedImport('resource://gre/modules/Services.jsm').Services;
+        content_scheduleSyncMessage();
     }
 
     function content_startup(data, reason) {
