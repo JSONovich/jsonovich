@@ -20,7 +20,7 @@
     ADDON_DOMAIN = 'lackoftalent.org',
     electrolyte = null,
     ipcServices = {},
-    PRIVILEDGED = typeof global.sendSyncMessage === 'undefined',
+    PRIVILEGED = typeof global.sendSyncMessage === 'undefined',
     Services = null;
 
     function scopedImport(path, scope) {
@@ -60,8 +60,8 @@
             ADDON_NAME: ADDON_NAME,
             ADDON_LNAME: ADDON_LNAME,
             ADDON_DOMAIN: ADDON_DOMAIN,
-            IN_CHROME: PRIVILEDGED,
-            IN_CONTENT: !PRIVILEDGED,
+            IN_CHROME: PRIVILEGED,
+            IN_CONTENT: !PRIVILEGED,
             content: global.content,
             Cc: Components.classes,
             Ci: Components.interfaces,
@@ -74,7 +74,7 @@
         };
         scopedImport('resource://gre/modules/XPCOMUtils.jsm', electrolyte);
 
-        if(PRIVILEDGED) { /*!! CHROME !!*/
+        if(PRIVILEGED) { /*!! CHROME !!*/
             ipcServices.messageManager = Components.classes['@mozilla.org/globalmessagemanager;1'].getService(Components.interfaces.nsIChromeFrameMessageManager);
             ipcServices.messageListener = function bootstrapSyncListener(msg) {
                 switch(msg.name) {
@@ -114,7 +114,7 @@
 
     function shutdown(data, reason) {
         if(electrolyte != null) {
-            if(PRIVILEDGED) { /*!! CHROME !!*/
+            if(PRIVILEGED) { /*!! CHROME !!*/
                 if(reason == ADDON_UNINSTALL) {
                     if(electrolyte.uninstall) {
                         electrolyte.uninstall();
@@ -148,7 +148,7 @@
         }
     };
 
-    if(PRIVILEDGED) { /*!! CHROME !!*/
+    if(PRIVILEGED) { /*!! CHROME !!*/
         Services = scopedImport('resource://gre/modules/Services.jsm').Services;
         global.startup = startup;
         global.shutdown = shutdown;
