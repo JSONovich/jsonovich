@@ -123,7 +123,7 @@
                 if(reason != APP_SHUTDOWN) {
                     if(ipcServices.messageManager) {
                         if('removeDelayedFrameScript' in ipcServices.messageManager) {
-                            ipcServices.messageManager.removeDelayedFrameScript(electrolyte.getResourceURISpec('modules/content/e10sbootstrap.js'));
+                            ipcServices.messageManager.removeDelayedFrameScript(electrolyte.getResourceURISpec('bootstrap.js'));
                         }
                         ipcServices.messageManager.sendAsyncMessage(ADDON_LNAME + ':shutdown', {});
                         ipcServices.messageManager.removeMessageListener(ADDON_LNAME + ':getStartupConstants', ipcServices.messageListener);
