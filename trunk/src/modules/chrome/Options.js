@@ -25,13 +25,16 @@ observer = {
         if(aTopic != 'addon-options-displayed' || aData != ADDON_LNAME + '@' + ADDON_DOMAIN) {
             return;
         }
-        [].forEach.call(aSubject.querySelectorAll('setting,setting button'), function(node) {
+        [].forEach.call(aSubject.querySelectorAll('setting,setting button,.preferences-description'), function(node) {
             ['title', 'desc', 'label'].forEach(function(attr) {
                 var t = node.getAttribute(attr);
                 if(t) {
                     node.setAttribute(attr, l(t));
                 }
             });
+            if(node.textContent) {
+                node.textContent = l(node.textContent);
+            }
         });
         for(var k in events) {
             aSubject.getElementById(k).addEventListener('click', events[k], false);
