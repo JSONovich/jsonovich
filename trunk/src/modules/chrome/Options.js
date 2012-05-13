@@ -41,26 +41,29 @@ events[ADDON_LNAME + '-pref-reset'] = resetPrefs;
 XPCOMUtils.defineLazyGetter(this, 'valid', function() {
     return require('validate');
 });
+XPCOMUtils.defineLazyGetter(this, 'l', function() {
+    return require('l10n').bundle('options');
+});
 
 function addAccept() {
     var host = {}, mode = {
         value: !prefBranch.get('acceptHeader.json', 'boolean')
     };
-    while(Services.prompt.prompt(null, 'Add host override', 'Enter a valid host name for which the default HTTP Accept setting should be overridden:', host, 'Send "application/json" in the HTTP Accept header for this host', mode)) {
+    while(Services.prompt.prompt(null, l('prompt.add.host.title'), l('prompt.add.host.text'), host, l('prompt.add.host.checkbox'), mode)) {
         if(!valid.host(host.value)) {
-            Services.prompt.alert(null, 'Bad host', "The specified host name didn't look right." + valid.explainHost);
+            Services.prompt.alert(null, l('error.invalid.host.title'), l('error.invalid.host.text', valid.host.maxLen));
             continue;
         }
         if(mode.value) {
             let q = {
                 value: '1'
             };
-            while(Services.prompt.prompt(null, 'Specify q-value', 'Enter the quality factor to attach to the JSON MIME type in the Accept header:', q, null, {})) {
+            while(Services.prompt.prompt(null, l('prompt.add.q.title'), l('prompt.add.q.text'), q, null, {})) {
                 if(valid.q(q.value)) {
                     q = parseFloat(q.value); // silently allow 0 here even though user could have just unticked box on 1st prompt
                     break;
                 }
-                Services.prompt.alert(null, 'Bad q-value', "The specified quality factor didn't look right." + valid.explainQ);
+                Services.prompt.alert(null, l('error.invalid.q.title'), l('error.invalid.q.text'));
             }
             if(typeof q === 'object') {
                 continue; // q-value prompt cancelled, go back to host prompt
@@ -84,8 +87,8 @@ function removeAccept() {
         overrides.push('[q=' + overrideBranch.get(overrideHosts[i], 'string-ascii') + ']: ' + overrideHosts[i]);
     }
     if(overrides.length == 0) {
-        Services.prompt.alert(null, 'Remove host override', 'No host names are currently set to override the default HTTP Accept header setting.');
-    } else if(Services.prompt.select(null, 'Remove host override', 'Select 1 host name that should no longer override the default HTTP Accept header setting:', overrides.length, overrides, selected)) {
+        Services.prompt.alert(null, l('error.none.host.title'), l('error.none.host.text'));
+    } else if(Services.prompt.select(null, l('prompt.remove.host.title'), l('prompt.remove.host.text'), overrides.length, overrides, selected)) {
         overrideBranch.unset(overrideHosts[selected.value]);
     }
 }
@@ -93,15 +96,15 @@ events[ADDON_LNAME + '-pref-accept-rem'] = removeAccept;
 
 function addMime() {
     var mime = {};
-    while(Services.prompt.prompt(null, 'Add MIME type', 'Enter a valid MIME type that ' + ADDON_NAME + ' should intercept:', mime, null, {})) {
+    while(Services.prompt.prompt(null, l('prompt.add.mime.title'), l('prompt.add.mime.text'), mime, null, {})) {
         if(!valid.mime(mime.value)) {
-            Services.prompt.alert(null, 'Bad MIME type', "The specified MIME type didn't look right. " + valid.explainMime);
+            Services.prompt.alert(null, l('error.invalid.mime.title'), l('error.invalid.mime.text', valid.mime.maxLen));
             continue;
         }
         let conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|');
         mime.value = mime.value.toLowerCase();
         if(conversions.indexOf(mime.value) !== -1) {
-            Services.prompt.alert(null, 'Bad MIME type', 'The specified MIME type is already intercepted by ' + ADDON_NAME + '.');
+            Services.prompt.alert(null, l('error.already.mime.title'), l('error.already.mime.text'));
         } else {
             conversions.push(mime.value);
             prefBranch.set(prefNameConv, 'string-ascii', conversions.join('|'));
@@ -114,8 +117,8 @@ events[ADDON_LNAME + '-pref-mime-add'] = addMime;
 function removeMime() {
     var conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|'), selected = {};
     if(conversions.length == 1 && conversions[0].length == 0) {
-        Services.prompt.alert(null, 'Remove MIME type', 'No MIME types are currently set to be intercepted.');
-    } else if(Services.prompt.select(null, 'Remove MIME type', 'Select 1 MIME type that ' + ADDON_NAME + ' should no longer intercept:', conversions.length, conversions, selected)) {
+        Services.prompt.alert(null, l('error.none.mime.title'), l('error.none.mime.text'));
+    } else if(Services.prompt.select(null, l('prompt.remove.mime.title'), l('prompt.remove.mime.text'), conversions.length, conversions, selected)) {
         conversions.splice(selected.value, 1);
         prefBranch.set(prefNameConv, 'string-ascii', conversions.join('|'));
     }
@@ -124,9 +127,9 @@ events[ADDON_LNAME + '-pref-mime-rem'] = removeMime;
 
 function addExtMap() {
     var ext = {}, mime = {};
-    while(Services.prompt.prompt(null, 'Add file extension', 'Enter a valid file extension that ' + ADDON_NAME + ' should handle:', ext, null, {})) {
+    while(Services.prompt.prompt(null, l('prompt.add.fileExt.title'), l('prompt.add.fileExt.text'), ext, null, {})) {
         if(!valid.fileExt(ext.value)) {
-            Services.prompt.alert(null, 'Bad file extension', "The specified file extension didn't look right." + valid.explainFileExt);
+            Services.prompt.alert(null, l('error.invalid.fileExt.title'), l('error.invalid.fileExt.text', valid.fileExt.maxLen));
             continue;
         }
         let extensions = [], mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|');
@@ -135,19 +138,19 @@ function addExtMap() {
         });
         ext.value = ext.value.toLowerCase();
         if(extensions.indexOf(ext.value) !== -1) {
-            Services.prompt.alert(null, 'Bad file extension', 'The specified file extension is already handled by ' + ADDON_NAME + '.');
+            Services.prompt.alert(null, l('error.already.fileExt.title'), l('error.already.fileExt.text'));
         } else {
-            while(Services.prompt.prompt(null, 'Add MIME type', 'Enter a valid MIME type that ' + ADDON_NAME + ' should map to the "' + ext.value + '" extension:', mime, null, {})) {
+            while(Services.prompt.prompt(null, l('prompt.add.mapping.title'), l('prompt.add.mapping.text', ext.value), mime, null, {})) {
                 if(!valid.mime(mime.value)) {
-                    Services.prompt.alert(null, 'Bad MIME type', "The specified MIME type didn't look right." + valid.explainMime);
+                    Services.prompt.alert(null, l('error.invalid.mime.title'), l('error.invalid.mime.text', valid.mime.maxLen));
                     continue;
                 }
                 let conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|');
                 mime.value = mime.value.toLowerCase();
                 if(conversions.indexOf(mime.value) === -1) {
-                    Services.prompt.alert(null, 'Bad MIME type', 'The specified MIME type is not intercepted by ' + ADDON_NAME + '.');
+                    Services.prompt.alert(null, l('error.invalid.mapping.title'), l('error.invalid.mapping.text'));
                 } else if(mappings.indexOf(ext.value + ':' + mime.value) !== -1) {
-                    Services.prompt.alert(null, 'Bad MIME type', 'The specified file extension to MIME type mapping already exists.');
+                    Services.prompt.alert(null, l('error.already.mapping.title'), l('error.already.mapping.text'));
                 } else {
                     mappings.push(ext.value + ':' + mime.value);
                     prefBranch.set(prefNameExt, 'string-ascii', mappings.join('|'));
@@ -162,8 +165,8 @@ events[ADDON_LNAME + '-pref-ext-add'] = addExtMap;
 function removeExtMap() {
     var mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|'), selected = {};
     if(mappings.length == 1 && mappings[0].length == 0) {
-        Services.prompt.alert(null, 'Remove file extension mapping', 'No mappings from file extensions to MIME types currently exist.');
-    } else if(Services.prompt.select(null, 'Remove file extension mapping', 'Select 1 file extension mapping that ' + ADDON_NAME + ' should remove:', mappings.length, mappings, selected)) {
+        Services.prompt.alert(null, l('error.none.mapping.title'), l('error.none.mapping.text'));
+    } else if(Services.prompt.select(null, l('prompt.remove.mapping.title'), l('prompt.remove.mapping.title'), mappings.length, mappings, selected)) {
         mappings.splice(selected.value, 1);
         prefBranch.set(prefNameExt, 'string-ascii', mappings.join('|'));
     }

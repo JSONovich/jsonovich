@@ -11,6 +11,11 @@
 'use strict';
 
 function startup() {
+    var listenPref = require('prefs').branch(ADDON_PREFROOT).listen;
+    TS['L10n'] = [Date.now()];
+        require('l10n').register(listenPref);
+    TS['L10n'].push(Date.now());
+
     TS['PrepareAsyncLoad'] = [Date.now()];
     var async = {
         timer: Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer),
@@ -21,8 +26,6 @@ function startup() {
     };
     async.timer.init({ // async load
         observe: function() {
-            var prefs = require('prefs').branch,
-            listenPref = prefs('extensions.' + ADDON_LNAME).listen;
             listenPref('debug', function(branch, pref) {
                 var debug = branch.get(pref, 'boolean'),
                 log = require('log');
@@ -46,7 +49,8 @@ function startup() {
                         'RegisterAcceptHeader': 'time taken to set up default Accept header',
                         'RegisterResAlias': 'time taken to register resource:// URL alias',
                         'ObserveOptionsUI': 'time taken to add options UI observer',
-                        'PrepareAsyncLoad': 'time spent initialising nsiTimer to defer loading non-essentials'
+                        'PrepareAsyncLoad': 'time spent initialising nsiTimer to defer loading non-essentials',
+                        'L10n': 'time spent registering localisation module'
                     };
                     for(let measure in TS) {
                         if(TS[measure].length>1) {
