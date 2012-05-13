@@ -45,131 +45,171 @@ XPCOMUtils.defineLazyGetter(this, 'l', function() {
     return require('l10n').bundle('options');
 });
 
-function addAccept() {
-    var host = {}, mode = {
-        value: !prefBranch.get('acceptHeader.json', 'boolean')
-    };
-    while(Services.prompt.prompt(null, l('prompt.add.host.title'), l('prompt.add.host.text'), host, l('prompt.add.host.checkbox'), mode)) {
-        if(!valid.host(host.value)) {
-            Services.prompt.alert(null, l('error.invalid.host.title'), l('error.invalid.host.text', valid.host.maxLen));
+function promptAdd(options) {
+    var textbox = {}, checkbox = {};
+    if(typeof options.textbox !== 'undefined') {
+        textbox.value = options.textbox;
+    }
+    if(typeof options.checkbox !== 'undefined') {
+        checkbox.value = options.checkbox;
+    }
+    while(Services.prompt.prompt(null, l('prompt.add.' + options.type + '.title'), l('prompt.add.' + options.type + '.text', options.msgParams ? options.msgParams : null), textbox, options.checkbox ? l('prompt.add.' + options.type + '.checkbox') : null, checkbox)) {
+        if(options.test && !options.test(textbox.value)) {
+            Services.prompt.alert(null, l('error.invalid.' + (options.testType ? options.testType : options.type) + '.title'), l('error.invalid.' + (options.invalidType ? options.invalidType : options.type) + '.text', options.invalidMsgParams ? options.invalidMsgParams : null));
             continue;
         }
-        if(mode.value) {
-            let q = {
-                value: '1'
-            };
-            while(Services.prompt.prompt(null, l('prompt.add.q.title'), l('prompt.add.q.text'), q, null, {})) {
-                if(valid.q(q.value)) {
-                    q = parseFloat(q.value); // silently allow 0 here even though user could have just unticked box on 1st prompt
-                    break;
-                }
-                Services.prompt.alert(null, l('error.invalid.q.title'), l('error.invalid.q.text'));
-            }
-            if(typeof q === 'object') {
-                continue; // q-value prompt cancelled, go back to host prompt
-            } else {
-                mode = q;
-            }
+        if(options.onOk && options.onOk(textbox.value, checkbox.value)) {
+            continue;
         } else {
-            mode = 0;
+            return true;
         }
-        prefBranch.set('acceptHeaderOverride.json.' + host.value, 'string-ascii', mode);
-        return;
     }
+    if(options.onCancel) {
+        options.onCancel();
+    }
+    return false;
+}
+
+function promptRemove(options) {
+    var selected = {};
+    if(!options.choices.length || (options.choices.length == 1 && !options.choices[0].length)) {
+        Services.prompt.alert(null, l('error.none.' + options.type + '.title'), l('error.none.' + options.type + '.text'));
+        return false;
+    } else if(Services.prompt.select(null, l('prompt.remove.' + options.type + '.title'), l('prompt.remove.' + options.type + '.text'), options.choices.length, options.choices, selected)) {
+        if(options.onOk) {
+            options.onOk(selected.value);
+        }
+        return true;
+    }
+    if(options.onCancel) {
+        options.onCancel();
+    }
+    return false;
+}
+
+function addAccept() {
+    promptAdd({
+        type: 'host',
+        checkbox: !prefBranch.get('acceptHeader.json', 'boolean'),
+        test: valid.host,
+        invalidMsgParams: valid.host.maxLen,
+        onOk: function(host, checked) {
+            var q = 0;
+            if(checked && !promptAdd({
+                type: 'q',
+                textbox: '1',
+                test: valid.q,
+                onOk: function(textbox) {
+                    q = parseFloat(textbox); // silently allow 0 here even though user could have just unticked box on 1st prompt
+                }
+            })) {
+                return true; // q-value prompt cancelled, go back to host prompt
+            }
+            prefBranch.set('acceptHeaderOverride.json.' + host, 'string-ascii', q);
+        }
+    });
 }
 events[ADDON_LNAME + '-pref-accept-add'] = addAccept;
 
 function removeAccept() {
     var overrideBranch = prefs(ADDON_PREFROOT + '.acceptHeaderOverride.json'),
     overrideHosts = overrideBranch.getChildList(),
-    overrides = [], selected = {};
+    overrides = [];
     for(let i = 0; i < overrideHosts.length; i++) {
         overrides.push('[q=' + overrideBranch.get(overrideHosts[i], 'string-ascii') + ']: ' + overrideHosts[i]);
     }
-    if(overrides.length == 0) {
-        Services.prompt.alert(null, l('error.none.host.title'), l('error.none.host.text'));
-    } else if(Services.prompt.select(null, l('prompt.remove.host.title'), l('prompt.remove.host.text'), overrides.length, overrides, selected)) {
-        overrideBranch.unset(overrideHosts[selected.value]);
-    }
+    promptRemove({
+        type: 'host',
+        choices: overrides,
+        onOk: function(sel) {
+            overrideBranch.unset(overrideHosts[sel]);
+        }
+    });
 }
 events[ADDON_LNAME + '-pref-accept-rem'] = removeAccept;
 
 function addMime() {
-    var mime = {};
-    while(Services.prompt.prompt(null, l('prompt.add.mime.title'), l('prompt.add.mime.text'), mime, null, {})) {
-        if(!valid.mime(mime.value)) {
-            Services.prompt.alert(null, l('error.invalid.mime.title'), l('error.invalid.mime.text', valid.mime.maxLen));
-            continue;
-        }
-        let conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|');
-        mime.value = mime.value.toLowerCase();
-        if(conversions.indexOf(mime.value) !== -1) {
-            Services.prompt.alert(null, l('error.already.mime.title'), l('error.already.mime.text'));
-        } else {
-            conversions.push(mime.value);
+    promptAdd({
+        type: 'mime',
+        test: valid.mime,
+        invalidMsgParams: valid.mime.maxLen,
+        onOk: function(mime) {
+            var conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|');
+            mime = mime.toLowerCase();
+            if(conversions.indexOf(mime) !== -1) {
+                Services.prompt.alert(null, l('error.already.mime.title'), l('error.already.mime.text'));
+                return true;
+            }
+            conversions.push(mime);
             prefBranch.set(prefNameConv, 'string-ascii', conversions.join('|'));
-            return;
         }
-    }
+    });
 }
 events[ADDON_LNAME + '-pref-mime-add'] = addMime;
 
 function removeMime() {
-    var conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|'), selected = {};
-    if(conversions.length == 1 && conversions[0].length == 0) {
-        Services.prompt.alert(null, l('error.none.mime.title'), l('error.none.mime.text'));
-    } else if(Services.prompt.select(null, l('prompt.remove.mime.title'), l('prompt.remove.mime.text'), conversions.length, conversions, selected)) {
-        conversions.splice(selected.value, 1);
-        prefBranch.set(prefNameConv, 'string-ascii', conversions.join('|'));
-    }
+    var conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|');
+    promptRemove({
+        type: 'mime',
+        choices: conversions,
+        onOk: function(sel) {
+            conversions.splice(sel, 1);
+            prefBranch.set(prefNameConv, 'string-ascii', conversions.join('|'));
+        }
+    });
 }
 events[ADDON_LNAME + '-pref-mime-rem'] = removeMime;
 
 function addExtMap() {
-    var ext = {}, mime = {};
-    while(Services.prompt.prompt(null, l('prompt.add.fileExt.title'), l('prompt.add.fileExt.text'), ext, null, {})) {
-        if(!valid.fileExt(ext.value)) {
-            Services.prompt.alert(null, l('error.invalid.fileExt.title'), l('error.invalid.fileExt.text', valid.fileExt.maxLen));
-            continue;
-        }
-        let extensions = [], mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|');
-        mappings.map(function(v) {
-            extensions.push(v.split(':')[0]);
-        });
-        ext.value = ext.value.toLowerCase();
-        if(extensions.indexOf(ext.value) !== -1) {
-            Services.prompt.alert(null, l('error.already.fileExt.title'), l('error.already.fileExt.text'));
-        } else {
-            while(Services.prompt.prompt(null, l('prompt.add.mapping.title'), l('prompt.add.mapping.text', ext.value), mime, null, {})) {
-                if(!valid.mime(mime.value)) {
-                    Services.prompt.alert(null, l('error.invalid.mime.title'), l('error.invalid.mime.text', valid.mime.maxLen));
-                    continue;
-                }
-                let conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|');
-                mime.value = mime.value.toLowerCase();
-                if(conversions.indexOf(mime.value) === -1) {
-                    Services.prompt.alert(null, l('error.invalid.mapping.title'), l('error.invalid.mapping.text'));
-                } else if(mappings.indexOf(ext.value + ':' + mime.value) !== -1) {
-                    Services.prompt.alert(null, l('error.already.mapping.title'), l('error.already.mapping.text'));
-                } else {
-                    mappings.push(ext.value + ':' + mime.value);
-                    prefBranch.set(prefNameExt, 'string-ascii', mappings.join('|'));
-                    return;
-                }
+    promptAdd({
+        type: 'fileExt',
+        test: valid.fileExt,
+        invalidMsgParams: valid.fileExt.maxLen,
+        onOk: function(ext) {
+            var extensions = [], mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|');
+            mappings.map(function(v) {
+                extensions.push(v.split(':')[0]);
+            });
+            ext = ext.toLowerCase();
+            if(extensions.indexOf(ext) !== -1) {
+                Services.prompt.alert(null, l('error.already.fileExt.title'), l('error.already.fileExt.text'));
+                return true;
             }
+            return !promptAdd({
+                type: 'mapping',
+                msgParams: ext,
+                test: valid.mime,
+                testType: 'mime',
+                invalidMsgParams: valid.mime.maxLen,
+                onOk: function(mime) {
+                    var conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|');
+                    mime = mime.toLowerCase();
+                    if(conversions.indexOf(mime) === -1) {
+                        Services.prompt.alert(null, l('error.invalid.mapping.title'), l('error.invalid.mapping.text'));
+                        return true;
+                    } else if(mappings.indexOf(ext + ':' + mime) !== -1) {
+                        Services.prompt.alert(null, l('error.already.mapping.title'), l('error.already.mapping.text'));
+                        return true;
+                    }
+                    mappings.push(ext + ':' + mime);
+                    prefBranch.set(prefNameExt, 'string-ascii', mappings.join('|'));
+                }
+            });
         }
-    }
+    });
 }
 events[ADDON_LNAME + '-pref-ext-add'] = addExtMap;
 
 function removeExtMap() {
-    var mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|'), selected = {};
-    if(mappings.length == 1 && mappings[0].length == 0) {
-        Services.prompt.alert(null, l('error.none.mapping.title'), l('error.none.mapping.text'));
-    } else if(Services.prompt.select(null, l('prompt.remove.mapping.title'), l('prompt.remove.mapping.title'), mappings.length, mappings, selected)) {
-        mappings.splice(selected.value, 1);
-        prefBranch.set(prefNameExt, 'string-ascii', mappings.join('|'));
-    }
+    var mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|');
+    promptRemove({
+        type: 'mapping',
+        choices: mappings,
+        onOk: function(sel) {
+            mappings.splice(sel, 1);
+            prefBranch.set(prefNameExt, 'string-ascii', mappings.join('|'));
+        }
+    });
 }
 events[ADDON_LNAME + '-pref-ext-rem'] = removeExtMap;
 
