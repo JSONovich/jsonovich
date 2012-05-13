@@ -1,34 +1,34 @@
 <?xml version="1.0"?>
 <vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     <setting type="bool"
-             title="Add to default HTTP Accept header"
-             desc="Modify the default HTTP Accept header to include 'application/json'. Mainly useful for working with CouchDB, known to cause conflicts with Confluence, Netflix and the BBC."
+             title="pref.accept.title"
+             desc="pref.accept.text"
              pref="extensions.jsonovich.acceptHeader.json"/>
     <setting type="control"
-             title="Host-specific HTTP Accept header"
-             desc="Override the default setting above for specific host names. Adding too many may degrade performance.">
-        <button id="jsonovich-pref-accept-add" label="Add..."/>
-        <button id="jsonovich-pref-accept-rem" label="Remove..."/>
+             title="pref.host.title"
+             desc="pref.host.text">
+        <button id="jsonovich-pref-host-add" label="pref.host.button.add"/>
+        <button id="jsonovich-pref-host-remove" label="pref.host.button.remove"/>
     </setting>
     <setting type="control"
-             title="MIME types"
-             desc="Control MIME types to be intercepted and treated as JSON. Wildcards aren't supported, only exact matches.">
-        <button id="jsonovich-pref-mime-add" label="Add..."/>
-        <button id="jsonovich-pref-mime-rem" label="Remove..."/>
+             title="pref.mime.title"
+             desc="pref.mime.text">
+        <button id="jsonovich-pref-mime-add" label="pref.mime.button.add"/>
+        <button id="jsonovich-pref-mime-remove" label="pref.mime.button.remove"/>
     </setting>
     <setting type="control"
-             title="File extensions"
-             desc="Set up mappings from file extension to MIME type. File extensions should only map to MIME types which are intercepted by this addon.">
-        <button id="jsonovich-pref-ext-add" label="Add..."/>
-        <button id="jsonovich-pref-ext-rem" label="Remove..."/>
+             title="pref.fileExt.title"
+             desc="pref.fileExt.text">
+        <button id="jsonovich-pref-fileExt-add" label="pref.fileExt.button.add"/>
+        <button id="jsonovich-pref-fileExt-remove" label="pref.fileExt.button.remove"/>
     </setting>
     <setting type="bool"
-             title="Debug mode"
-             desc="More console messages to help diagnose problems with the addon."
+             title="pref.debug.title"
+             desc="pref.debug.text"
              pref="extensions.jsonovich.debug"/>
     <setting type="control"
-             title="Restore defaults"
-             desc="Clear all preferences for this addon and restore the clean-installation defaults.">
-        <button id="jsonovich-pref-reset" label="Clear Preferences"/>
+             title="pref.reset.title"
+             desc="pref.reset.text">
+        <button id="jsonovich-pref-reset" label="pref.reset.button"/>
     </setting>
 </vbox>

@@ -10,6 +10,13 @@
 
 'use strict';
 
+XPCOMUtils.defineLazyGetter(this, 'l', function() {
+    return require('l10n').bundle('options');
+});
+XPCOMUtils.defineLazyGetter(this, 'valid', function() {
+    return require('validate');
+});
+
 var prefNameConv = 'mime.conversions',
 prefNameExt = 'mime.extensionMap',
 events = {},
@@ -18,6 +25,14 @@ observer = {
         if(aTopic != 'addon-options-displayed' || aData != ADDON_LNAME + '@' + ADDON_DOMAIN) {
             return;
         }
+        [].forEach.call(aSubject.querySelectorAll('setting,setting button'), function(node) {
+            ['title', 'desc', 'label'].forEach(function(attr) {
+                var t = node.getAttribute(attr);
+                if(t) {
+                    node.setAttribute(attr, l(t));
+                }
+            });
+        });
         for(var k in events) {
             aSubject.getElementById(k).addEventListener('click', events[k], false);
         }
@@ -37,13 +52,6 @@ function resetPrefs() {
     require('chrome/DefaultPrefs').set(prefs(ADDON_PREFROOT, true).set);
 }
 events[ADDON_LNAME + '-pref-reset'] = resetPrefs;
-
-XPCOMUtils.defineLazyGetter(this, 'valid', function() {
-    return require('validate');
-});
-XPCOMUtils.defineLazyGetter(this, 'l', function() {
-    return require('l10n').bundle('options');
-});
 
 function promptAdd(options) {
     var textbox = {}, checkbox = {};
@@ -109,7 +117,7 @@ function addAccept() {
         }
     });
 }
-events[ADDON_LNAME + '-pref-accept-add'] = addAccept;
+events[ADDON_LNAME + '-pref-host-add'] = addAccept;
 
 function removeAccept() {
     var overrideBranch = prefs(ADDON_PREFROOT + '.acceptHeaderOverride.json'),
@@ -126,7 +134,7 @@ function removeAccept() {
         }
     });
 }
-events[ADDON_LNAME + '-pref-accept-rem'] = removeAccept;
+events[ADDON_LNAME + '-pref-host-remove'] = removeAccept;
 
 function addMime() {
     promptAdd({
@@ -158,7 +166,7 @@ function removeMime() {
         }
     });
 }
-events[ADDON_LNAME + '-pref-mime-rem'] = removeMime;
+events[ADDON_LNAME + '-pref-mime-remove'] = removeMime;
 
 function addExtMap() {
     promptAdd({
@@ -198,7 +206,7 @@ function addExtMap() {
         }
     });
 }
-events[ADDON_LNAME + '-pref-ext-add'] = addExtMap;
+events[ADDON_LNAME + '-pref-fileExt-add'] = addExtMap;
 
 function removeExtMap() {
     var mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|');
@@ -211,7 +219,7 @@ function removeExtMap() {
         }
     });
 }
-events[ADDON_LNAME + '-pref-ext-rem'] = removeExtMap;
+events[ADDON_LNAME + '-pref-fileExt-remove'] = removeExtMap;
 
 /**
  * Dynamically add functionality to buttons on inline options
