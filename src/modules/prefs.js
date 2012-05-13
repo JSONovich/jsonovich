@@ -59,7 +59,9 @@ exports.branch = function selectBranch(name, defaults) {
                     listener.notify('', data);
                 },
                 start: function() {
-                    branch.QueryInterface(Ci.nsIPrefBranch2);
+                    if(Ci.nsIPrefBranch2) {
+                        branch.QueryInterface(Ci.nsIPrefBranch2);
+                    }
                     branch.addObserver('', listener, false);
                     listener.listening = require('unload').unload(listener.stop);
                 },
