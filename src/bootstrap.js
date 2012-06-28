@@ -178,11 +178,13 @@
             path: electrolyte.getResourceURISpec('modules/content/OncePerProcess.jsm')
         };
         ipcServices.messageManager.addMessageListener(ADDON_LNAME + ':shutdown', shutdown);
+        global.addEventListener('unload', shutdown, false);
         Components.utils['import'](ipcServices.once.path, ipcServices.once);
     }
 
     function content_shutdown(data, reason) {
         ipcServices.messageManager.removeMessageListener(ADDON_LNAME + ':shutdown', shutdown);
+        global.removeEventListener('unload', shutdown, false);
         ipcServices.once.resetOncePerProcess();
         if(typeof Components.utils['unload'] == 'function') {
             Components.utils['unload'](ipcServices.once.path);
