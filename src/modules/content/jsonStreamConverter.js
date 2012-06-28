@@ -94,7 +94,7 @@ JSONStreamConverter.prototype = {
     onStopRequest: function(aReq, aCtx, aStatus) {
         TS['StopRequest'] = [Date.now()];
         log.debug("Entered onStopRequest");
-        var data = utf8Converter.convertStringToUTF8(this.rawdata, this.charset, true);
+        var data = utf8Converter.convertStringToUTF8(this.rawdata, this.charset, true, true);
         let prettyPrinted = "";
         try {
             TS['ParseJSON'] = [Date.now()];
