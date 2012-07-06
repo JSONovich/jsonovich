@@ -4,10 +4,6 @@
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @copyright Portions (C) 2010 the Mozilla Foundation.
  * @description This file contains utility functions for logging to the error console.
- *
- * Changelog:
- * [2011-05] - Created log module
- * [2011-06] - Don't clobber Error objects
  */
 
 'use strict';

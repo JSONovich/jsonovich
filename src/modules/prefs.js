@@ -4,9 +4,6 @@
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @copyright Portions (C) 2010 the Mozilla Foundation.
  * @description This file contains utilities for managing addon preferences specific to Gecko environments.
- *
- * Changelog:
- * [2011-05] - Created preferences manager
  */
 
 'use strict';

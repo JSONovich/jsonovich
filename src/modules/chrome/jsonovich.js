@@ -3,11 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description This file contains lifecycle functions specific to chrome processes.
- *
- * Changelog:
- * [2011-05] - Added require, startup, uninstall and shutdown functions.
- * [2011-05] - Moved require out for Electrolysis.
- * [2011-08] - Moved logging initialisation out since it's also needed by content processes
  */
 
 'use strict';

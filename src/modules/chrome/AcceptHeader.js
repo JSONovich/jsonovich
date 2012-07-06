@@ -3,10 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description Modifies the default HTTP Accept header based on user preference.
- *
- * Changelog:
- * [2011-07] - Created separate module for default Accept header
- * [2011-09] - Moved Accept header generating function in
  */
 
 'use strict';

@@ -7,9 +7,6 @@
  * "The properties of electrolytes may be exploited using electrolysis to extract constituent elements
  *  and compounds contained within the solution."
  *
- * Changelog:
- * [2011-07] - Created module shared between chrome and content sides of Electrolysis
- *
  * NOTES:
  * - Assumes 'Services.scriptloader' has already been set up by the relevant
  *   bootstrap script (importing or emulating Services.jsm)

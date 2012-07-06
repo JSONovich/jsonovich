@@ -3,10 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description This file contains the JSONovich bootstrap for Gecko 2+ browsers.
- *
- * Changelog:
- * [2011-05] - Created FF4 restartless bootstrap for JSONovich extension
- * [2012-05] - Merged E10S content script bootstrap into here to share code
  */
 
 (function(global) {

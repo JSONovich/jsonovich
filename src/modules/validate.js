@@ -3,15 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description Validation for various user inputs.
- *
- * Changelog:
- * [2011-08] - Created Accept header utility functions
- *             + validHost: check host to override is sensible
- *             + validQ: check quality factor of override is sensible
- *             + modifyAccept: cleanly alter an Accept string to (not) contain the given MIME by q-value
- * [2011-09] - Move towards validating user input in one place, here
- *             + Added MIME type and file extension validation
- *             + Moved modifyAccept out
  */
 
 'use strict';

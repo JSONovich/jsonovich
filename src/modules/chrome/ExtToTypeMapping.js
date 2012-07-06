@@ -3,9 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description Maps JSON file extensions to the appropriate content type.
- *
- * Changelog:
- * [2011-07] - Created separate module for file extension mapping
  */
 
 'use strict';

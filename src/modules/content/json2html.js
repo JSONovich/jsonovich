@@ -3,11 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2010 JSONovich Team. All Rights Reserved.
  * @description This file contains the JSON to HTML stringifier.
- *
- * Changelog:
- * [2010-12] - Created custom JSON stringifier for JSONovich extension
- *              + No need for Google Code Prettify library
- *              + Initial work towards user-customisable formatting
  */
 
 'use strict';
