@@ -3,11 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description Changes JSON MIME types to Javascript to trigger display in browser.
- *
- * Changelog:
- * [2011-07] - Created new simple stream converter to force me to implement support for Javascript MIME type
- *           - Registration function merged to ease support for Electrolysis
- * [2011-09] - Hacked in support for JavaScript MIME types using existing stream converter
  */
 
 'use strict';

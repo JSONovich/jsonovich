@@ -6,9 +6,6 @@
  * @description This file contains the JSONovich bootstrap for older Gecko browsers.
  * @todo When dropping Gecko 1.9.1/Firefox 3.5 support, remove emulation of XPCOMUtils lazy getters.
  * @todo When dropping Gecko 1.9.2/Firefox 3.6 support, all this code becomes unnecessary.
- *
- * Changelog:
- * [2011-05] - Created FF4 legacy bootstrap for JSONovich extension
  */
 
 const ADDON_NAME = 'JSONovich';

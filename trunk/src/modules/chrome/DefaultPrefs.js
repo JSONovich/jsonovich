@@ -3,9 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description Module exporting default JSONovich preferences.
- *
- * Changelog:
- * [2011-05] - Created initial defaults
  */
 
 'use strict';

@@ -3,9 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description This file contains lifecycle functions specific to content processes.
- *
- * Changelog:
- * [2011-07] - Separated content-related lifecycle functions for Electrolysis
  */
 
 'use strict';

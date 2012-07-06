@@ -34,10 +34,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK *****
- *
- * Changelog:
- * [2011-05] (William Elwood) - Minor niggles suggested by NetBeans, remove
- *                              'let' for cross-browser, use strict.
  */
 
 'use strict';

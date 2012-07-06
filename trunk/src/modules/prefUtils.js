@@ -3,9 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description Utilities for dealing with preferences.
- *
- * Changelog:
- * [2011-10] - Created preferences helper functions
  */
 
 'use strict';

@@ -3,9 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description HTTP request observer to override default Accept header for specific hosts.
- *
- * Changelog:
- * [2011-08] - Created request observer for per-domain Accept header overrides
  */
 
 'use strict';

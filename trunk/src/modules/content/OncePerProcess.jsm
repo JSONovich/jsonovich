@@ -3,9 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description Utility to return boolean flags allowing operations in frame scripts to be run only once per process rather than per tab.
- *
- * Changelog:
- * [2011-08] - Created frame script run-once-per-process utility
  */
 
 'use strict';

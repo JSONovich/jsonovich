@@ -3,9 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description This file contains lifecycle functions relevant to both chrome and content processes.
- *
- * Changelog:
- * [2011-08] - Moved logging initialisation to all processes
  */
 
 'use strict';

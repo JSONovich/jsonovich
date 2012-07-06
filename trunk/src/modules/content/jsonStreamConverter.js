@@ -24,14 +24,6 @@
  * ***** END LICENSE BLOCK *****
  *
  * This file contains the stream converter for JSON content types (JSONStreamConverter).
- *
- * Changelog:
- * [2008]    - Initial support for application/json pretty-printing in JSONovich.
- * [2010-09] - Support for XPCOM registration differences in Gecko 2 (Firefox 4).
- * [2010-12] - Remove separate JSON module, use native JSON parser.
- *           - Custom JSON stringifier module.
- * [2011-05] - Rewrote component registration to be dynamic so it can be used by
- *             both restartless and legacy bootstraps.
  */
 
 'use strict';

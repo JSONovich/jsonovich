@@ -3,9 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description Registers resource:// aliases.
- *
- * Changelog:
- * [2011-07] - Created separate module for resource:// URLs
  */
 
 'use strict';

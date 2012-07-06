@@ -3,9 +3,6 @@
  * @author William Elwood <we9@kent.ac.uk>
  * @copyright 2011 JSONovich Team. All Rights Reserved.
  * @description Adds custom logic to the buttons on our options dialog.
- *
- * Changelog:
- * [2011-08] - Created options observer
  */
 
 'use strict';
