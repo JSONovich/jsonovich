@@ -25,7 +25,7 @@ observer = {
         if(aTopic != 'addon-options-displayed' || aData != ADDON_LNAME + '@' + ADDON_DOMAIN) {
             return;
         }
-        var container = aSubject.querySelector('#detail-rows'); // normal add-ons manager
+        var container = aSubject.getElementById('detail-rows'); // normal add-ons manager
         if(!container) { // fennec XBL add-ons manager
             container = aSubject.getAnonymousElementByAttribute(aSubject.querySelector('[addonID="'+aData+'"]'), 'anonid', 'options-box');
         }
