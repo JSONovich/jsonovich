@@ -76,7 +76,9 @@ function startup() {
     electrolyte = {};
     Services.scriptloader.loadSubScript(getResourceURISpec('modules/electrolyte.js'), electrolyte);
     if(electrolyte.startup) {
-        electrolyte.startup();
+        var once = {};
+        Cu['import'](getResourceURISpec('modules/content/OncePerProcess.jsm'), once);
+        electrolyte.startup(once);
     }
 }
 
