@@ -8,22 +8,14 @@
 'use strict';
 
 function startup(once) {
-    function init() {
-        TS['RegisterReqObserver'] = [Date.now()];
-        require('content/RequestObserver').register('json');
-        TS['RegisterReqObserver'].push(Date.now());
+    TS['RegisterReqObserver'] = [Date.now()];
+    require('content/RequestObserver').register(once, 'json');
+    TS['RegisterReqObserver'].push(Date.now());
 
-        let prefs = require('prefs').branch,
-        listenPref = prefs(ADDON_PREFROOT).listen;
+    let prefs = require('prefs').branch,
+    listenPref = prefs(ADDON_PREFROOT).listen;
 
-        TS['RegisterConversions'] = [Date.now()];
-        require('content/StreamConverter').register(listenPref);
-        TS['RegisterConversions'].push(Date.now());
-    }
-
-    if(once) {
-        once.runOnce('init', init);
-    } else {
-        init();
-    }
+    TS['RegisterConversions'] = [Date.now()];
+    require('content/StreamConverter').register(once, listenPref);
+    TS['RegisterConversions'].push(Date.now());
 }

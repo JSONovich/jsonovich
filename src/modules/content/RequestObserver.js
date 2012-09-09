@@ -22,7 +22,7 @@ XPCOMUtils.defineLazyGetter(this, 'generateAcceptHeader', function() {
  *
  * @param mode <string>  A string matching an entry in this module's private observers object.
  */
-exports.register = function registerRequestObserver(mode) {
+exports.register = function registerRequestObserver(once, mode) {
     if(modes[mode] && typeof modes[mode].observer != 'object') {
         modes[mode].overrideBranch = require('prefs').branch(ADDON_PREFROOT + '.acceptHeaderOverride.' + mode);
         modes[mode].observer = {
@@ -44,11 +44,15 @@ exports.register = function registerRequestObserver(mode) {
                 }
             }
         };
-        Services.obs.addObserver(modes[mode].observer, 'http-on-modify-request', false);
-        require('unload').unload(function(){
+        once.load('RequestObserver', function() {
+            Services.obs.addObserver(modes[mode].observer, 'http-on-modify-request', false);
+        }, function() {
             Services.obs.removeObserver(modes[mode].observer, 'http-on-modify-request');
             delete modes[mode].observer;
             delete modes[mode].overrideBranch;
+        });
+        require('unload').unload(function() {
+            once.unload('RequestObserver');
         });
     }
 };
