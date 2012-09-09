@@ -44,7 +44,7 @@ exports.register = function registerRequestObserver(once, mode) {
                 }
             }
         };
-        once.load('RequestObserver', function() {
+        once.load('RequestObserver-'+mode, function() {
             Services.obs.addObserver(modes[mode].observer, 'http-on-modify-request', false);
         }, function() {
             Services.obs.removeObserver(modes[mode].observer, 'http-on-modify-request');
@@ -52,7 +52,7 @@ exports.register = function registerRequestObserver(once, mode) {
             delete modes[mode].overrideBranch;
         });
         require('unload').unload(function() {
-            once.unload('RequestObserver');
+            once.unload('RequestObserver-'+mode);
         });
     }
 };
