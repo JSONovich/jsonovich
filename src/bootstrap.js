@@ -101,7 +101,7 @@
         var content_constants = {
             installPath: data.installPath.path
         };
-        ipcServices.messageManager = Components.classes['@mozilla.org/globalmessagemanager;1'].getService(Components.interfaces.nsIChromeFrameMessageManager);
+        ipcServices.messageManager = Components.classes['@mozilla.org/globalmessagemanager;1'].getService('nsIMessageBroadcaster' in Components.interfaces ? Components.interfaces.nsIMessageBroadcaster : Components.interfaces.nsIChromeFrameMessageManager);
         ipcServices.messageListener = function bootstrapSyncListener(msg) {
             switch(msg.name) {
                 case ADDON_LNAME + ':getStartupConstants':
@@ -130,7 +130,7 @@
                 if('removeDelayedFrameScript' in ipcServices.messageManager) {
                     ipcServices.messageManager.removeDelayedFrameScript(electrolyte.getResourceURISpec('bootstrap.js'));
                 }
-                ipcServices.messageManager.sendAsyncMessage(ADDON_LNAME + ':shutdown', {});
+                'broadcastAsyncMessage' in ipcServices.messageManager ? ipcServices.messageManager.broadcastAsyncMessage(ADDON_LNAME + ':shutdown', {}) : ipcServices.messageManager.sendAsyncMessage(ADDON_LNAME + ':shutdown', {});
                 ipcServices.messageManager.removeMessageListener(ADDON_LNAME + ':getStartupConstants', ipcServices.messageListener);
             }
             ipcServices = {};
