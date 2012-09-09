@@ -82,10 +82,10 @@
 
     function shutdown(data, reason) {
         if(electrolyte != null) {
-            PRIVILEGED ? chrome_shutdown(data, reason) : content_shutdown(data, reason);
             if(electrolyte.shutdown) {
                 electrolyte.shutdown();
             }
+            PRIVILEGED ? chrome_shutdown(data, reason) : content_shutdown(data, reason);
             electrolyte = null;
         }
     };
@@ -133,7 +133,7 @@
                 ipcServices.messageManager.sendAsyncMessage(ADDON_LNAME + ':shutdown', {});
                 ipcServices.messageManager.removeMessageListener(ADDON_LNAME + ':getStartupConstants', ipcServices.messageListener);
             }
-            ipcServices = null;
+            ipcServices = {};
         }
     }
 
@@ -146,6 +146,9 @@
     }
 
     function content_load() {
+        var data = {
+            installPath: Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile)
+        };
         function content_ensureStartupConstants() {
             var reply = global.sendSyncMessage(ADDON_LNAME + ':getStartupConstants', {});
             if(reply.length) {
@@ -160,9 +163,6 @@
                 run: content_ensureStartupConstants
             }, Components.interfaces.nsIThread.DISPATCH_NORMAL);
         }
-        var data = {
-            installPath: Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile)
-        };
         global.removeEventListener('DOMContentLoaded', content_load, false);
         Services = scopedImport('resource://gre/modules/Services.jsm').Services;
         content_scheduleSyncMessage();
@@ -173,18 +173,21 @@
         ipcServices.once = {
             path: electrolyte.getResourceURISpec('modules/content/OncePerProcess.jsm')
         };
-        ipcServices.messageManager.addMessageListener(ADDON_LNAME + ':shutdown', shutdown);
-        global.addEventListener('unload', shutdown, false);
-        Components.utils['import'](ipcServices.once.path, ipcServices.once);
+        scopedImport(ipcServices.once.path, ipcServices.once);
+        ipcServices.once.load('bootstrap', function() {
+            ipcServices.messageManager.addMessageListener(ADDON_LNAME + ':shutdown', shutdown);
+            global.addEventListener('unload', shutdown, false);
+        }, function() {
+            ipcServices.messageManager.removeMessageListener(ADDON_LNAME + ':shutdown', shutdown);
+            global.removeEventListener('unload', shutdown, false);
+            if(typeof Components.utils['unload'] == 'function') {
+                Components.utils['unload'](ipcServices.once.path);
+            }
+            ipcServices = {};
+        });
     }
 
     function content_shutdown(data, reason) {
-        ipcServices.messageManager.removeMessageListener(ADDON_LNAME + ':shutdown', shutdown);
-        global.removeEventListener('unload', shutdown, false);
-        ipcServices.once.resetOncePerProcess();
-        if(typeof Components.utils['unload'] == 'function') {
-            Components.utils['unload'](ipcServices.once.path);
-        }
-        ipcServices = {};
+        ipcServices.once.unload('bootstrap');
     }
 })(this);
