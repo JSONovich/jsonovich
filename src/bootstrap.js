@@ -146,6 +146,9 @@
     }
 
     function content_load() {
+        if(['chrome:', 'resource:', 'about:', 'view-source:'].indexOf(global.content.location.protocol) > -1) {
+            return;
+        }
         var data = {
             installPath: Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile)
         };
