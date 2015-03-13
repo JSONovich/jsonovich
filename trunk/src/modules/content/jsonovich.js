@@ -8,10 +8,6 @@
 'use strict';
 
 function startup(once) {
-    TS['RegisterReqObserver'] = [Date.now()];
-    require('content/RequestObserver').register(once, 'json');
-    TS['RegisterReqObserver'].push(Date.now());
-
     let prefs = require('prefs').branch,
     listenPref = prefs(ADDON_PREFROOT).listen;
 
