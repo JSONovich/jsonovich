@@ -28,6 +28,10 @@ function startup() {
     require('chrome/ResourceAlias').register(ADDON_LNAME, getResourceURI('resources/')); // trailing slash required inside XPI
     TS['RegisterResAlias'].push(Date.now());
 
+    TS['RegisterReqObserver'] = [Date.now()];
+    require('chrome/RequestObserver').register(once, 'json');
+    TS['RegisterReqObserver'].push(Date.now());
+
     if(Services.vc.compare(Services.appinfo.platformVersion, '6.9') > 0) { // inline options UI only available in Gecko7+
         TS['ObserveOptionsUI'] = [Date.now()];
         require('chrome/Options').observe(prefBranch);
