@@ -4,7 +4,7 @@
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>jsonovich@lackoftalent.org</id>
     <name>JSONovich</name>
-    <version>1.9.7</version>
+    <version>1.9.7.1</version>
     <type>2</type>
     <bootstrap>true</bootstrap>
     <multiprocessCompatible>true</multiprocessCompatible>

@@ -71,6 +71,12 @@
             Services: Services
         };
         scopedImport('resource://gre/modules/XPCOMUtils.jsm', electrolyte);
+        ipcServices = {
+            once: {
+                path: electrolyte.getResourceURISpec('modules/content/OncePerProcess.jsm')
+            }
+        };
+        scopedImport(ipcServices.once.path, ipcServices.once);
 
         PRIVILEGED ? chrome_startup(data, reason) : content_startup(data, reason);
         Services.scriptloader.loadSubScript(getResourceURISpec('modules/electrolyte.js'), electrolyte);
@@ -117,7 +123,6 @@
         // ref: http://adblockplus.org/jsdoc/adblockplus/symbols/src/modules_AppIntegrationFennec.jsm.html
         } else {
             electrolyte.IN_CONTENT = true;
-            ipcServices = {};
         }
     }
 
@@ -173,10 +178,6 @@
 
     function content_startup(data, reason) {
         ipcServices.messageManager = global;
-        ipcServices.once = {
-            path: electrolyte.getResourceURISpec('modules/content/OncePerProcess.jsm')
-        };
-        scopedImport(ipcServices.once.path, ipcServices.once);
         ipcServices.once.load('bootstrap', function() {
             ipcServices.messageManager.addMessageListener(ADDON_LNAME + ':shutdown', shutdown);
             global.addEventListener('unload', shutdown, false);

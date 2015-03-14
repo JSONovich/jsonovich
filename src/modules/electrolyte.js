@@ -104,20 +104,14 @@ function require(path) {
         lifecycle.unshift(require('chrome/' + ADDON_LNAME)); // code only needed in the main process
     }
 
-    function cycle(mode, args) {
-        if(args && !Array.isArray(args)) {
-            args = [args];
-        }
-        lifecycle.forEach(function(lc) {
-            if(typeof lc[mode] === 'function') {
-                lc[mode].apply(global, args);
-            }
-        });
-    }
-
     ['startup', 'uninstall', 'shutdown'].forEach(function(mode) {
-        global[mode] = function(args) {
-            cycle(mode, args);
+        global[mode] = function() {
+            var args = [].slice.call(arguments);
+            lifecycle.forEach(function(lc) {
+                if(typeof lc[mode] === 'function') {
+                    lc[mode].apply(global, args);
+                }
+            });
         }
     });
 })(this);
