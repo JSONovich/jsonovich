@@ -37,6 +37,12 @@ function startup(once) {
         require('chrome/Options').observe(prefBranch);
         TS['ObserveOptionsUI'].push(Date.now());
     }
+
+    if(webext) {
+        TS['WebextMigratePrefs'] = [Date.now()];
+        require('chrome/WebextMigrate').migrate(listenPref);
+        TS['WebextMigratePrefs'].push(Date.now());
+    }
 }
 
 function uninstall() {

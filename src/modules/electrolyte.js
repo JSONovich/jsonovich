@@ -54,6 +54,7 @@ function require(path) {
             ADDON_PREFROOT: 'extensions.' + ADDON_LNAME,
             IN_CHROME: IN_CHROME,
             IN_CONTENT: IN_CONTENT,
+            webext: webext,
             Cc: Cc,
             Ci: Ci,
             Cm: Cm,

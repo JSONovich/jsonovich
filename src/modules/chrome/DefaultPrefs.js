@@ -7,7 +7,7 @@
 
 'use strict';
 
-var defaults = {
+var defaults = exports.defaults = {
     'boolean': {
         'debug': false,            // user set to true enables debugging messages in console
         'acceptHeader.json': false // user set to true adds json mime to http accept header

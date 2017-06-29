@@ -61,6 +61,7 @@
             IN_CHROME: PRIVILEGED,
             IN_CONTENT: !PRIVILEGED,
             content: global.content,
+            webext: data.webExtension ? data.webExtension.startup() : false,
             Cc: Components.classes,
             Ci: Components.interfaces,
             Cm: Components.manager,

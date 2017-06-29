@@ -15,7 +15,7 @@ fs       = require('fs'),
 path     = require('path'),
 
 BASE_DIR            = process.cwd(),
-SRC_DIR             = path.existsSync('src') ? 'src' : null,
+SRC_DIR             = fs.existsSync('src') ? 'src' : null,
 install_rdf_path    = path.join(SRC_DIR, 'install.rdf'),
 PKG                 = (function() {
     var install_rdf = fs.readFileSync(install_rdf_path, 'utf8'),
@@ -166,7 +166,7 @@ function getFilesRecursivelySync(root) {
 }
 
 function ensureDirSync(dir) {
-    if(!path.existsSync(dir)) {
+    if(!fs.existsSync(dir)) {
         fs.mkdirSync(dir, '0755');
     }
 }
