@@ -178,12 +178,12 @@ function addExtMap() {
         test: valid.fileExt,
         invalidMsgParams: valid.fileExt.maxLen,
         onOk: function(ext) {
-            var extensions = [], mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|');
+            var exts = [], mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|');
             mappings.map(function(v) {
-                extensions.push(v.split(':')[0]);
+                exts.push(v.split(':')[0]);
             });
             ext = ext.toLowerCase();
-            if(extensions.indexOf(ext) !== -1) {
+            if(exts.indexOf(ext) !== -1) {
                 Services.prompt.alert(null, l('error.already.fileExt.title'), l('error.already.fileExt.text'));
                 return true;
             }
