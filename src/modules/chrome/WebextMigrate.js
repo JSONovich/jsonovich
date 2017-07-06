@@ -19,9 +19,9 @@ exports.migrate = listenPref => {
             debug(`Webext connected: ${port.sender.url}`);
 
             listenPref('', (branch, pref) => {
-                let type = 'string-ascii';
-                for(let [t, prefs] of defaults) {
-                    if(pref in prefs) {
+                let type = 'string';
+                for(let t in defaults) {
+                    if(pref in defaults[t]) {
                         type = t;
                         break;
                     }

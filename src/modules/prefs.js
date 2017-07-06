@@ -126,10 +126,8 @@ exports.branch = function selectBranch(name, defaults) {
 
         /**
          * @param pref <string>  The preference to get relative to the branch.
-         * @param type <string>  The type of value to get (boolean, integer, string-ascii,
-         *                       string-unicode, string-locale, file-abs, file-rel)
-         * @return <bool|int|string|nsISupportsString|nsIPrefLocalizedString
-         *              |nsILocalFile|nsIRelativeFilePref>
+         * @param type <string>  The type of value to get (boolean, integer, string)
+         * @return <bool|int|string>
          *                       The requested value, or the default if not set, or null if default not set.
          */
         returnObj.get = function getPref(pref, type) {
@@ -139,16 +137,8 @@ exports.branch = function selectBranch(name, defaults) {
                         return branch.getBoolPref(pref);
                     case 'integer':
                         return branch.getIntPref(pref);
-                    case 'string-ascii':
+                    case 'string':
                         return branch.getCharPref(pref);
-                    case 'string-unicode':
-                        return branch.getComplexType(pref, Ci.nsISupportsString).data;
-                    case 'string-locale':
-                        return branch.getComplexType(pref, Ci.nsIPrefLocalizedString).data;
-                    case 'file-abs':
-                        return branch.getComplexType(pref, Ci.nsILocalFile).data;
-                    case 'file-rel':
-                        return branch.getComplexType(pref, Ci.nsIRelativeFilePref).data;
                     default:
                         require('log').error('Unexpected pref type "' + type + '" in getPref.');
                 }
@@ -174,10 +164,8 @@ exports.branch = function selectBranch(name, defaults) {
 
     /**
      * @param pref <string>  The preference to be set relative to the branch.
-     * @param type <string>  The type of value to set (boolean, integer, string-ascii,
-     *                       string-unicode, string-locale, file-abs, file-rel)
-     * @param value <bool|int|string|nsISupportsString|nsIPrefLocalizedString
-     *              |nsILocalFile|nsIRelativeFilePref>
+     * @param type <string>  The type of value to set (boolean, integer, string)
+     * @param value <bool|int|string>
      *                       The value to set.
      */
     returnObj.set = function setPref(pref, type, value) {
@@ -188,36 +176,8 @@ exports.branch = function selectBranch(name, defaults) {
             case 'integer':
                 branch.setIntPref(pref, value);
                 break;
-            case 'string-ascii':
+            case 'string':
                 branch.setCharPref(pref, value);
-                break;
-            case 'string-unicode':
-                if(typeof value == 'string') {
-                    let str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-                    str.data = value;
-                    value = str;
-                }
-                prefs.setComplexValue(pref, Ci.nsISupportsString, value);
-                break;
-            case 'string-locale':
-                if(typeof value == 'string') {
-                    let pls = Cc["@mozilla.org/pref-localizedstring;1"].createInstance(Ci.nsIPrefLocalizedString);
-                    pls.data = value;
-                    value = pls;
-                }
-                prefs.setComplexValue(pref, Ci.nsIPrefLocalizedString, value);
-                break;
-            case 'file-abs':
-                if(typeof value == 'string') {
-                    let file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-                    file.initWithPath(value);
-                    value = file;
-                }
-                prefs.setComplexValue(pref, Ci.nsILocalFile, value);
-                break;
-            case 'file-rel':
-                // see https://developer.mozilla.org/en/Code_snippets/File_I%2f%2fO#Relative_path_(nsIRelativeFilePref)
-                prefs.setComplexValue(pref, Ci.nsIRelativeFilePref, value);
                 break;
             default:
                 require('log').error('Unexpected pref type "' + type + '" in setPref.');

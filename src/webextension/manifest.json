@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "JSONovich",
-    "version": "1.99.1",
+    "version": "1.99.4",
     "description": "Pretty-prints JSON content in the browser for easy, unobtrusive viewing.",
     "homepage_url": "https://github.com/mjgiarlo/jsonovich",
     "author": "Michael J. Giarlo",
@@ -16,10 +16,19 @@
     },
     "background": {
         "scripts": [
-            "migrate.js"
+            "common.js",
+            "migrate.js",
+            "background.js"
         ]
     },
     "permissions": [
-        "storage"
+        "storage",
+        "webRequest",
+        "webRequestBlocking",
+        "webNavigation",
+        "<all_urls>"
+    ],
+    "web_accessible_resources": [
+        "resources/*"
     ]
 }

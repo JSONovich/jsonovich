@@ -117,7 +117,7 @@ function addAccept() {
             })) {
                 return true; // q-value prompt cancelled, go back to host prompt
             }
-            prefBranch.set('acceptHeaderOverride.json.' + host, 'string-ascii', q);
+            prefBranch.set('acceptHeaderOverride.json.' + host, 'string', q);
         }
     });
 }
@@ -128,7 +128,7 @@ function removeAccept() {
     overrideHosts = overrideBranch.getChildList(),
     overrides = [];
     for(let i = 0; i < overrideHosts.length; i++) {
-        overrides.push('[q=' + overrideBranch.get(overrideHosts[i], 'string-ascii') + ']: ' + overrideHosts[i]);
+        overrides.push('[q=' + overrideBranch.get(overrideHosts[i], 'string') + ']: ' + overrideHosts[i]);
     }
     promptRemove({
         type: 'host',
@@ -146,27 +146,27 @@ function addMime() {
         test: valid.mime,
         invalidMsgParams: valid.mime.maxLen,
         onOk: function(mime) {
-            var conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|');
+            var conversions = (prefBranch.get(prefNameConv, 'string') || '').split('|');
             mime = mime.toLowerCase();
             if(conversions.indexOf(mime) !== -1) {
                 Services.prompt.alert(null, l('error.already.mime.title'), l('error.already.mime.text'));
                 return true;
             }
             conversions.push(mime);
-            prefBranch.set(prefNameConv, 'string-ascii', conversions.join('|'));
+            prefBranch.set(prefNameConv, 'string', conversions.join('|'));
         }
     });
 }
 events[ADDON_LNAME + '-pref-mime-add'] = addMime;
 
 function removeMime() {
-    var conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|');
+    var conversions = (prefBranch.get(prefNameConv, 'string') || '').split('|');
     promptRemove({
         type: 'mime',
         choices: conversions,
         onOk: function(sel) {
             conversions.splice(sel, 1);
-            prefBranch.set(prefNameConv, 'string-ascii', conversions.join('|'));
+            prefBranch.set(prefNameConv, 'string', conversions.join('|'));
         }
     });
 }
@@ -178,7 +178,7 @@ function addExtMap() {
         test: valid.fileExt,
         invalidMsgParams: valid.fileExt.maxLen,
         onOk: function(ext) {
-            var exts = [], mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|');
+            var exts = [], mappings = (prefBranch.get(prefNameExt, 'string') || '').split('|');
             mappings.map(function(v) {
                 exts.push(v.split(':')[0]);
             });
@@ -194,7 +194,7 @@ function addExtMap() {
                 testType: 'mime',
                 invalidMsgParams: valid.mime.maxLen,
                 onOk: function(mime) {
-                    var conversions = (prefBranch.get(prefNameConv, 'string-ascii') || '').split('|');
+                    var conversions = (prefBranch.get(prefNameConv, 'string') || '').split('|');
                     mime = mime.toLowerCase();
                     if(conversions.indexOf(mime) === -1) {
                         Services.prompt.alert(null, l('error.invalid.mapping.title'), l('error.invalid.mapping.text'));
@@ -204,7 +204,7 @@ function addExtMap() {
                         return true;
                     }
                     mappings.push(ext + ':' + mime);
-                    prefBranch.set(prefNameExt, 'string-ascii', mappings.join('|'));
+                    prefBranch.set(prefNameExt, 'string', mappings.join('|'));
                 }
             });
         }
@@ -213,13 +213,13 @@ function addExtMap() {
 events[ADDON_LNAME + '-pref-fileExt-add'] = addExtMap;
 
 function removeExtMap() {
-    var mappings = (prefBranch.get(prefNameExt, 'string-ascii') || '').split('|');
+    var mappings = (prefBranch.get(prefNameExt, 'string') || '').split('|');
     promptRemove({
         type: 'mapping',
         choices: mappings,
         onOk: function(sel) {
             mappings.splice(sel, 1);
-            prefBranch.set(prefNameExt, 'string-ascii', mappings.join('|'));
+            prefBranch.set(prefNameExt, 'string', mappings.join('|'));
         }
     });
 }

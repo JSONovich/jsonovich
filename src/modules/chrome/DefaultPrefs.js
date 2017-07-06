@@ -7,24 +7,29 @@
 
 'use strict';
 
+XPCOMUtils.defineLazyGetter(this, 'nativeJsonViewer', function() {
+    return require('prefs').branch('devtools.jsonview');
+});
+
 var defaults = exports.defaults = {
     'boolean': {
         'debug': false,            // user set to true enables debugging messages in console
         'acceptHeader.json': false // user set to true adds json mime to http accept header
     },
-    'string-ascii': {
+    'string': {
         'mime.conversions': [
             'application/json',                // standard, http://www.ietf.org/rfc/rfc4627.txt
             'application/sparql-results+json', // standard, http://www.w3.org/TR/rdf-sparql-json-res/
             'application/schema+json',         // draft, http://json-schema.org/
             'application/jsonrequest',         // proposed, http://json.org/JSONRequest.html
-            'application/json-p',              // proposed, http://www.json-p.org/
-            'text/json-p',                     // proposed, http://www.json-p.org/
             'application/x-json',              // legacy, officially application/json
             'text/json',                       // legacy, officially application/json
             'text/x-json',                     // legacy, officially application/json
             'application/rdf+json',            // legacy, officially application/json
             'application/jsonml+json',         // unofficial, http://jsonml.org/
+            'application/manifest+json',       // proposed, https://w3c.github.io/manifest/
+            'application/json-p',              // proposed, http://www.json-p.org/
+            'text/json-p',                     // proposed, http://www.json-p.org/
             'application/javascript',          // standard, http://www.ietf.org/rfc/rfc4329.txt
             'application/ecmascript',          // standard, http://www.ietf.org/rfc/rfc4329.txt
             'text/javascript',                 // obsolete, http://www.ietf.org/rfc/rfc4329.txt
@@ -56,5 +61,12 @@ exports.set = function setDefaults(setDefaultPref) {
         for(let pref in defaults[type]) {
             setDefaultPref(pref, type, defaults[type][pref]);
         }
+    }
+
+    if(nativeJsonViewer.get('enabled', 'boolean')) {
+        nativeJsonViewer.set('enabled', 'boolean', false);
+        require('unload').unload(function() {
+            nativeJsonViewer.set('enabled', 'boolean', true);
+        });
     }
 };

@@ -7,10 +7,8 @@
 
 'use strict';
 
-(function() {
+{
     function folder() {
-        document.removeEventListener("DOMContentLoaded", folder, false);
-        document.removeEventListener("load", folder, false);
         var r_folded = / folded\b/, r_toggled = / toggled\b/, r_class = /[\n\t\r]/g;
         Array.prototype.map.call(document.querySelectorAll(".json"), function(fold) {
             fold.addEventListener("click", toggleFold, false);
@@ -54,6 +52,22 @@
             return false;
         }
     }
-    document.addEventListener("DOMContentLoaded", folder, false);
-    document.addEventListener("load", folder, false);
-})();
+
+    function onFinished() {
+        document.querySelector('style').remove(); // anti-FOUC
+    }
+
+    new Promise(resolve => {
+        if(document.readyState !== 'loading')
+            resolve();
+        else
+            document.addEventListener('readystatechange', resolve, {capture: true, once: true, passive: true});
+    }).then(() => JSON.parse(document.body.textContent)).then(json => {
+        document.body.innerHTML = JSON2HTML.formatJSON(json);
+        folder();
+    }).catch(error => {
+        const msg = document.createElement('div');
+        msg.textContent = error.toString();
+        document.body.insertBefore(msg, document.body.firstChild);
+    }).then(onFinished, onFinished);
+}

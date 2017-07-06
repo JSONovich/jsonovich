@@ -9,10 +9,6 @@
 
 function startup() {
     var listenPref = require('prefs').branch(ADDON_PREFROOT).listen;
-    TS['L10n'] = [Date.now()];
-        require('l10n').register(listenPref);
-    TS['L10n'].push(Date.now());
-
     TS['PrepareAsyncLoad'] = [Date.now()];
     var async = {
         timer: Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer),
@@ -28,8 +24,7 @@ function startup() {
                 log = require('log');
                 log.setDebug(debug);
                 if(debug) {
-                    let url = typeof content === 'object' && typeof content.document === 'object' && content.document.location ? content.document.location : 'chrome',
-                    desc = {
+                    let desc = {
                         'Bootstrap': 'time taken to execute bootstrap script',
                         'Startup': 'time between us receiving startup event and leaving event listener',
                         'Install': 'time between us receiving startup event and leaving event listener during user-initiated install',
@@ -51,7 +46,7 @@ function startup() {
                     };
                     for(let measure in TS) {
                         if(TS[measure].length>1) {
-                            log.info('<' + url + '> ' + measure + ': ' + (TS[measure][1]-TS[measure][0]) + 'ms' + (measure in desc ? ' (' + desc[measure] + ')' : ''));
+                            log.info(measure + ': ' + (TS[measure][1]-TS[measure][0]) + 'ms' + (measure in desc ? ' (' + desc[measure] + ')' : ''));
                         }
                     }
                 }

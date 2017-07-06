@@ -5,7 +5,12 @@
  * @description This file contains style rules for rendering formatted JSON.
  */
 
- body, .json {
+// browser.tabs.insertCSS from background at same time as executeScript => "An unexpected error occurred"
+// <link> inserted from content script or page script => doesn't load
+// hence this file has been converted from CSS to JS, which loads fine
+{
+const css = `
+body, .json {
   margin:0;
   padding:0;
 }
@@ -70,7 +75,7 @@
   content:'+';
 }
 .json .foldable.toggled code:first-of-type:after {
-  content:' \2026 ';
+  content:' \\2026 ';
 }
 .json .number.gutter:before {
   content:counter(line);
@@ -128,4 +133,10 @@
   .json code .separator {
     color:#440;
   }
+}
+`;
+
+const style = document.createElement('style');
+style.textContent = css;
+document.head.appendChild(style);
 }

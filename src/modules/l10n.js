@@ -8,40 +8,16 @@
 
 'use strict';
 
-var userLocale;
-
-XPCOMUtils.defineLazyGetter(this, 'browserLocale', function() {
-    var branch = require('prefs').branch('general.useragent');
-    return function() {
-        return branch.get('locale', 'string-locale');
-    };
-});
-
-exports.register = function register(listenPref) {
-    listenPref = listenPref || require('prefs').branch(ADDON_PREFROOT).listen;
-    listenPref('locale', function(branch, pref) {
-        userLocale = branch.get(pref, 'string-locale');
-        if(!userLocale) {
-            userLocale = browserLocale();
-        }
-    });
-    require('unload').unload(function() {
-        Services.strings.flushBundles();
-    });
+exports.register = function register() {
+    require('unload').unload(Services.strings.flushBundles);
 };
 
 exports.bundle = function getBundle(name) {
     if(!name || typeof name != 'string' || !name.length) {
         return null;
     }
-    var file;
-    if(userLocale) {
-        file = getResourceURI('locale/' + userLocale + '/' + name + '.properties');
-    }
-    if(!file || !file.exists()) {
-        file = getResourceURI('locale/en-GB/' + name + '.properties');
-    }
-    var bundle = Services.strings.createBundle(file.spec);
+    var file = 'chrome://' + ADDON_LNAME + '/locale/' + name + '.properties';
+    var bundle = Services.strings.createBundle(file);
 
     return function(key, params) {
         try {
@@ -53,7 +29,7 @@ exports.bundle = function getBundle(name) {
             }
             return bundle.formatStringFromName(key, params, params.length);
         } catch(e) {
-            require('log').debug(key + ' not found in ' + name + ' (' + file.spec + ')');
+            require('log').debug(key + ' not found in ' + name + ' (' + file + ')');
             return '»' + key + '«';
         }
     };

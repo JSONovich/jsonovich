@@ -8,21 +8,21 @@
 'use strict';
 
 var stringSet = exports.stringSet = function stringSet(branch, pref, entrySep, callback) {
-    var orig = branch.get(pref, 'string-ascii') || '',
+    var orig = branch.get(pref, 'string') || '',
     entries = orig.split(entrySep),
     validEntries = [];
-    try {
-        for(let i = 0; i < entries.length; i++) {
+    for(let i = 0; i < entries.length; i++) {
+        try {
             if(callback(entries[i])) {
                 validEntries.push(entries[i]);
             }
+        } catch(e) {
+            require('log').error('Uncaught exception in "' + pref + '[' + entries[i] + ']" callback - ' + e);
         }
-        validEntries = validEntries.join(entrySep);
-        if(orig != validEntries) { // some entries were invalid, let's remove them from prefs
-            branch.set(pref, 'string-ascii', validEntries);
-        }
-    } catch(e) {
-        require('log').error('Uncaught exception in "' + pref + '" listener - ' + e);
+    }
+    validEntries = validEntries.join(entrySep);
+    if(orig != validEntries) { // some entries were invalid, let's remove them from prefs
+        branch.set(pref, 'string', validEntries);
     }
 };
 

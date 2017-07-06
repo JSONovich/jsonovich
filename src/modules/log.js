@@ -8,8 +8,8 @@
 
 'use strict';
 
-let debug = false,
-prefixError = '[' + ADDON_NAME + ' Error] ',
+let debug = false;
+const prefixError = '[' + ADDON_NAME + ' Error] ',
 prefixInfo = '[' + ADDON_NAME + ' Info] ',
 prefixDebug = '[' + ADDON_NAME + ' Debug] ';
 

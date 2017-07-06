@@ -52,8 +52,6 @@ function require(path) {
             ADDON_LNAME: ADDON_LNAME,
             ADDON_DOMAIN: ADDON_DOMAIN,
             ADDON_PREFROOT: 'extensions.' + ADDON_LNAME,
-            IN_CHROME: IN_CHROME,
-            IN_CONTENT: IN_CONTENT,
             webext: webext,
             Cc: Cc,
             Ci: Ci,
@@ -98,12 +96,7 @@ function require(path) {
 
 (function(global) {
     var lifecycle = [require(ADDON_LNAME)]; // code common to both types of process
-    if(IN_CONTENT) {
-        lifecycle.unshift(require('content/' + ADDON_LNAME)); // code only needed in content processes
-    }
-    if(IN_CHROME) {
-        lifecycle.unshift(require('chrome/' + ADDON_LNAME)); // code only needed in the main process
-    }
+    lifecycle.unshift(require('chrome/' + ADDON_LNAME)); // code only needed in the main process
 
     ['startup', 'uninstall', 'shutdown'].forEach(function(mode) {
         global[mode] = function() {
