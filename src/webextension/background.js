@@ -10,7 +10,7 @@
 {
 // pre-compiled RegExps
 const rAcceptSep = /\s*,\s*/;
-const rQSep = /\s*;\s*/;
+const rParamSep = /\s*;\s*/;
 const rAccept = /^accept$/i;
 const rContentType = /^content-type$/i;
 const rCharset = /; *charset *= *([^; ]+)/i;
@@ -74,7 +74,7 @@ function headerOverride(headers, current, name, value) {
  * @return String The overridden Accept header.
  */
 function acceptOverride(current, overrides) {
-    const accept = current.split(rAcceptSep).filter(value => !(value.split(rQSep, 2)[0] in overrides));
+    const accept = current.split(rAcceptSep).filter(value => !(value.split(rParamSep, 2)[0] in overrides));
 
     for(let mime in overrides) {
         let q = overrides[mime];
@@ -186,7 +186,7 @@ const listeners = {
 
             const mime = details.responseHeaders.find(header => header.value && rContentType.test(header.name));
             let mode;
-            if((!mime || !(mode = mimes.get(mime.value))) && !(mode = handleUrl(details.url)))
+            if((!mime || !(mode = mimes.get(mime.value.split(rParamSep, 2)[0]))) && !(mode = handleUrl(details.url)))
                 return; // no matching mimetype or extension
             tabs.set(details.tabId, mode);
             log(`Handling tab ${details.tabId} as ${mode}.`);
