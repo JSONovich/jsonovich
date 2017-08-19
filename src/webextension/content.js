@@ -8,10 +8,8 @@
 'use strict';
 
 {
-    const root = (document.head || document.body || document.documentElement);
-    const style = document.createElement('style');
-    style.textContent = 'html{display:none}'; // anti-FOUC
-    root.appendChild(style);
+    const root = (document.head || document.body || document.documentElement); // TODO: can still be null
+    document.documentElement.style.display = 'none'; // anti-FOUC
 
     ['resources/jsonovich.css.js', 'resources/json2html.js', 'resources/jsonovich.js'].forEach(path => {
         const script = document.createElement('script');
