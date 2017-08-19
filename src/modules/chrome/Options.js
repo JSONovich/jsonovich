@@ -23,6 +23,9 @@ observer = {
             return;
         }
         var container = aSubject.getElementById('detail-rows'); // normal add-ons manager
+        if(!container) { // Android add-ons manager (hopefully)
+            container = aSubject.querySelector('.options-box');
+        }
         if(!container) { // fennec XBL add-ons manager
             container = aSubject.getAnonymousElementByAttribute(aSubject.querySelector('[addonID="'+aData+'"]'), 'anonid', 'options-box');
         }
