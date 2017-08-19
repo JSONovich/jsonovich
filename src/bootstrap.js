@@ -56,7 +56,7 @@
             ADDON_NAME: ADDON_NAME,
             ADDON_LNAME: ADDON_LNAME,
             ADDON_DOMAIN: ADDON_DOMAIN,
-            webext: data.webExtension ? data.webExtension.startup() : false,
+            webext: data.webExtension ? data.webExtension.startup(reason) : false,
             Cc: Components.classes,
             Ci: Components.interfaces,
             Cm: Components.manager,
