@@ -98,7 +98,8 @@ function handleUrl(url) {
     log('handleUrl', url);
     url = new URL(url);
     const ext = url.pathname.lastIndexOf('.');
-    return ext > -1 ? exts.get(url.pathname.slice(ext + 1)) : undefined;
+    const redirect = url.pathname.lastIndexOf('%3A//');
+    return ext > -1 && redirect == -1 ? exts.get(url.pathname.slice(ext + 1)) : undefined;
 }
 
 const listeners = {
