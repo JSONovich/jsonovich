@@ -181,8 +181,8 @@ const listeners = {
          */
         onHeadersReceived(details) {
             log('onHeadersReceived', details, log === noop ? undefined : JSON.stringify(details.responseHeaders));
-            if(details.tabId == -1)
-                return; // internal request
+            if(details.tabId == -1 || details.statusCode != 200)
+                return; // internal request or non-OK response
 
             const mime = details.responseHeaders.find(header => header.value && rContentType.test(header.name));
             let mode;
