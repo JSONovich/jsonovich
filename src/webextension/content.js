@@ -8,13 +8,27 @@
 'use strict';
 
 {
-    const root = (document.head || document.body || document.documentElement); // TODO: can still be null
-    document.documentElement.style.display = 'none'; // anti-FOUC
+    const init = () => {
+        document.documentElement.hidden = true; // anti-FOUC
 
-    ['resources/jsonovich.css.js', 'resources/json2html.js', 'resources/jsonovich.js'].forEach(path => {
-        const script = document.createElement('script');
-        script.src = browser.runtime.getURL(path);
-        script.async = false; // order is important
-        root.appendChild(script);
-    });
+        ['resources/jsonovich.css.js', 'resources/json2html.js', 'resources/jsonovich.js'].forEach(path => {
+            const script = document.createElement('script');
+            script.src = browser.runtime.getURL(path);
+            script.async = false; // order is important
+            document.documentElement.appendChild(script);
+        });
+    };
+
+    if(document.documentElement) {
+        init();
+    } else {
+        (new MutationObserver((mutations, self) => {
+            if(document.documentElement) {
+                self.disconnect();
+                init();
+            }
+        })).observe(document, {
+            childList: true
+        });
+    }
 }

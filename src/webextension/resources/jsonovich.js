@@ -54,7 +54,7 @@
     }
 
     function onFinished() {
-        document.documentElement.style.display = ''; // anti-FOUC
+        document.documentElement.hidden = false; // anti-FOUC
     }
 
     new Promise(resolve => {
