@@ -239,18 +239,17 @@ const listeners = {
          * @param details Object Details of the navigation.
          */
         onCommitted(details) {
-            log('onCommitted', details, Array.from(tabs), Array.from(reqs));
+            log('onCommitted', details, tabs, reqs);
             if(!tabs.has(details.tabId))
                 return;
 
             browser.tabs.executeScript(details.tabId, {
                 file: '/content.js',
                 runAt: 'document_start'
+            }).catch(error => {
+                log('Failed to load content script!', error);
             }).then(result => {
                 tabs.delete(details.tabId);
-            }, error => {
-                tabs.delete(details.tabId);
-                log('Failed to load content script!', error);
             });
         }
     }

@@ -11,7 +11,16 @@ const noop = () => {};
 let log = noop;
 
 const defaults = (defaults => {
-    const logDebug = (...args) => console.log('[JSONovich Webext]', ...args);
+    function inspect(arg) {
+        if(arg instanceof Map || arg instanceof Set)
+            return Array.from(arg);
+        if(arg instanceof Location)
+            return arg.toString();
+        if(arg instanceof Error)
+            return arg.toString() + '\n' + arg.stack;
+        return arg;
+    }
+    const logDebug = (...args) => console.log('[JSONovich Webext]', ...args.map(inspect));
     function setDebug(enable) {
         enable && log === noop && logDebug('Debug mode on:', browser.runtime.getManifest());
         log = enable ? logDebug : noop;
