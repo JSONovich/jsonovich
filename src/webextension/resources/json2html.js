@@ -7,9 +7,8 @@
 
 'use strict';
 
-var EXPORTED_SYMBOLS = ["JSON2HTML"],
-JSON2HTML = function() {
-  let lineBreaks = {
+const JSON2HTML = (() => {
+  const lineBreaks = {
 /**/    "before block": false, // default formatting
     "before items": true,
     "before separator": false,
@@ -23,12 +22,28 @@ JSON2HTML = function() {
     "after items": true,
     "after block": false
 /**/  },
-  str_true = 'true', str_false = 'false',
-  str_null = 'null', str_indent = '  ', sep_array_items = ',',
-  sep_object_properties = ',', sep_object_property_kv = ': ',
-  delim_open_array = '[', delim_close_array = ']',
-  delim_open_object = '{', delim_close_object = '}',
-  delim_string = '"',
+  literal = {
+    true: 'true',
+    false: 'false',
+    null: 'null',
+    indent: '  ',
+    delim: {
+      open: {
+        array: '[',
+        object: '{',
+        string: '"'
+      },
+      close: {
+        array: ']',
+        object: '}',
+        string: '"'
+      }
+    },
+    sep: {
+      value: ',',
+      key: ': '
+    }
+  },
   // From Google code-prettify:
   // Define regexps here so that the interpreter doesn't have to create an
   // object each time the function containing them is called.
@@ -51,92 +66,62 @@ JSON2HTML = function() {
     }
   },
 
-  formatArray = function(data, arr) {
-    new Line(data, "before block");
-    data.currentLine.addDelimiter(new Element(delim_open_array, "array delimiter open"));
-    if(arr.length) {
-      foldStart(data);
-      new Line(data, "before items");
-      data.currentLine.indentInc(data);
-      for(let i in Iterator(arr, true)) {
-        if(i > 0) {
-          new Line(data, "before separator");
-          data.currentLine.addDelimiter(new Element(sep_array_items, "array separator"));
-          new Line(data, "after separator");
-        }
-        formatRecursively(data, arr[i]);
-      }
-      new Line(data, "after items");
-      data.currentLine.indentDec(data);
-      data.folds.shift();
-    }
-    data.currentLine.addDelimiter(new Element(delim_close_array, "array delimiter close"));
-    new Line(data, "after block");
-  },
-
   formatObject = function(data, obj) {
-    let it = Iterator(obj, true);
+    const showKeys = Object.prototype.toString.call(obj) !== '[object Array]';
+    const mode = showKeys ? "object" : "array";
+    const entries = Object.entries(obj);
     new Line(data, "before block");
-    data.currentLine.addDelimiter(new Element(delim_open_object, "object delimiter open"));
-    try {
-      let memb = it.next();
+    data.currentLine.addDelimiter(new Element(literal.delim.open[mode], mode + " delimiter open"));
+    if(entries.length) {
       foldStart(data);
       new Line(data, "before items");
       data.currentLine.indentInc(data);
-      try {
-        for(;;) {
-          data.currentLine.addElement(new Element(delim_string, "key delimiter"));
-          data.currentLine.addElement(new Element(encodeHTML(escapeString(memb)), "key"));
-          data.currentLine.addElement(new Element(delim_string, "key delimiter"));
-          data.currentLine.addElement(new Element(sep_object_property_kv, "object property separator"));
-          formatRecursively(data, obj[memb]);
-          memb = it.next();
+      let first = true;
+      for(const [k, v] of entries) {
+        if(first) {
+          first = false;
+        } else {
           new Line(data, "before separator");
-          data.currentLine.addDelimiter(new Element(sep_object_properties, "object separator"));
+          data.currentLine.addDelimiter(new Element(literal.sep.value, mode + " separator"));
           new Line(data, "after separator");
         }
-      } catch(e) {
-        if(!(e instanceof StopIteration)) {
-          throw e;
+        if(showKeys) {
+          data.currentLine.addElement(new Element(literal.delim.open.string, "key delimiter"));
+          data.currentLine.addElement(new Element(encodeHTML(escapeString(k)), "key"));
+          data.currentLine.addElement(new Element(literal.delim.close.string, "key delimiter"));
+          data.currentLine.addElement(new Element(literal.sep.key, "object property separator"));
         }
+        formatRecursively(data, v);
       }
       new Line(data, "after items");
       data.currentLine.indentDec(data);
       data.folds.shift();
-    } catch(e) {
-      if(!(e instanceof StopIteration)) {
-        throw e;
-      }
     }
-    data.currentLine.addDelimiter(new Element(delim_close_object, "object delimiter close"));
+    data.currentLine.addDelimiter(new Element(literal.delim.close[mode], mode + " delimiter close"));
     new Line(data, "after block");
   },
 
   formatRecursively = function(data, thing) {
     if(thing == null) {
-      data.currentLine.addElement(new Element(str_null, "null"));
+      data.currentLine.addElement(new Element(literal.null, "null"));
     } else {
       switch(typeof thing) {
         case "number":
           data.currentLine.addElement(new Element(thing, "number"));
           break;
         case "boolean":
-          data.currentLine.addElement(new Element(thing ? str_true : str_false,
+          data.currentLine.addElement(new Element(thing ? literal.true : literal.false,
             "boolean " + (thing ? "true" : "false")));
           break;
         case "string":
           data.currentLine.addElement(new Element([
-            new Element(delim_string, "delimiter"),
+            new Element(literal.delim.open.string, "delimiter"),
             new Element(encodeHTML(escapeString(thing)), "content"),
-            new Element(delim_string, "delimiter")
+            new Element(literal.delim.close.string, "delimiter")
             ], "string"));
           break;
         case "object":
-          if(Object.prototype.toString.call(thing) === '[object Array]') {
-            formatArray(data, thing);
-          } else {
-            formatObject(data, thing);
-          }
+          formatObject(data, thing);
           break;
         default:
           data.currentLine.addElement(new Element(thing, "unknown"));
@@ -203,9 +188,9 @@ JSON2HTML = function() {
         for(let i = this.indent, j = indentContent.length - this.indent, d; i > 0; i--, j++) {
           d = indentContent[j];
           if(d) {
-            prefix += d + str_indent.substr(d.length);
+            prefix += d + literal.indent.substr(d.length);
           } else {
-            prefix += str_indent;
+            prefix += literal.indent;
           }
         }
       }
@@ -220,7 +205,7 @@ JSON2HTML = function() {
   return {
     encodeHTML: encodeHTML,
     formatJSON: function(json) {
-      let data = {
+      const data = {
         numFolds: 0,
         numIndent: 0,
         folds: [],
@@ -231,4 +216,4 @@ JSON2HTML = function() {
       return '<pre class="json">' + data.lines.join("\n") + "</pre>";
     }
   }
-}();
+})();
