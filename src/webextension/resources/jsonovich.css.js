@@ -134,6 +134,12 @@ body, .json {
     color:#440;
   }
 }
+
+.error {
+  background-color:#f46;
+  padding:0.5em;
+  font-weight:bold;
+}
 `;
 
 const style = document.createElement('style');

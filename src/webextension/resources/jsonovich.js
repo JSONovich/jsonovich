@@ -67,6 +67,7 @@
         folder();
     }).catch(error => {
         const msg = document.createElement('div');
+        msg.className = 'error';
         msg.textContent = error.toString();
         document.body.insertBefore(msg, document.body.firstChild);
     }).then(onFinished, onFinished);
