@@ -7,37 +7,7 @@
 
 'use strict';
 
-const noop = () => {};
-let log = noop;
-
-const defaults = (defaults => {
-    function inspect(arg) {
-        if(arg instanceof Map || arg instanceof Set)
-            return Array.from(arg);
-        if(arg instanceof Location)
-            return arg.toString();
-        if(arg instanceof Error)
-            return arg.toString() + '\n' + arg.stack;
-        return arg;
-    }
-    const logDebug = (...args) => console.log('[JSONovich Webext]', ...args.map(inspect));
-    function setDebug(enable) {
-        enable && log === noop && logDebug('Debug mode on:', browser.runtime.getManifest());
-        log = enable ? logDebug : noop;
-    }
-    setDebug(defaults.debug);
-    const promise = browser.storage.local.get(defaults);
-    promise.then(config => {
-        setDebug(config.debug);
-        browser.storage.onChanged.addListener((changes, areaName) => {
-            const {debug} = changes;
-            if(areaName === 'local' && typeof debug !== 'undefined')
-                setDebug('newValue' in debug && debug.newValue);
-        });
-        log('common.js started', window.location);
-    });
-    return promise;
-})({
+const defaultConfig = {
     mimetypes: {
         'application/json': 'json',                // standard, http://www.ietf.org/rfc/rfc4627.txt
         'application/sparql-results+json': 'json', // standard, http://www.w3.org/TR/rdf-sparql-json-res/
@@ -66,4 +36,41 @@ const defaults = (defaults => {
     },
     accept: {},
     debug: false
+};
+const configInit = browser.storage.local.get(defaultConfig);
+
+const logger = {
+    disabled: () => {},
+    get enabled() {
+        let page = window.location.href;
+        switch(page) {
+        case browser.runtime.getURL('_generated_background_page.html'):
+            page = 'background';
+            break;
+        case browser.runtime.getURL('options/options.html'):
+            page = 'options';
+            break;
+        default:
+            const base = browser.runtime.getURL();
+            if(page.startsWith(base))
+                page = page.replace(base, '');
+        }
+        const logger = Function.prototype.bind.call(console.log, console, `[JSONovich ${page}]`);
+        logger('Debugging enabled', browser.runtime.getManifest());
+        delete this.enabled;
+        return this.enabled = logger;
+    }
+};
+let log = logger.disabled;
+const setDebug = enable => log = enable ? logger.enabled : logger.disabled;
+
+setDebug(defaultConfig.debug);
+configInit.then(config => {
+    setDebug(config.debug);
+    browser.storage.onChanged.addListener((changes, areaName) => {
+        const {debug} = changes;
+        if(areaName === 'local' && typeof debug !== 'undefined')
+            setDebug('newValue' in debug && debug.newValue);
+    });
+    log('common.js started');
 });

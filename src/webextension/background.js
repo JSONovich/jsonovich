@@ -123,7 +123,7 @@ const listeners = {
             if(accept) {
                 accept.onDelete = accept.onAdd = matcher => {
                     const listener = listeners.accept.get(matcher);
-                    log('onDelete/onAdd', matcher, !!listener);
+                    log('accept.onDelete/onAdd', matcher, !!listener);
                     if(!listener)
                         return;
                     browser.webRequest.onBeforeRequest.removeListener(listener);
@@ -154,7 +154,7 @@ const listeners = {
          * @return webRequest.BlockingResponse Changed headers.
          */
         onBeforeSendHeaders(details) {
-            log('onBeforeSendHeaders', details, log === noop ? undefined : JSON.stringify(details.requestHeaders));
+            log('onBeforeSendHeaders', details, log === logger.disabled ? undefined : JSON.stringify(details.requestHeaders));
             if(details.tabId == -1)
                 return; // internal request
 
@@ -181,7 +181,7 @@ const listeners = {
          * @return webRequest.BlockingResponse Changed headers.
          */
         onHeadersReceived(details) {
-            log('onHeadersReceived', details, log === noop ? undefined : JSON.stringify(details.responseHeaders));
+            log('onHeadersReceived', details, log === logger.disabled ? undefined : JSON.stringify(details.responseHeaders));
             if(details.tabId == -1 || details.statusCode != 200)
                 return; // internal request or non-OK response
 
@@ -239,7 +239,7 @@ const listeners = {
          * @param details Object Details of the navigation.
          */
         onCommitted(details) {
-            log('onCommitted', details, tabs, reqs);
+            log('onCommitted', details, log === logger.disabled ? undefined : {tabs: Array.from(tabs), reqs: Array.from(reqs)});
             if(!tabs.has(details.tabId))
                 return;
 
@@ -247,7 +247,7 @@ const listeners = {
                 file: '/content.js',
                 runAt: 'document_start'
             }).catch(error => {
-                log('Failed to load content script!', error);
+                log('Failed to load content script!', error + '\n' + error.stack);
             }).then(result => {
                 tabs.delete(details.tabId);
             });
@@ -291,7 +291,7 @@ function ensureListeners() {
         listeners.accept.clear();
         browser.webRequest.onBeforeSendHeaders.removeListener(listeners.webRequest.onBeforeSendHeaders);
     }
-    log('acceptMatchers', log === noop ? undefined : [...acceptMatchers], acceptMatchers.size, listeners.accept.size);
+    log('acceptMatchers', log === logger.disabled ? undefined : Array.from(acceptMatchers), acceptMatchers.size == listeners.accept.size);
 
     if(exts.size) {
         // handle file and ftp(s)
@@ -334,7 +334,7 @@ function ensureListeners() {
     }
 }
 
-defaults.then(config => {
+configInit.then(config => {
     browser.storage.onChanged.addListener(listeners.storage.onChanged);
 
     // pretend everything changed to kick all other necessary listeners into life
@@ -344,6 +344,6 @@ defaults.then(config => {
         accept: {newValue: config.accept}
     }, 'local');
 
-    log('background.js started', window.location);
+    log('background.js started');
 });
 }
