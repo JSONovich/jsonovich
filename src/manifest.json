@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "default_locale": "en",
-    "name": "__MSG_extensionName__",
+    "name": "JSONovich",
     "version": "1.99.6alpha1",
     "description": "__MSG_extensionDescription__",
     "homepage_url": "https://github.com/mjgiarlo/jsonovich",

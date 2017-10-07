@@ -1,13 +1,4 @@
 {
-    "extensionName": {
-        "message": "$NAME$",
-        "description": "Name of the extension.",
-        "placeholders": {
-            "name": {
-                "content": "JSONovich"
-            }
-        }
-    },
     "extensionDescription": {
         "message": "Pretty-prints JSON content in the browser for easy, unobtrusive viewing.",
         "description": "Description of the extension."
