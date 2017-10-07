@@ -21,6 +21,10 @@
             "background.js"
         ]
     },
+    "icons": {
+        "32": "icon32.png",
+        "64": "icon64.png"
+    },
     "permissions": [
         "storage",
         "webRequest",
