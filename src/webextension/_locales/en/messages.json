@@ -1,0 +1,19 @@
+{
+    "extensionName": {
+        "message": "$NAME$",
+        "description": "Name of the extension.",
+        "placeholders": {
+            "name": {
+                "content": "JSONovich"
+            }
+        }
+    },
+    "extensionDescription": {
+        "message": "Pretty-prints JSON content in the browser for easy, unobtrusive viewing.",
+        "description": "Description of the extension."
+    },
+    "extensionLongDescription": {
+        "message": "JSONovich pretty-prints JSON content of various types directly in a browser tab. It uses the browser's native JSON parser and a custom-built formatter to produce its output.\n\nNormally, the browser would either prompt to download or display as plain text any JSON sent with the correct application/json mime-type. JSONovich makes working with and debugging output from web services easier by formatting JSON nicely inside the browser.",
+        "description": "Detailed description of the extension."
+    }
+}

@@ -1,8 +1,9 @@
 {
     "manifest_version": 2,
-    "name": "JSONovich",
-    "version": "1.99.5",
-    "description": "Pretty-prints JSON content in the browser for easy, unobtrusive viewing.",
+    "default_locale": "en",
+    "name": "__MSG_extensionName__",
+    "version": "1.99.6alpha1",
+    "description": "__MSG_extensionDescription__",
     "homepage_url": "https://github.com/mjgiarlo/jsonovich",
     "author": "Michael J. Giarlo",
     "developer": {
