@@ -42,6 +42,89 @@ const defaultConfig = {
 };
 const configInit = browser.storage.local.get(defaultConfig);
 
+const valid = {
+    expect: {
+        mimetype: { // ref: https://tools.ietf.org/html/rfc7231#section-3.1.1.1
+            maxLen: 80,
+            regex: /^(?:application|text)\/[^\*/]+$/
+        },
+        extension: {
+            maxLen: 10,
+            regex: /^[^\*\.?#/\\]+$/
+        },
+        pattern: { // ref: https://developer.mozilla.org/Add-ons/WebExtensions/Match_patterns
+            maxLen: 2000,
+            regex: /^<all_urls>|(?:\*|https?|file|ftp|app):\/\/(?:\*(?:\.[^\./]+)?|[^\./][^/]*|)(?:\/.*)?$/
+        },
+        format: {
+            choice: ['json', 'js']
+        },
+        accept: {
+            obj: {
+                k: 'mimetype',
+                v: 'q'
+            },
+            choice: [{'application/json':'1'}]
+        },
+        q: { // number between 0 and 1 with up to 3 decimal digits, ref: https://tools.ietf.org/html/rfc7231#section-5.3.1
+            maxLen: 5,
+            regex: /^(?:1(?:\.0{1,3})?|0(?:\.\d{1,3})?)$/
+        }
+    },
+    schema: {
+        mimetypes: {
+            k: 'mimetype',
+            v: 'format'
+        },
+        extensions: {
+            k: 'extension',
+            v: 'format'
+        },
+        accept: {
+            k: 'pattern',
+            v: 'accept'
+        },
+        debug: true
+    },
+    entry: (expect, value) => {
+        switch(typeof expect) {
+        case 'boolean':
+            return value === false || value === true;
+        case 'string':
+            if((expect = valid.expect[expect])) {
+                if(expect.obj)
+                    return valid.entry(expect.obj, value);
+                else
+                    return value && typeof value === 'string' && value.length
+                        && (!expect.maxLen || value.length <= expect.maxLen)
+                        && (!expect.choice || expect.choice.includes(value))
+                        && (!expect.regex || expect.regex.test(value));
+            }
+            break;
+        case 'object':
+            if(expect.k && expect.v && typeof value === 'object') {
+                for(const k in value) {
+                    if(!valid.entry(expect.k, k) || !valid.entry(expect.v, value[k]))
+                        return false;
+                }
+                return true;
+            }
+            break;
+        }
+        return false;
+    },
+    config: (config) => {
+        if(typeof config !== 'object')
+            throw 'Configuration must be an object.';
+        for(const k in config) {
+            if(!(k in valid.schema))
+                delete config[k]; // ignore unrecognised keys
+            else if(!valid.entry(valid.schema[k], config[k]))
+                throw `Invalid configuration entry "${k}": ${JSON.stringify(config[k])}.`;
+        }
+    }
+};
+
 const logger = {
     disabled: () => {},
     get enabled() {

@@ -118,11 +118,11 @@ const listeners = {
                 return; // shouldn't have non-local prefs
             const {mimetypes, extensions, accept} = changes;
 
-            if(mimetypes)
+            if(mimetypes && valid.entry(valid.schema.mimetypes, mimetypes.newValue))
                 updateMap(mimes, mimetypes);
-            if(extensions)
+            if(extensions && valid.entry(valid.schema.extensions, extensions.newValue))
                 updateMap(exts, extensions);
-            if(accept) {
+            if(accept && valid.entry(valid.schema.accept, accept.newValue)) {
                 accept.onDelete = accept.onAdd = matcher => {
                     const listener = listeners.accept.get(matcher);
                     log('accept.onDelete/onAdd', matcher, !!listener);
