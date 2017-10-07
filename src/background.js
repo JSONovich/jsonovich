@@ -8,6 +8,8 @@
 'use strict';
 
 {
+ts.background = Date.now();
+
 // pre-compiled RegExps
 const rAcceptSep = /\s*,\s*/;
 const rParamSep = /\s*;\s*/;
@@ -344,6 +346,6 @@ configInit.then(config => {
         accept: {newValue: config.accept}
     }, 'local');
 
-    log('background.js started');
+    log('background.js started', Date.now() - ts.background);
 });
 }

@@ -7,6 +7,9 @@
 
 'use strict';
 
+const ts = {
+    common: Date.now()
+};
 const defaultConfig = {
     mimetypes: {
         'application/json': 'json',                // standard, http://www.ietf.org/rfc/rfc4627.txt
@@ -72,5 +75,5 @@ configInit.then(config => {
         if(areaName === 'local' && typeof debug !== 'undefined')
             setDebug('newValue' in debug && debug.newValue);
     });
-    log('common.js started');
+    log('common.js started', Date.now() - ts.common);
 });
