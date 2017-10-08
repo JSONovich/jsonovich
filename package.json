@@ -1,0 +1,32 @@
+{
+  "name": "jsonovich",
+  "version": "1.99.6-alpha.1",
+  "description": "Pretty-prints JSON content in the browser for easy, unobtrusive viewing.",
+  "keywords": [
+    "json",
+    "viewer",
+    "webextension",
+    "firefox"
+  ],
+  "license": "MPL-1.1",
+  "author": "Michael J. Giarlo",
+  "contributors": [
+    "William Elwood <we9@kent.ac.uk>"
+  ],
+  "homepage": "https://github.com/mjgiarlo/jsonovich#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mjgiarlo/jsonovich.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mjgiarlo/jsonovich/issues"
+  },
+  "private": true,
+  "scripts": {
+    "build": "gulp"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-vinyl-zip": "^2.0.0"
+  }
+}
