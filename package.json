@@ -1,6 +1,6 @@
 {
   "name": "jsonovich",
-  "version": "1.99.6-alpha.1",
+  "version": "2.0.0-0",
   "description": "Pretty-prints JSON content in the browser for easy, unobtrusive viewing.",
   "keywords": [
     "json",
