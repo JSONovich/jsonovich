@@ -23,10 +23,13 @@
   },
   "private": true,
   "scripts": {
-    "build": "gulp"
+    "build": "gulp",
+    "version": "gulp version && git add .",
+    "postversion": "git push --follow-tags"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
+    "gulp-json-modify": "^1.0.2",
     "gulp-vinyl-zip": "^2.0.0"
   }
 }
