@@ -1,0 +1,125 @@
+:root {
+    --in-content-border-color: #d7d7db;
+    --in-content-box-background-hover: #ebebeb;
+    --in-content-link-color: #0a8dff;
+    --in-content-link-color-hover: #0060df;
+    --in-content-link-color-active: #003eaa;
+    --in-content-link-color-visited: #0a8dff;
+    --in-content-primary-button-background: #0a84ff;
+    --in-content-primary-button-background-hover: #0060df;
+    --in-content-primary-button-background-active: #003eaa;
+    --detail-contributions-border-color: #d2dbe8;
+    --detail-contributions-background-hover: #f3f7fb;
+
+}
+html, body {
+    margin: 0;
+    padding: 0;
+}
+a {
+    color: var(--in-content-link-color);
+}
+a:hover {
+    color: var(--in-content-link-color-hover);
+}
+a:active {
+    color: var(--in-content-link-color-active);
+}
+a:visited {
+    color: var(--in-content-link-color-visited);
+}
+button {
+    margin: 0.1rem 0;
+}
+section {
+    padding: 0.2rem 0;
+    border-top: 1px solid var(--in-content-border-color);
+}
+main {
+    max-height: 20rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+details {
+    background: linear-gradient(transparent, var(--in-content-box-background-hover) 1rem, var(--in-content-box-background-hover));
+}
+details > p {
+    margin: 0;
+}
+summary {
+    font-weight: bold;
+    font-size: 1.42rem;
+    cursor: pointer;
+}
+.right {
+    padding: 0.25rem;
+    float: right;
+    text-align: right;
+}
+
+
+.grid > main, .grid > footer {
+    display: grid;
+}
+.grid > main {
+    grid-template-columns: auto 1fr 1fr;
+}
+.grid > footer {
+    grid-template-columns: 8fr 6fr 3fr;
+}
+.grid [data-input].radio {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(max-content, 4rem));
+}
+.grid > main > header, .grid > main > label, .grid > footer > div {
+    display: contents; /* subgrid will make this much less awkward */
+}
+/*.grid > main > header.empty, */.grid > footer > div:not(:first-of-type) {
+    display: none;
+}
+.grid > main > header > span, .grid > main > label > span, .grid > footer > div > span, main.browser-style {
+    padding: 0.25rem;
+}
+.grid input[type=text] {
+    width: 100%;
+}
+.grid > main > header > span {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(to top, transparent, var(--in-content-box-background-hover) 0.5rem, var(--in-content-box-background-hover));
+    border-image: linear-gradient(to top, transparent, var(--in-content-box-background-hover) 0.5rem, var(--in-content-box-background-hover)) 1 100%;
+    font-weight: bold;
+}
+.grid > main > header > span:first-of-type {
+    border-left-width: 1px;
+    border-left-style: solid;
+}
+.grid > main > header > span:last-of-type {
+    border-right-width: 1px;
+    border-right-style: solid;
+}
+.grid > main > label > span {
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+}
+.grid > main > label > span:first-of-type {
+    border-left: 1px solid transparent;
+}
+.grid > main > label > span:last-of-type {
+    border-right: 1px solid transparent;
+}
+.grid > main > label:hover > span {
+    border-top-color: var(--detail-contributions-border-color);
+    border-bottom-color: var(--detail-contributions-border-color);
+    background-color: var(--detail-contributions-background-hover);
+}
+.grid > main > label:hover > span:first-of-type {
+    border-left-color: var(--detail-contributions-border-color);
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+.grid > main > label:hover > span:last-of-type {
+    border-right-color: var(--detail-contributions-border-color);
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+}

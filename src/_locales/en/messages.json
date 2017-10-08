@@ -6,5 +6,145 @@
     "extensionLongDescription": {
         "message": "JSONovich pretty-prints JSON content of various types directly in a browser tab. It uses the browser's native JSON parser and a custom-built formatter to produce its output.\n\nNormally, the browser would either prompt to download or display as plain text any JSON sent with the correct application/json mime-type. JSONovich makes working with and debugging output from web services easier by formatting JSON nicely inside the browser.",
         "description": "Detailed description of the extension."
+    },
+    "section.format.label": {
+        "message": "Override Default Handling",
+        "description": "Label for the format section."
+    },
+    "section.format.text": {
+        "message": "Format documents as JSON by matching a MIME type or file extension. Wildcards aren't supported yet, only exact matches.",
+        "description": "Description for the format section."
+    },
+    "section.accept.label": {
+        "message": "Override HTTP $HEADER$ Header",
+        "description": "Label for the accept section.",
+        "placeholders": {
+            "header": {
+                "content": "Accept"
+            }
+        }
+    },
+    "section.accept.text": {
+        "message": "Modify the default HTTP $HEADER$ header by matching a URL pattern. Mainly useful for working with CouchDB, has been known to cause conflicts with Confluence, Netflix and the BBC.",
+        "description": "Description for the accept section.",
+        "placeholders": {
+            "header": {
+                "content": "Accept"
+            }
+        }
+    },
+    "pref.debug.label": {
+        "message": "Debug mode",
+        "description": "Label for the debug preference."
+    },
+    "pref.debug.text": {
+        "message": "More console messages to help diagnose problems with the addon.",
+        "description": "Description for the debug preference."
+    },
+    "column.mimetype.label": {
+        "message": "MIME type",
+        "description": "Label for the mimetype column. Contains MIME type strings."
+    },
+    "column.mimetype.text": {
+        "message": "Matches the `$HEADER$` HTTP response header.",
+        "description": "Description for the mimetype column.",
+        "placeholders": {
+            "header": {
+                "content": "Content-Type"
+            }
+        }
+    },
+    "column.extension.label": {
+        "message": "File extension",
+        "description": "Label for the extension column. Contains file extensions."
+    },
+    "column.extension.text": {
+        "message": "Matches the part of the filename after the last dot.",
+        "description": "Description for the extension column."
+    },
+    "column.pattern.label": {
+        "message": "URL match pattern",
+        "description": "Label for the pattern column. Contains URL match patterns as described at https://developer.mozilla.org/Add-ons/WebExtensions/Match_patterns ."
+    },
+    "column.pattern.text": {
+        "message": "Matches URLs as described at the linked documentation page.",
+        "description": "Description for the pattern column."
+    },
+    "column.format.label": {
+        "message": "Format",
+        "description": "Label for the format column. Shows how the matching entry will be formatted."
+    },
+    "column.format.text": {
+        "message": "The type of formatting to perform. Currently this is ignored since the formatter only understands JSON.",
+        "description": "Description for the format column. Currently this is ignored since the formatter only understands JSON."
+    },
+    "column.accept.label": {
+        "message": "Accept",
+        "description": "Label for the accept column. Contains the list of modifications that will be made to the HTTP Accept header for the matching URL."
+    },
+    "column.accept.text": {
+        "message": "The modifications that will be made to the `$HEADER$` HTTP request header.",
+        "description": "Description for the accept column.",
+        "placeholders": {
+            "header": {
+                "content": "Accept"
+            }
+        }
+    },
+    "placeholder.match.format": {
+        "message": "New...",
+        "description": "Placeholder for a text input expecting some sort of matcher expression for overriding the default browser handling behaviour."
+    },
+    "placeholder.match.accept": {
+        "message": "New...",
+        "description": "Placeholder for a text input expecting a URL match pattern for modifying the HTTP Accept header."
+    },
+    "action.add.label": {
+        "message": "Add",
+        "description": "Label for an add button. Result is immediate."
+    },
+    "action.add.text": {
+        "message": "Insert this item.",
+        "description": "Description for an add button."
+    },
+    "action.edit.label": {
+        "message": "Edit:",
+        "description": "Content for an edit label."
+    },
+    "action.edit.text": {
+        "message": "Modify the value of the selected item(s).",
+        "description": "Description for an edit label."
+    },
+    "action.remove.label": {
+        "message": "Remove",
+        "description": "Label for a remove button. Result is immediate."
+    },
+    "action.remove.text": {
+        "message": "Delete the selected item(s).",
+        "description": "Description for a remove button."
+    },
+    "action.export.label": {
+        "message": "Export...",
+        "description": "Label for the export button. User will be prompted with a standard download dialog."
+    },
+    "action.export.text": {
+        "message": "Save all preferences for this addon to a file.",
+        "description": "Description for the export button."
+    },
+    "action.import.label": {
+        "message": "Import...",
+        "description": "Label for the import button. User will be prompted with a standard file selection dialog."
+    },
+    "action.import.text": {
+        "message": "Select a file whose contents will replace all preferences for this addon.",
+        "description": "Description for the import button."
+    },
+    "action.reset.label": {
+        "message": "Restore Defaults",
+        "description": "Label for the reset button. Result is immediate."
+    },
+    "action.reset.text": {
+        "message": "Clear all preferences for this addon and restore the defaults, like a fresh install.",
+        "description": "Description for the reset button."
     }
 }
