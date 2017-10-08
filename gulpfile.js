@@ -7,11 +7,17 @@
 
 'use strict';
 
+const path = require('path');
+
 const gulp = require('gulp');
 const plugin = {
     get jsonModify() {
       delete this.jsonModify;
       return this.jsonModify = require('gulp-json-modify');
+    },
+    get signAddon() {
+      delete this.signAddon;
+      return this.signAddon = require('sign-addon').default;
     },
     get zip() {
       delete this.zip;
@@ -19,9 +25,17 @@ const plugin = {
     },
 };
 const data = {
+    get manifest() {
+        delete this.manifest;
+        return this.manifest = require('./src/manifest.json');
+    },
     get package() {
         delete this.package;
         return this.package = require('./package.json');
+    },
+    get secret() {
+        delete this.secret;
+        return this.secret = require('./secret.json');
     }
 };
 
@@ -39,15 +53,33 @@ function version() {
 }
 
 /**
- * Build the Firefox .xpi from the source files.
+ * Build an unsigned .xpi from the source files.
  */
-function xpi() {
-    return gulp.src('src/**/*', { nodir: true })
-        .pipe(plugin.zip.zip('jsonovich.xpi'))
-        .pipe(gulp.dest('build'));
+function buildXPI() {
+    return gulp.src('src/**/*', {nodir: true})
+        .pipe(plugin.zip.dest('build/jsonovich.xpi'));
+}
+
+/**
+ * Upload an unsigned .xpi to AMO for signing/review.
+ */
+function uploadXPI() {
+    return plugin.signAddon({
+        xpiPath: path.resolve('build/jsonovich.xpi'),
+        id: data.manifest.applications.gecko.id, // docs say optional and "will have no effect!", but server disagrees
+        version: data.manifest.version,
+        apiKey: data.secret.jwtIssuer,
+        apiSecret: data.secret.jwtSecret,
+        downloadDir: path.resolve('build') // doesn't seem to be used for a listed addon
+    })
+    .then(function(result) {
+        console.log(result); // helpfully, for a listed addon, result == {success: false} and all the useful information went to stdout
+    });
 }
 
 gulp.task('version', version);
-gulp.task('xpi', xpi);
-gulp.task('build', ['xpi']);
+gulp.task('build:xpi', ['version'], buildXPI);
+gulp.task('build', ['build:xpi']);
+gulp.task('publish:xpi', ['build:xpi'], uploadXPI);
+gulp.task('publish', ['publish:xpi']);
 gulp.task('default', ['build']);
