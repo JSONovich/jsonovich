@@ -24,8 +24,8 @@
   "private": true,
   "scripts": {
     "build": "gulp",
-    "version": "gulp version && git add .",
-    "postversion": "git push --follow-tags"
+    "version": "gulp version && git add -u",
+    "postversion": "git push --follow-tags && gulp publish"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
