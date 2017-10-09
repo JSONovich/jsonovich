@@ -15,6 +15,10 @@ const plugin = {
       delete this.jsonModify;
       return this.jsonModify = require('gulp-json-modify');
     },
+    get newer() {
+      delete this.newer;
+      return this.newer = require('gulp-newer');
+    },
     get signAddon() {
       delete this.signAddon;
       return this.signAddon = require('sign-addon').default;
@@ -45,6 +49,7 @@ const data = {
  */
 function version() {
     return gulp.src(['src/manifest.json'], {base: '.'})
+        .pipe(plugin.newer('package.json'))
         .pipe(plugin.jsonModify({
             key: 'version',
             value: data.package.version.replace(/-([^\.0-9]+)\./, '$1').replace(/(\d)-(\d)/, '$1pre$2')
@@ -57,7 +62,8 @@ function version() {
  */
 function buildXPI() {
     return gulp.src('src/**/*', {nodir: true})
-        .pipe(plugin.zip.dest('build/jsonovich.xpi'));
+        .pipe(plugin.newer('build/jsonovich.xpi'))
+        .pipe(plugin.zip.dest('build/jsonovich.xpi', {unlessEmpty: true}));
 }
 
 /**
@@ -78,7 +84,7 @@ function uploadXPI() {
 }
 
 gulp.task('version', version);
-gulp.task('build:xpi', ['version'], buildXPI);
+gulp.task('build:xpi', buildXPI);
 gulp.task('build', ['build:xpi']);
 gulp.task('publish:xpi', ['build:xpi'], uploadXPI);
 gulp.task('publish', ['publish:xpi']);
