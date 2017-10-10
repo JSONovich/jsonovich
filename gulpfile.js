@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /* eslint-env node */
+/* eslint-disable no-console */
 'use strict';
 
 const path = require('path');
@@ -87,7 +88,6 @@ function lintJSON() {
 function lintJS(fix) {
     return gulp.src(['**/*.js', '!node_modules/**'], {nodir: true})
         .pipe(plugin.eslint({
-            configFile: 'eslint.json',
             fix: fix
         }))
         .pipe(plugin.eslint.format())

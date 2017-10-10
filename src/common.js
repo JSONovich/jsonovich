@@ -86,28 +86,31 @@ const valid = {
     },
     entry: (expect, value) => {
         switch(typeof expect) {
-        case 'boolean':
-            return value === false || value === true;
-        case 'string':
-            if((expect = valid.expect[expect])) {
-                if(expect.obj)
-                    return valid.entry(expect.obj, value);
-                else
-                    return value && typeof value === 'string' && value.length
-                        && (!expect.maxLen || value.length <= expect.maxLen)
-                        && (!expect.choice || expect.choice.includes(value))
-                        && (!expect.regex || expect.regex.test(value));
+            case 'boolean': {
+                return value === false || value === true;
             }
-            break;
-        case 'object':
-            if(expect.k && expect.v && typeof value === 'object') {
-                for(const k in value) {
-                    if(!valid.entry(expect.k, k) || !valid.entry(expect.v, value[k]))
-                        return false;
+            case 'string': {
+                if((expect = valid.expect[expect])) {
+                    if(expect.obj)
+                        return valid.entry(expect.obj, value);
+                    else
+                        return value && typeof value === 'string' && value.length
+                            && (!expect.maxLen || value.length <= expect.maxLen)
+                            && (!expect.choice || expect.choice.includes(value))
+                            && (!expect.regex || expect.regex.test(value));
                 }
-                return true;
+                break;
             }
-            break;
+            case 'object': {
+                if(expect.k && expect.v && typeof value === 'object') {
+                    for(const k in value) {
+                        if(!valid.entry(expect.k, k) || !valid.entry(expect.v, value[k]))
+                            return false;
+                    }
+                    return true;
+                }
+                break;
+            }
         }
         return false;
     },
@@ -128,18 +131,21 @@ const logger = {
     get enabled() {
         let page = location.href;
         switch(page) {
-        case browser.runtime.getURL('_generated_background_page.html'):
-            page = 'background';
-            break;
-        case browser.runtime.getURL('options/options.html'):
-            page = 'options';
-            break;
-        default:
-            const base = browser.runtime.getURL();
-            if(page.startsWith(base))
-                page = page.replace(base, '');
+            case browser.runtime.getURL('_generated_background_page.html'): {
+                page = 'background';
+                break;
+            }
+            case browser.runtime.getURL('options/options.html'): {
+                page = 'options';
+                break;
+            }
+            default: {
+                const base = browser.runtime.getURL();
+                if(page.startsWith(base))
+                    page = page.replace(base, '');
+            }
         }
-        const logger = Function.prototype.bind.call(console.log, console, `[JSONovich ${page}]`);
+        const logger = Function.prototype.bind.call(console.log, console, `[JSONovich ${page}]`); // eslint-disable-line no-console
         logger('Debugging enabled', browser.runtime.getManifest());
         delete this.enabled;
         return this.enabled = logger;

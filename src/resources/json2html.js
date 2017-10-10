@@ -103,27 +103,32 @@ const JSON2HTML = (() => {
       data.currentLine.addElement(new Element(literal.null, "null"));
     } else {
       switch(typeof thing) {
-        case "number":
+          case "number": {
           data.currentLine.addElement(new Element(thing, "number"));
           break;
-        case "boolean":
+          }
+          case "boolean": {
           data.currentLine.addElement(new Element(thing ? literal.true : literal.false,
             "boolean " + (thing ? "true" : "false")));
           break;
-        case "string":
+          }
+          case "string": {
           data.currentLine.addElement(new Element([
             new Element(literal.delim.open.string, "delimiter"),
             new Element(encodeHTML(escapeString(thing)), "content"),
             new Element(literal.delim.close.string, "delimiter")
             ], "string"));
           break;
-        case "object":
+          }
+          case "object": {
           formatObject(data, thing);
           break;
-        default:
+          }
+          default: {
           data.currentLine.addElement(new Element(thing, "unknown"));
           break;
       }
+    }
     }
   };
 

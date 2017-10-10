@@ -20,7 +20,7 @@ const nodes = {};
  * @param msg string Localisation lookup key.
  */
 function userError(err, msg) {
-    log(e.toString() + '\n' + e.stack); // TODO: add something more visible
+    log(err.toString() + '\n' + err.stack); // TODO: add something more visible
 }
 
 /**
@@ -161,16 +161,18 @@ const events = {
             const grid = row.closest('.grid');
             const pref = row.nodeName == 'HEADER' ? row.id : row.dataset.pref;
             switch(row.nodeName) {
-            case 'HEADER':
-                for(const box of grid.querySelectorAll('label[data-pref=' + pref + '] input[type=checkbox]:not([id])' + (node.checked ? ':not(:checked)' : ':checked'))) {
-                    box.checked = node.checked;
+                case 'HEADER': {
+                    for(const box of grid.querySelectorAll('label[data-pref=' + pref + '] input[type=checkbox]:not([id])' + (node.checked ? ':not(:checked)' : ':checked'))) {
+                        box.checked = node.checked;
+                    }
+                    break;
                 }
-                break;
-            case 'LABEL':
-                const selectAll = nodes[pref].querySelector('input[type=checkbox]:not([id])');
-                selectAll.checked = grid.querySelector('label[data-pref=' + pref + '] input[type=checkbox]:not([id]):checked');
-                selectAll.indeterminate = selectAll.checked && grid.querySelector('label[data-pref=' + pref + '] input[type=checkbox]:not([id]):not(:checked)');
-                break;
+                case 'LABEL': {
+                    const selectAll = nodes[pref].querySelector('input[type=checkbox]:not([id])');
+                    selectAll.checked = grid.querySelector('label[data-pref=' + pref + '] input[type=checkbox]:not([id]):checked');
+                    selectAll.indeterminate = selectAll.checked && grid.querySelector('label[data-pref=' + pref + '] input[type=checkbox]:not([id]):not(:checked)');
+                    break;
+                }
             }
             const footers = grid.querySelectorAll('footer > div');
             if(footers.length < 2)
@@ -259,36 +261,38 @@ function onPrefChanged(changes, areaName) {
         const node = nodes[pref];
         if(node) {
             switch(typeof schema) {
-            case 'boolean':
-                if(node.nodeName == 'INPUT' && node.type == 'checkbox') {
-                    node.checked = change.newValue;
-                    continue;
-                }
-                break;
-            case 'object':
-                if(node.nodeName == 'HEADER' && nodes['tpl-grid-head-' + schema.k]) {
-                    const frag = document.createDocumentFragment();
-                    const tpl = nodes['tpl-grid-row'];
-                    for(const k in change.newValue) {
-                        const row = tpl.cloneNode(true);
-                        const label = row.querySelector('label');
-                        label.dataset.pref = pref;
-                        label.dataset.key = k;
-                        label.children[1].textContent = k;
-                        label.children[2].textContent = valid.expect[schema.v].choice && !valid.expect[schema.v].obj ? change.newValue[k] : JSON.stringify(change.newValue[k]);
-                        frag.appendChild(row);
+                case 'boolean': {
+                    if(node.nodeName == 'INPUT' && node.type == 'checkbox') {
+                        node.checked = change.newValue;
+                        continue;
                     }
-                    const selectAll = node.querySelector('input[type=checkbox]:not([id])');
-                    if(selectAll && selectAll.checked)
-                        selectAll.click(); // deselect all to restore correct footer
-                    for(const n of node.parentNode.querySelectorAll('label[data-pref=' + pref + ']')) {
-                        n.remove();
-                    }
-                    node.classList.toggle('empty', !frag.childElementCount);
-                    node.after(frag);
-                    continue;
+                    break;
                 }
-                break;
+                case 'object': {
+                    if(node.nodeName == 'HEADER' && nodes['tpl-grid-head-' + schema.k]) {
+                        const frag = document.createDocumentFragment();
+                        const tpl = nodes['tpl-grid-row'];
+                        for(const k in change.newValue) {
+                            const row = tpl.cloneNode(true);
+                            const label = row.querySelector('label');
+                            label.dataset.pref = pref;
+                            label.dataset.key = k;
+                            label.children[1].textContent = k;
+                            label.children[2].textContent = valid.expect[schema.v].choice && !valid.expect[schema.v].obj ? change.newValue[k] : JSON.stringify(change.newValue[k]);
+                            frag.appendChild(row);
+                        }
+                        const selectAll = node.querySelector('input[type=checkbox]:not([id])');
+                        if(selectAll && selectAll.checked)
+                            selectAll.click(); // deselect all to restore correct footer
+                        for(const n of node.parentNode.querySelectorAll('label[data-pref=' + pref + ']')) {
+                            n.remove();
+                        }
+                        node.classList.toggle('empty', !frag.childElementCount);
+                        node.after(frag);
+                        continue;
+                    }
+                    break;
+                }
             }
         }
         log(`Unable to display ${typeof change.newValue} preference "${pref}" in ${node ? node.nodeName : 'null'} node.`);
