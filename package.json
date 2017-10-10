@@ -30,7 +30,7 @@
     "postversion": "git push --follow-tags && gulp publish"
   },
   "devDependencies": {
-    "addons-linter": "^0.26.1",
+    "addons-linter": "^0.27.0",
     "gulp": "^3.9.1",
     "gulp-eslint": "^4.0.0",
     "gulp-if": "^2.0.2",
