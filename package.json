@@ -1,7 +1,7 @@
 {
   "name": "jsonovich",
   "version": "2.0.0-0",
-  "description": "Pretty-prints JSON content in the browser for easy, unobtrusive viewing.",
+  "description": "A webextension for Firefox. Pretty-prints JSON content in the browser for easy, unobtrusive viewing.",
   "keywords": [
     "json",
     "viewer",
