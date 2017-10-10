@@ -11,6 +11,10 @@ const path = require('path');
 
 const gulp = require('gulp');
 const plugin = {
+    get addonsLinter() {
+      delete this.addonsLinter;
+      return this.addonsLinter = require('addons-linter');
+    },
     get jsonModify() {
       delete this.jsonModify;
       return this.jsonModify = require('gulp-json-modify');
@@ -58,6 +62,23 @@ function version() {
 }
 
 /**
+ * Run the addon linter to check for addon-specific coding issues.
+ */
+function lint() {
+    return plugin.addonsLinter.createInstance({
+        config: {
+            _: [path.resolve('src')],
+            logLevel: process.env.VERBOSE ? 'debug' : 'fatal',
+            stack: Boolean(process.env.VERBOSE)
+        }
+    }).run().then(result => {
+        const n = result.errors.length;
+        if(n)
+            throw `${n} error${n == 1 ? '' : 's'} found by addon linter.`;
+    });
+}
+
+/**
  * Build an unsigned .xpi from the source files.
  */
 function buildXPI() {
@@ -78,12 +99,13 @@ function uploadXPI() {
         apiSecret: data.secret.jwtSecret,
         downloadDir: path.resolve('build') // doesn't seem to be used for a listed addon
     })
-    .then(function(result) {
+    .then(result => {
         console.log(result); // helpfully, for a listed addon, result == {success: false} and all the useful information went to stdout
     });
 }
 
 gulp.task('version', version);
+gulp.task('lint', lint);
 gulp.task('build:xpi', buildXPI);
 gulp.task('build', ['build:xpi']);
 gulp.task('publish:xpi', ['build:xpi'], uploadXPI);
