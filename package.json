@@ -13,13 +13,13 @@
   "contributors": [
     "William Elwood <we9@kent.ac.uk>"
   ],
-  "homepage": "https://github.com/mjgiarlo/jsonovich#readme",
+  "homepage": "https://github.com/JSONovich/jsonovich#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mjgiarlo/jsonovich.git"
+    "url": "git+https://github.com/JSONovich/jsonovich.git"
   },
   "bugs": {
-    "url": "https://github.com/mjgiarlo/jsonovich/issues"
+    "url": "https://github.com/JSONovich/jsonovich/issues"
   },
   "private": true,
   "scripts": {
