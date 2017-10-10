@@ -29,4 +29,4 @@ To quote the original homepage on Mike's τεχνοσοφια blog:
 > JSONovich is named after Pavement member Bob Nastanovich primarily because he seems like a swell guy.
 
 ## License
-[MPL 1.1](https://www.mozilla.org/MPL/1.1/)/[GPL 2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)/[LGPL 2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)
+[MPL 2.0](https://www.mozilla.org/MPL/2.0/)

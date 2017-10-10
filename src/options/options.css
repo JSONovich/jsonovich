@@ -1,13 +1,17 @@
-:root {
-    --in-content-border-color: #d7d7db;
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+ :root {
+    --in-content-border-color: #d7d7db;                     /* photon: grey-30 */
     --in-content-box-background-hover: #ebebeb;
     --in-content-link-color: #0a8dff;
-    --in-content-link-color-hover: #0060df;
-    --in-content-link-color-active: #003eaa;
+    --in-content-link-color-hover: #0060df;                 /* photon: blue-60 */
+    --in-content-link-color-active: #003eaa;                /* photon: blue-70 */
     --in-content-link-color-visited: #0a8dff;
-    --in-content-primary-button-background: #0a84ff;
-    --in-content-primary-button-background-hover: #0060df;
-    --in-content-primary-button-background-active: #003eaa;
+    --in-content-primary-button-background: #0a84ff;        /* photon: blue-50 */
+    --in-content-primary-button-background-hover: #0060df;  /* photon: blue-60 */
+    --in-content-primary-button-background-active: #003eaa; /* photon: blue-70 */
     --detail-contributions-border-color: #d2dbe8;
     --detail-contributions-background-hover: #f3f7fb;
 

@@ -1,9 +1,6 @@
-/**
- * @license MPL 1.1/GPL 2.0/LGPL 2.1, see license.txt
- * @author William Elwood <we9@kent.ac.uk>
- * @copyright 2010 JSONovich Team. All Rights Reserved.
- * @description This file contains style rules for rendering formatted JSON.
- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /* eslint-env browser */
 'use strict';

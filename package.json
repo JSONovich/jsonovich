@@ -8,7 +8,7 @@
     "webextension",
     "firefox"
   ],
-  "license": "MPL-1.1",
+  "license": "MPL-2.0",
   "author": "Michael J. Giarlo",
   "contributors": [
     "William Elwood <we9@kent.ac.uk>"
