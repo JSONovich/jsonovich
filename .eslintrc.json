@@ -4,7 +4,5 @@
         "es6": true
     },
     "rules": {
-        "no-unused-vars": "warn",
-        "no-useless-escape": "warn"
     }
 }

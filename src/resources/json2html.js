@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/* exported JSON2HTML */
 'use strict';
 
 const JSON2HTML = (() => {
@@ -46,7 +47,7 @@ const JSON2HTML = (() => {
   // object each time the function containing them is called.
   // The language spec requires a new object created even if you don't access
   // the $1 members.
-  r_amp = /&/g, r_lt = /</g, r_gt = />/g, r_quot = /\"/g,
+  r_amp = /&/g, r_lt = /</g, r_gt = />/g, r_quot = /"/g,
 
   encodeHTML = function(aHtmlSource) {
     return (aHtmlSource+'').replace(r_amp, '&amp;').replace(r_lt, '&lt;').replace(r_gt, '&gt;').replace(r_quot, '&quot;');

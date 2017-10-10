@@ -44,15 +44,15 @@ const valid = {
     expect: {
         mimetype: { // ref: https://tools.ietf.org/html/rfc7231#section-3.1.1.1
             maxLen: 80,
-            regex: /^(?:application|text)\/[^\*/]+$/
+            regex: /^(?:application|text)\/[^*/]+$/
         },
         extension: {
             maxLen: 10,
-            regex: /^[^\*\.?#/\\]+$/
+            regex: /^[^*.?#/\\]+$/
         },
         pattern: { // ref: https://developer.mozilla.org/Add-ons/WebExtensions/Match_patterns
             maxLen: 2000,
-            regex: /^<all_urls>|(?:\*|https?|file|ftp|app):\/\/(?:\*(?:\.[^\./]+)?|[^\./][^/]*|)(?:\/.*)?$/
+            regex: /^<all_urls>|(?:\*|https?|file|ftp|app):\/\/(?:\*(?:\.[^./]+)?|[^./][^/]*|)(?:\/.*)?$/
         },
         format: {
             choice: ['json', 'js']

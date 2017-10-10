@@ -67,7 +67,7 @@ function version() {
         .pipe(plugin.newer({dest: '.', extra: 'package.json'}))
         .pipe(plugin.jsonModify({
             key: 'version',
-            value: data.package.version.replace(/-([^\.0-9]+)\./, '$1').replace(/(\d)-(\d)/, '$1pre$2')
+            value: data.package.version.replace(/-([^.0-9]+)\./, '$1').replace(/(\d)-(\d)/, '$1pre$2')
         }))
         .pipe(gulp.dest('.'));
 }

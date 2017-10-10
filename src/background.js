@@ -249,7 +249,7 @@ const listeners = {
                 runAt: 'document_start'
             }).catch(error => {
                 log('Failed to load content script!', error + '\n' + error.stack);
-            }).then(result => {
+            }).then((/*result*/) => {
                 tabs.delete(details.tabId);
             });
         }
@@ -298,7 +298,7 @@ function ensureListeners() {
         // handle file and ftp(s)
         browser.webNavigation.onBeforeNavigate.addListener(listeners.webNavigation.onBeforeNavigate, {
             url: [{
-                urlMatches: `^(?:file|ftps?)://.+\.(?:${Array.from(exts.keys()).join('|')})$`
+                urlMatches: `^(?:file|ftps?)://.+\\.(?:${Array.from(exts.keys()).join('|')})$`
             }]
         });
     } else {

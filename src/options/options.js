@@ -20,7 +20,8 @@ const nodes = {};
  * @param msg string Localisation lookup key.
  */
 function userError(err, msg) {
-    log(err.toString() + '\n' + err.stack); // TODO: add something more visible
+    log(err.toString() + '\n' + err.stack);
+    msg; // TODO: use this to present a localised message in the page
 }
 
 /**
