@@ -53,7 +53,7 @@ const data = {
  */
 function version() {
     return gulp.src(['src/manifest.json'], {base: '.'})
-        .pipe(plugin.newer('package.json'))
+        .pipe(plugin.newer({dest: '.', extra: 'package.json'}))
         .pipe(plugin.jsonModify({
             key: 'version',
             value: data.package.version.replace(/-([^\.0-9]+)\./, '$1').replace(/(\d)-(\d)/, '$1pre$2')
