@@ -35,6 +35,7 @@
     "gulp-eslint": "^4.0.0",
     "gulp-if": "^2.0.2",
     "gulp-json-modify": "^1.0.2",
+    "gulp-json-validator": "^1.1.1",
     "gulp-newer": "^1.3.0",
     "gulp-vinyl-zip": "^2.1.0",
     "sign-addon": "^0.2.1"

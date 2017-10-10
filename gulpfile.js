@@ -25,6 +25,10 @@ const plugin = {
       delete this.jsonModify;
       return this.jsonModify = require('gulp-json-modify');
     },
+    get jsonValidate() {
+      delete this.jsonValidate;
+      return this.jsonValidate = require('gulp-json-validator');
+    },
     get newer() {
       delete this.newer;
       return this.newer = require('gulp-newer');
@@ -68,11 +72,19 @@ function version() {
 }
 
 /**
- * Run ESlint to check for general coding issues.
+ * Check for invalid JSON files.
+ */
+function lintJSON() {
+    return gulp.src(['**/*.json', '!node_modules/**'], {nodir: true})
+        .pipe(plugin.jsonValidate());
+}
+
+/**
+ * Check for general coding issues with ESlint.
  *
  * @param fix boolean Controls whether eslint will fix any issues it knows how.
  */
-function lintEslint(fix) {
+function lintJS(fix) {
     return gulp.src(['**/*.js', '!node_modules/**'], {nodir: true})
         .pipe(plugin.eslint({
             configFile: 'eslint.json',
@@ -84,7 +96,7 @@ function lintEslint(fix) {
 }
 
 /**
- * Run the addon linter to check for addon-specific coding issues.
+ * Check for addon-specific coding issues with addons-linter.
  */
 function lintAddon() {
     return plugin.addonsLinter.createInstance({
@@ -124,10 +136,11 @@ function uploadXPI() {
 }
 
 gulp.task('version', version);
-gulp.task('lint:eslint:fix', lintEslint.bind(null, true));
-gulp.task('lint:eslint', lintEslint);
+gulp.task('lint:json', lintJSON);
+gulp.task('lint:js:fix', lintJS.bind(null, true));
+gulp.task('lint:js', lintJS);
 gulp.task('lint:addon', lintAddon);
-gulp.task('lint', ['lint:eslint', 'lint:addon']);
+gulp.task('lint', ['lint:json', 'lint:js', 'lint:addon']);
 gulp.task('build:xpi', buildXPI);
 gulp.task('build', ['build:xpi']);
 gulp.task('publish:xpi', ['build:xpi'], uploadXPI);
