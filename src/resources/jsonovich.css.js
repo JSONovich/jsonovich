@@ -5,6 +5,9 @@
  * @description This file contains style rules for rendering formatted JSON.
  */
 
+/* eslint-env browser */
+'use strict';
+
 // browser.tabs.insertCSS from background at same time as executeScript => "An unexpected error occurred"
 // <link> inserted from content script or page script => doesn't load
 // hence this file has been converted from CSS to JS, which loads fine

@@ -5,6 +5,7 @@
  * @description Build script.
  */
 
+/* eslint-env node */
 'use strict';
 
 const path = require('path');
@@ -14,6 +15,14 @@ const plugin = {
     get addonsLinter() {
       delete this.addonsLinter;
       return this.addonsLinter = require('addons-linter');
+    },
+    get eslint() {
+      delete this.eslint;
+      return this.eslint = require('gulp-eslint');
+    },
+    get if() {
+      delete this.if;
+      return this.if = require('gulp-if');
     },
     get jsonModify() {
       delete this.jsonModify;
@@ -62,9 +71,25 @@ function version() {
 }
 
 /**
+ * Run ESlint to check for general coding issues.
+ *
+ * @param fix boolean Controls whether eslint will fix any issues it knows how.
+ */
+function lintEslint(fix) {
+    return gulp.src(['**/*.js', '!node_modules/**'], {nodir: true})
+        .pipe(plugin.eslint({
+            configFile: 'eslint.json',
+            fix: fix
+        }))
+        .pipe(plugin.eslint.format())
+        .pipe(plugin.if(file => file.eslint && file.eslint.fixed, gulp.dest('.')))
+        .pipe(plugin.eslint.failAfterError());
+}
+
+/**
  * Run the addon linter to check for addon-specific coding issues.
  */
-function lint() {
+function lintAddon() {
     return plugin.addonsLinter.createInstance({
         config: {
             _: [path.resolve('src')],
@@ -98,14 +123,14 @@ function uploadXPI() {
         apiKey: data.secret.jwtIssuer,
         apiSecret: data.secret.jwtSecret,
         downloadDir: path.resolve('build') // doesn't seem to be used for a listed addon
-    })
-    .then(result => {
-        console.log(result); // helpfully, for a listed addon, result == {success: false} and all the useful information went to stdout
-    });
+    }).then(result => console.log(result)); // helpfully, for a listed addon, result == {success: false} and all the useful information went to stdout
 }
 
 gulp.task('version', version);
-gulp.task('lint', lint);
+gulp.task('lint:eslint:fix', lintEslint.bind(null, true));
+gulp.task('lint:eslint', lintEslint);
+gulp.task('lint:addon', lintAddon);
+gulp.task('lint', ['lint:eslint', 'lint:addon']);
 gulp.task('build:xpi', buildXPI);
 gulp.task('build', ['build:xpi']);
 gulp.task('publish:xpi', ['build:xpi'], uploadXPI);

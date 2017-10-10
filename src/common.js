@@ -5,6 +5,7 @@
  * @description Common code for background scripts.
  */
 
+/* eslint-env webextensions, worker */
 'use strict';
 
 const ts = {
@@ -128,7 +129,7 @@ const valid = {
 const logger = {
     disabled: () => {},
     get enabled() {
-        let page = window.location.href;
+        let page = location.href;
         switch(page) {
         case browser.runtime.getURL('_generated_background_page.html'):
             page = 'background';

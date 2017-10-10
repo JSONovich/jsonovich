@@ -1,0 +1,13 @@
+{
+    "extends": "eslint:recommended",
+    "env": {
+        "es6": true
+    },
+    "rules": {
+        "no-case-declarations": "warn",
+        "no-console": "warn",
+        "no-undef": "warn",
+        "no-unused-vars": "warn",
+        "no-useless-escape": "warn"
+    }
+}

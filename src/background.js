@@ -5,6 +5,8 @@
  * @description Background script handling networking tasks.
  */
 
+/* eslint-env webextensions, worker */
+/* global configInit:false, log:false, logger:false, ts:false, valid:false */
 'use strict';
 
 {

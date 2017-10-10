@@ -5,6 +5,8 @@
  * @description This file contains block-folding functions for the rendered JSON content.
  */
 
+/* eslint-env browser */
+/* global JSON2HTML:false */
 'use strict';
 
 {

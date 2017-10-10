@@ -5,6 +5,7 @@
  * @description Content script to inject unprivileged page scripts.
  */
 
+/* eslint-env webextensions, browser */
 'use strict';
 
 {

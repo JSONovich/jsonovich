@@ -5,6 +5,8 @@
  * @description Page script specific to the options UI.
  */
 
+/* eslint-env webextensions, browser */
+/* global configInit:false, defaultConfig:false, log:false, ts:false, valid:false */
 'use strict';
 
 {
