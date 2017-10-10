@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "default_locale": "en",
     "name": "JSONovich",
-    "version": "2.0.0pre0",
+    "version": "2.0.0pre2",
     "description": "__MSG_extensionDescription__",
     "homepage_url": "https://github.com/mjgiarlo/jsonovich",
     "author": "Michael J. Giarlo",
