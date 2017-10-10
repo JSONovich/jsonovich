@@ -62,10 +62,10 @@ summary {
     display: grid;
 }
 .grid > main {
-    grid-template-columns: auto 1fr 1fr;
+    grid-template-columns: auto minmax(max-content, 1fr) 1fr;
 }
 .grid > footer {
-    grid-template-columns: 8fr 6fr 3fr;
+    grid-template-columns: 2fr 1fr auto;
 }
 .grid [data-input].radio {
     display: grid;
@@ -74,8 +74,16 @@ summary {
 .grid > main > header, .grid > main > label, .grid > footer > div {
     display: contents; /* subgrid will make this much less awkward */
 }
-/*.grid > main > header.empty, */.grid > footer > div:not(:first-of-type) {
-    display: none;
+.grid > footer > div:not(:first-of-type) > * { /* element size still affects grid properly in horizontal axis, but is otherwise effectively invisible */
+    visibility: hidden;
+    height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top: 0;
+    border-bottom: 0;
+    overflow: hidden;
 }
 .grid > main > header > span, .grid > main > label > span, .grid > footer > div > span, main.browser-style {
     padding: 0.25rem;
@@ -122,4 +130,24 @@ summary {
     border-right-color: var(--detail-contributions-border-color);
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
+}
+
+
+#btn-export::before {
+    content: '\01F4BE\0000A0';
+}
+#btn-import::before {
+    content: '\01F4C2\0000A0';
+}
+#btn-reset::before {
+    content: '\002728\0000A0';
+}
+button[name="add"]::before {
+    content: '\002795\0000A0';
+}
+button[name="remove"]::before {
+    content: '\00274C\0000A0';
+}
+.edit::before {
+    content: '\01F527\0000A0';
 }
