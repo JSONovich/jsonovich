@@ -161,17 +161,18 @@ const events = {
                 return;
             const grid = row.closest('.grid');
             const pref = row.nodeName == 'HEADER' ? row.id : row.dataset.pref;
+            const selector = 'label[data-pref=' + pref + '] input[type=checkbox]:not([id])';
             switch(row.nodeName) {
                 case 'HEADER': {
-                    for(const box of grid.querySelectorAll('label[data-pref=' + pref + '] input[type=checkbox]:not([id])' + (node.checked ? ':not(:checked)' : ':checked'))) {
+                    for(const box of grid.querySelectorAll(selector + (node.checked ? ':not(:checked)' : ':checked'))) {
                         box.checked = node.checked;
                     }
                     break;
                 }
                 case 'LABEL': {
-                    const selectAll = nodes[pref].querySelector('input[type=checkbox]:not([id])');
-                    selectAll.checked = grid.querySelector('label[data-pref=' + pref + '] input[type=checkbox]:not([id]):checked');
-                    selectAll.indeterminate = selectAll.checked && grid.querySelector('label[data-pref=' + pref + '] input[type=checkbox]:not([id]):not(:checked)');
+                    const selectAll = nodes[pref].querySelector('.select-all input[type=checkbox]:not([id])');
+                    selectAll.checked = grid.querySelector(selector + ':checked');
+                    selectAll.indeterminate = selectAll.checked && grid.querySelector(selector + ':not(:checked)');
                     break;
                 }
             }
@@ -282,7 +283,7 @@ function onPrefChanged(changes, areaName) {
                             label.children[2].textContent = valid.expect[schema.v].choice && !valid.expect[schema.v].obj ? change.newValue[k] : JSON.stringify(change.newValue[k]);
                             frag.appendChild(row);
                         }
-                        const selectAll = node.querySelector('input[type=checkbox]:not([id])');
+                        const selectAll = node.querySelector('.select-all input[type=checkbox]:not([id])');
                         if(selectAll && selectAll.checked)
                             selectAll.click(); // deselect all to restore correct footer
                         for(const n of node.parentNode.querySelectorAll('label[data-pref=' + pref + ']')) {

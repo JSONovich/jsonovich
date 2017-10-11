@@ -78,7 +78,7 @@ summary {
 .grid > main > header, .grid > main > label, .grid > footer > div {
     display: contents; /* subgrid will make this much less awkward */
 }
-.grid > footer > div:not(:first-of-type) > * { /* element size still affects grid properly in horizontal axis, but is otherwise effectively invisible */
+.grid > main > header.empty > .select-all > *, .grid > footer > div:not(:first-of-type) > * { /* element size still affects grid properly in horizontal axis, but is otherwise effectively invisible */
     visibility: hidden;
     height: 0;
     margin-top: 0;
