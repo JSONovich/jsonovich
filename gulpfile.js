@@ -38,6 +38,10 @@ const plugin = {
       delete this.signAddon;
       return this.signAddon = require('sign-addon').default;
     },
+    get stylelint() {
+      delete this.stylelint;
+      return this.stylelint = require('gulp-stylelint');
+    },
     get zip() {
       delete this.zip;
       return this.zip = require('gulp-vinyl-zip');
@@ -70,6 +74,21 @@ function version() {
             value: data.package.version.replace(/-([^.0-9]+)\./, '$1').replace(/(\d)-(\d)/, '$1pre$2')
         }))
         .pipe(gulp.dest('.'));
+}
+
+/**
+ * Check for problems in CSS files.
+ */
+function lintCSS() {
+    return gulp.src(['**/*.css', '!node_modules/**'], {nodir: true})
+        .pipe(plugin.stylelint({
+            reporters: [
+                {
+                    formatter: 'string',
+                    console: true
+                }
+            ]
+        }));
 }
 
 /**
@@ -136,11 +155,12 @@ function uploadXPI() {
 }
 
 gulp.task('version', version);
+gulp.task('lint:css', lintCSS);
 gulp.task('lint:json', lintJSON);
 gulp.task('lint:js:fix', lintJS.bind(null, true));
 gulp.task('lint:js', lintJS);
 gulp.task('lint:addon', lintAddon);
-gulp.task('lint', ['lint:json', 'lint:js', 'lint:addon']);
+gulp.task('lint', ['lint:css', 'lint:json', 'lint:js', 'lint:addon']);
 gulp.task('build:xpi', buildXPI);
 gulp.task('build', ['build:xpi']);
 gulp.task('publish:xpi', ['build:xpi'], uploadXPI);

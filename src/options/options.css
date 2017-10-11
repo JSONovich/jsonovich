@@ -1,8 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
- 
- :root {
+
+:root {
     --in-content-border-color: #d7d7db;                     /* photon: grey-30 */
     --in-content-box-background-hover: #ebebeb;
     --in-content-link-color: #0a8dff;
@@ -14,71 +14,92 @@
     --in-content-primary-button-background-active: #003eaa; /* photon: blue-70 */
     --detail-contributions-border-color: #d2dbe8;
     --detail-contributions-background-hover: #f3f7fb;
-
 }
-html, body {
+
+html,
+body {
     margin: 0;
     padding: 0;
 }
+
 a {
     color: var(--in-content-link-color);
 }
+
 a:hover {
     color: var(--in-content-link-color-hover);
 }
+
 a:active {
     color: var(--in-content-link-color-active);
 }
+
 a:visited {
     color: var(--in-content-link-color-visited);
 }
+
 button {
     margin: 0.1rem 0;
 }
+
 section {
     padding: 0.2rem 0;
     border-top: 1px solid var(--in-content-border-color);
 }
+
 main {
     max-height: 20rem;
     overflow-x: hidden;
     overflow-y: auto;
 }
+
 details {
     background: linear-gradient(transparent, var(--in-content-box-background-hover) 1rem, var(--in-content-box-background-hover));
 }
+
 details > p {
     margin: 0;
 }
+
 summary {
     font-weight: bold;
     font-size: 1.42rem;
     cursor: pointer;
 }
+
 .right {
     padding: 0.25rem;
     float: right;
     text-align: right;
 }
 
-
-.grid > main, .grid > footer {
+.grid > main,
+.grid > footer {
     display: grid;
 }
+
 .grid > main {
     grid-template-columns: auto minmax(max-content, 1fr) 1fr;
 }
+
 .grid > footer {
     grid-template-columns: 2fr 1fr auto;
 }
+
 .grid [data-input].radio {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(max-content, 4rem));
 }
-.grid > main > header, .grid > main > label, .grid > footer > div {
+
+.grid > main > header,
+.grid > main > label,
+.grid > footer > div {
     display: contents; /* subgrid will make this much less awkward */
 }
-.grid > main > header.empty > .select-all > *, .grid > footer > div:not(:first-of-type) > * { /* element size still affects grid properly in horizontal axis, but is otherwise effectively invisible */
+
+/* element size still affects grid properly in horizontal axis, but is otherwise effectively invisible */
+.grid > main > header.empty > .select-all > *,
+.grid > footer > div:not(:first-of-type) > * {
     visibility: hidden;
     height: 0;
     margin-top: 0;
@@ -89,12 +110,18 @@ summary {
     border-bottom: 0;
     overflow: hidden;
 }
-.grid > main > header > span, .grid > main > label > span, .grid > footer > div > span, main.browser-style {
+
+.grid > main > header > span,
+.grid > main > label > span,
+.grid > footer > div > span,
+main.browser-style {
     padding: 0.25rem;
 }
+
 .grid input[type=text] {
     width: 100%;
 }
+
 .grid > main > header > span {
     position: sticky;
     top: 0;
@@ -102,56 +129,68 @@ summary {
     border-image: linear-gradient(to top, transparent, var(--in-content-box-background-hover) 0.5rem, var(--in-content-box-background-hover)) 1 100%;
     font-weight: bold;
 }
+
 .grid > main > header > span:first-of-type {
     border-left-width: 1px;
     border-left-style: solid;
 }
+
 .grid > main > header > span:last-of-type {
     border-right-width: 1px;
     border-right-style: solid;
 }
+
 .grid > main > label > span {
     border-top: 1px solid transparent;
     border-bottom: 1px solid transparent;
 }
+
 .grid > main > label > span:first-of-type {
     border-left: 1px solid transparent;
 }
+
 .grid > main > label > span:last-of-type {
     border-right: 1px solid transparent;
 }
+
 .grid > main > label:hover > span {
     border-top-color: var(--detail-contributions-border-color);
     border-bottom-color: var(--detail-contributions-border-color);
     background-color: var(--detail-contributions-background-hover);
 }
+
 .grid > main > label:hover > span:first-of-type {
     border-left-color: var(--detail-contributions-border-color);
     border-top-left-radius: 2px;
     border-bottom-left-radius: 2px;
 }
+
 .grid > main > label:hover > span:last-of-type {
     border-right-color: var(--detail-contributions-border-color);
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
 }
 
-
 #btn-export::before {
     content: '\01F4BE\0000A0';
 }
+
 #btn-import::before {
     content: '\01F4C2\0000A0';
 }
+
 #btn-reset::before {
     content: '\002728\0000A0';
 }
+
 button[name="add"]::before {
     content: '\002795\0000A0';
 }
+
 button[name="remove"]::before {
     content: '\00274C\0000A0';
 }
+
 .edit::before {
     content: '\01F527\0000A0';
 }
