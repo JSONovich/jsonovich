@@ -79,15 +79,17 @@ function version() {
 /**
  * Check for problems in CSS files.
  */
-function lintCSS() {
+function lintCSS(fix) {
     return gulp.src(['**/*.css', '!node_modules/**'], {nodir: true})
         .pipe(plugin.stylelint({
+            fix: fix,
             reporters: [
                 {
                     formatter: 'string',
                     console: true
                 }
-            ]
+            ],
+            reportNeedlessDisables: true
         }));
 }
 
@@ -155,6 +157,7 @@ function uploadXPI() {
 }
 
 gulp.task('version', version);
+gulp.task('lint:css:fix', lintCSS.bind(null, true));
 gulp.task('lint:css', lintCSS);
 gulp.task('lint:json', lintJSON);
 gulp.task('lint:js:fix', lintJS.bind(null, true));
