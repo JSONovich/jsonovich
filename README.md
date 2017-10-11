@@ -1,4 +1,4 @@
-# JSONovich [![Mozilla Add-on](https://img.shields.io/amo/v/jsonovich.svg)](https://addons.mozilla.org/firefox/addon/jsonovich/) [![GitHub tag](https://img.shields.io/github/tag/JSONovich/jsonovich.svg)](https://github.com/JSONovich/jsonovich/tags) [![David](https://img.shields.io/david/dev/JSONovich/jsonovich.svg)](https://david-dm.org/JSONovich/jsonovich?type=dev)
+# JSONovich [![Mozilla Add-on](https://img.shields.io/amo/v/jsonovich.svg)](https://addons.mozilla.org/firefox/addon/jsonovich/) [![GitHub tag](https://img.shields.io/github/tag/JSONovich/jsonovich.svg)](https://github.com/JSONovich/jsonovich/tags) [![David](https://img.shields.io/david/dev/JSONovich/jsonovich.svg)](https://david-dm.org/JSONovich/jsonovich?type=dev) [![Build Status](https://semaphoreci.com/api/v1/jsonovich/jsonovich/branches/master/shields_badge.svg)](https://semaphoreci.com/jsonovich/jsonovich)
 A webextension for Firefox. Pretty-prints JSON content in the browser for easy, unobtrusive viewing.
 
 ## Installing
