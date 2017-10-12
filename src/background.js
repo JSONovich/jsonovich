@@ -188,7 +188,7 @@ const listeners = {
 
             const mime = details.responseHeaders.find(header => header.value && rContentType.test(header.name));
             let mode;
-            if((!mime || !(mode = mimes.get(mime.value.split(rParamSep, 2)[0]))) && !(mode = handleUrl(details.url)))
+            if((!mime || !(mode = mimes.get(mime.value.split(rParamSep, 2)[0])))/* && !(mode = handleUrl(details.url))*/)
                 return; // no matching mimetype or extension
             tabs.set(details.tabId, mode);
             log(`Handling tab ${details.tabId} as ${mode}.`);
