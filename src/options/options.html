@@ -10,9 +10,21 @@
     <body>
         <template id="tpl-grid">
             <main></main>
-            <footer>
-                <div><span><input type="text" autocomplete="off" data-input="key" data-name="add"></span><span data-input="value" data-name="add"></span><span class="right"><button class="browser-style" name="add" title="action.add.text">action.add.label</button></span></div>
-                <div><span class="edit" title="action.edit.text">action.edit.label</span><span data-input="value" data-name="edit"></span><span class="right"><button class="browser-style" name="remove" title="action.remove.text">action.remove.label</button></span></div>
+            <footer data-activerow="add">
+                <div data-row="add">
+                    <label>
+                        <span class="new" title="action.new.text">action.new.label</span>
+                        <span><input type="text" autocomplete="off" data-input="key" data-name="add" title="action.new.text"></span>
+                    </label>
+                    <span data-input="value" data-name="add"></span>
+                    <span class="right"><button class="browser-style" name="add" title="action.add.text">action.add.label</button></span>
+                </div>
+                <div data-row="edit">
+                    <span class="edit" title="action.edit.text">action.edit.label</span>
+                    <span data-name="selection" title="action.selection.text"></span>
+                    <span data-input="value" data-name="edit"></span>
+                    <span class="right"><button class="browser-style" name="remove" title="action.remove.text">action.remove.label</button></span>
+                </div>
             </footer>
         </template>
         <template id="tpl-grid-head">

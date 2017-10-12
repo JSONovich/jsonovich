@@ -9,7 +9,7 @@
 {
 ts.options = Date.now();
 
-const l = msg => browser.i18n.getMessage(msg) || `\u25BA${msg}\u25C4`;
+const l = (msg, ...args) => browser.i18n.getMessage(msg, args) || `\u25BA${msg}\u25C4`;
 const config = {};
 const nodes = {};
 
@@ -131,7 +131,7 @@ const events = {
         }
     },
     keyup: {
-        'input[data-name]': (node, ev) => {
+        'input[type=text][data-name]': (node, ev) => {
             if(!ev || ev.key != 'Enter')
                 return;
             const row = node.closest('footer > div');
@@ -176,14 +176,15 @@ const events = {
                     break;
                 }
             }
-            const footers = grid.querySelectorAll('footer > div');
-            if(footers.length < 2)
+            const footer = grid.querySelector('footer');
+            if(!footer)
                 return;
-            const isAnyBoxChecked = Boolean(grid.querySelector('label input[type=checkbox]:not([id]):checked'));
-            const isEditFormActive = Boolean(footers[0].querySelector('button[name=remove]'));
-            if(isAnyBoxChecked != isEditFormActive)
-                footers[0].before(footers[1]);
-            for(const radio of grid.querySelectorAll('[data-input=value][data-name=edit] input[type=radio]')) {
+            const boxes = grid.querySelectorAll('label input[type=checkbox]:not([id]):checked');
+            footer.dataset.activerow = boxes.length ? 'edit' : 'add';
+            const sel = footer.querySelector('div [data-name=selection]');
+            if(sel)
+                sel.textContent = boxes.length ? l('action.selection.label', boxes.length) : '';
+            for(const radio of footer.querySelectorAll('div [data-input=value][data-name=edit] input[type=radio]')) {
                 radio.checked = false; // reset edit radios every time selection changes
             }
         },

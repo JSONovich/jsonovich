@@ -92,12 +92,20 @@
         }
     },
     "placeholder.match.format": {
-        "message": "New...",
+        "message": "MIME type or file extension",
         "description": "Placeholder for a text input expecting some sort of matcher expression for overriding the default browser handling behaviour."
     },
     "placeholder.match.accept": {
-        "message": "New...",
+        "message": "URL match pattern",
         "description": "Placeholder for a text input expecting a URL match pattern for modifying the HTTP Accept header."
+    },
+    "action.new.label": {
+        "message": "New:",
+        "description": "Content for a new label."
+    },
+    "action.new.text": {
+        "message": "An entry to be added to the list.",
+        "description": "Description for a new label."
     },
     "action.add.label": {
         "message": "Add",
@@ -114,6 +122,20 @@
     "action.edit.text": {
         "message": "Modify the value of the selected item(s).",
         "description": "Description for an edit label."
+    },
+    "action.selection.label": {
+        "message": "$NUMBER$ selected",
+        "description": "Content for a selection label.",
+        "placeholders": {
+            "number": {
+                "content": "$1",
+                "example": "42"
+            }
+        }
+    },
+    "action.selection.text": {
+        "message": "The number of entries selected in the list.",
+        "description": "Description for a selection label."
     },
     "action.remove.label": {
         "message": "Remove",
