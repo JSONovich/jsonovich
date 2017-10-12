@@ -62,7 +62,14 @@ const valid = {
                 k: 'mimetype',
                 v: 'q'
             },
-            choice: [{'application/json':'1'}]
+            choice: [{'application/json':'1'}],
+            format: obj => {
+                const ret = [];
+                for(const k in obj) {
+                    ret.push(obj[k] == 1 ? k : k + ';q=' + obj[k]);
+                }
+                return ret.join(', ');
+            }
         },
         q: { // number between 0 and 1 with up to 3 decimal digits, ref: https://tools.ietf.org/html/rfc7231#section-5.3.1
             maxLen: 5,

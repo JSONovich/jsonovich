@@ -12,7 +12,7 @@
         "description": "Label for the format section."
     },
     "section.format.text": {
-        "message": "Format documents as JSON by matching a MIME type or file extension. Wildcards aren't supported yet, only exact matches.",
+        "message": "Format documents as JSON by matching a MIME type or file extension.\n\nWildcards aren't supported yet, only exact matches. Also there's no difference between formats yet.",
         "description": "Description for the format section."
     },
     "section.accept.label": {
@@ -25,7 +25,7 @@
         }
     },
     "section.accept.text": {
-        "message": "Modify the default HTTP $HEADER$ header by matching a URL pattern. Mainly useful for working with CouchDB, has been known to cause conflicts with Confluence, Netflix and the BBC.",
+        "message": "Modify the default HTTP $HEADER$ header by matching a URL pattern. The value given is a set of MIME type / q-value pairs and will be merged with the browser's default $HEADER$ header.\n\nTo set something other than the default, please export your configuration, edit it manually and re-import for now (UI suggestions welcome).",
         "description": "Description for the accept section.",
         "placeholders": {
             "header": {

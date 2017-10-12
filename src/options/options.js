@@ -280,10 +280,15 @@ function onPrefChanged(changes, areaName) {
                         for(const k in change.newValue) {
                             const row = tpl.cloneNode(true);
                             const label = row.querySelector('label');
+                            let content = change.newValue[k];
+                            if(valid.expect[schema.v].format)
+                                content = valid.expect[schema.v].format(content);
+                            else if(valid.expect[schema.v].obj)
+                                content = JSON.stringify(content);
                             label.dataset.pref = pref;
                             label.dataset.key = k;
                             label.children[1].textContent = k;
-                            label.children[2].textContent = valid.expect[schema.v].choice && !valid.expect[schema.v].obj ? change.newValue[k] : JSON.stringify(change.newValue[k]);
+                            label.children[2].textContent = content;
                             frag.appendChild(row);
                         }
                         const selectAll = node.querySelector('.select-all input[type=checkbox]:not([id])');
@@ -356,7 +361,9 @@ function generateTemplatedUI() {
         if(valid.expect[type].choice) {
             const inputsFrag = document.createDocumentFragment();
             for(let [k, choice] of valid.expect[type].choice.entries()) {
-                if(valid.expect[type].obj)
+                if(valid.expect[type].format)
+                    choice = valid.expect[type].format(choice);
+                else if(valid.expect[type].obj)
                     choice = JSON.stringify(choice);
                 const radio = document.createElement('input');
                 const label = document.createElement('label');

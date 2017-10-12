@@ -59,6 +59,7 @@ details {
 
 details > p {
     margin: 0;
+    white-space: pre-line;
 }
 
 summary {
