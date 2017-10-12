@@ -41,6 +41,8 @@ function replaceConfig(newConfig) {
  */
 function bulkModifyConfig(grid, value) {
     const type = grid.dataset.type;
+    if(valid.expect[type] && valid.expect[type].choice && value in valid.expect[type].choice)
+        value = valid.expect[type].choice[value];
     const prefChanges = {};
     let changed = false;
     for(const selected of grid.querySelectorAll('label[data-pref][data-key] input[type=checkbox]:not([id]):checked')) {
