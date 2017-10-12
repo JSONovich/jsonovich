@@ -1,4 +1,4 @@
-# JSONovich [![Mozilla Add-on](https://img.shields.io/amo/v/jsonovich.svg)](https://addons.mozilla.org/firefox/addon/jsonovich/) [![GitHub tag](https://img.shields.io/github/tag/JSONovich/jsonovich.svg)](https://github.com/JSONovich/jsonovich/tags) [![David](https://img.shields.io/david/dev/JSONovich/jsonovich.svg)](https://david-dm.org/JSONovich/jsonovich?type=dev) [![Build Status](https://semaphoreci.com/api/v1/jsonovich/jsonovich/branches/master/shields_badge.svg)](https://semaphoreci.com/jsonovich/jsonovich)
+# JSONovich [![Mozilla Add-on](https://img.shields.io/amo/v/jsonovich.svg)](https://addons.mozilla.org/firefox/addon/jsonovich/) [![GitHub tag](https://img.shields.io/github/tag/JSONovich/jsonovich.svg)](https://github.com/JSONovich/jsonovich/tags) [![Build Status](https://semaphoreci.com/api/v1/jsonovich/jsonovich/branches/master/shields_badge.svg)](https://semaphoreci.com/jsonovich/jsonovich)
 A webextension for Firefox. Pretty-prints JSON content in the browser for easy, unobtrusive viewing.
 
 ## Installing
@@ -13,7 +13,7 @@ Out of the box, many JSON content types are recognised along with a couple of fi
 
 See it in action by trying some of the endpoints at [JSON Test](http://www.jsontest.com/).
 
-## Contributing
+## Contributing [![David](https://img.shields.io/david/dev/JSONovich/jsonovich.svg)](https://david-dm.org/JSONovich/jsonovich?type=dev)
 If you'd like to hack on the code, pull requests are most welcome. There are various ways to test your changes in the browser, the [currently encouraged methods](https://developer.mozilla.org/Add-ons/WebExtensions/Temporary_Installation_in_Firefox) are to use `web-ext run` (CLI) or `about:debugging` (UI). It's also possible to use an [extension proxy file](https://developer.mozilla.org/Add-ons/Setting_up_extension_development_environment#Firefox_extension_proxy_file).
 
 When working from a local clone, the optional build system requires a recent version of node.js and npm (5+).
@@ -24,9 +24,11 @@ npm build               # produces an unsigned .xpi
 npm version <semver>    # bumps version and releases to AMO [requires valid API keys]
 ```
 
-## What's with the name?
-To quote the original homepage on Mike's τεχνοσοφια blog:
-> JSONovich is named after Pavement member Bob Nastanovich primarily because he seems like a swell guy.
+## FAQ
+- What's with the weird name?
+  > JSONovich is named after Pavement member Bob Nastanovich primarily because he seems like a swell guy.
+- And the logo?
+  > That's called an [Ambihelical Hexnut](http://mathworld.wolfram.com/AmbihelicalHexnut.html), an optical illusion similar to the impossible torus that is the JSON logo.
 
 ## License
 [MPL 2.0](https://www.mozilla.org/MPL/2.0/)
