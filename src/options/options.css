@@ -102,21 +102,17 @@ aside.right {
     display: contents; /* subgrid will make this much less awkward */
 }
 
-/* element size still affects grid properly in horizontal axis, but is otherwise effectively invisible */
-.grid > main > header.empty > .select-all > input,
-.grid > footer[data-activerow="add"] > div:not([data-row="add"]) > span,
-.grid > footer[data-activerow="add"] > div:not([data-row="add"]) > label > span,
-.grid > footer[data-activerow="edit"] > div:not([data-row="edit"]) > span,
-.grid > footer[data-activerow="edit"] > div:not([data-row="edit"]) > label > span {
-    visibility: hidden;
-    height: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    border-top: 0;
-    border-bottom: 0;
-    overflow: hidden;
+.grid > main > header > span {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(to top, transparent, var(--in-content-box-background-hover) 0.5rem, var(--in-content-box-background-hover));
+    border-image: linear-gradient(to top, transparent, var(--in-content-box-background-hover) 0.5rem, var(--in-content-box-background-hover)) 1 100%;
+    font-weight: bold;
+}
+
+.grid > main > label > span {
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
 }
 
 .grid > main > header > span,
@@ -127,18 +123,6 @@ main.browser-style {
     padding: 0.25rem;
 }
 
-.grid input[type=text] {
-    width: 100%;
-}
-
-.grid > main > header > span {
-    position: sticky;
-    top: 0;
-    background: linear-gradient(to top, transparent, var(--in-content-box-background-hover) 0.5rem, var(--in-content-box-background-hover));
-    border-image: linear-gradient(to top, transparent, var(--in-content-box-background-hover) 0.5rem, var(--in-content-box-background-hover)) 1 100%;
-    font-weight: bold;
-}
-
 .grid > main > header > span:first-of-type {
     border-left-width: 1px;
     border-left-style: solid;
@@ -147,11 +131,6 @@ main.browser-style {
 .grid > main > header > span:last-of-type {
     border-right-width: 1px;
     border-right-style: solid;
-}
-
-.grid > main > label > span {
-    border-top: 1px solid transparent;
-    border-bottom: 1px solid transparent;
 }
 
 .grid > main > label > span:first-of-type {
@@ -178,6 +157,27 @@ main.browser-style {
     border-right-color: var(--detail-contributions-border-color);
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
+}
+
+/* element size still affects grid properly in horizontal axis, but is otherwise effectively invisible */
+.grid > main > header.empty > .select-all > input,
+.grid > footer[data-activerow="add"] > div:not([data-row="add"]) > span,
+.grid > footer[data-activerow="edit"] > div:not([data-row="edit"]) > span,
+.grid > footer[data-activerow="add"] > div:not([data-row="add"]) > label > span,
+.grid > footer[data-activerow="edit"] > div:not([data-row="edit"]) > label > span {
+    visibility: hidden;
+    height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top: 0;
+    border-bottom: 0;
+    overflow: hidden;
+}
+
+.grid input[type=text] {
+    width: 100%;
 }
 
 #btn-export::before {
