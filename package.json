@@ -24,6 +24,7 @@
   "private": true,
   "scripts": {
     "build": "gulp",
+    "install": "npm ls --parseable --global gulp-cli >/dev/null || npm install --global gulp-cli",
     "test": "gulp lint",
     "preversion": "npm test",
     "version": "gulp version && git add -u",
@@ -32,11 +33,11 @@
   "devDependencies": {
     "addons-linter": "^0.27.0",
     "gulp": "^3.9.1",
-    "gulp-eslint": "^4.0.0",
+    "gulp-eslint": "^4.0.2",
     "gulp-if": "^2.0.2",
     "gulp-json-modify": "^1.0.2",
     "gulp-json-validator": "^1.1.1",
-    "gulp-newer": "^1.3.0",
+    "gulp-newer": "^1.4.0",
     "gulp-stylelint": "^6.0.0",
     "gulp-vinyl-zip": "^2.1.0",
     "sign-addon": "^0.2.1",
