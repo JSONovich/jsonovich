@@ -185,7 +185,7 @@ const events = {
             footer.dataset.activerow = boxes.length ? 'edit' : 'add';
             const sel = footer.querySelector('div [data-name=selection]');
             if(sel)
-                sel.textContent = boxes.length ? l('action.selection.label', boxes.length) : '';
+                sel.textContent = boxes.length ? l('action_selection_label', boxes.length) : '';
             for(const radio of footer.querySelectorAll('div [data-input=value][data-name=edit] input[type=radio]')) {
                 radio.checked = false; // reset edit radios every time selection changes
             }
@@ -335,7 +335,7 @@ function generateTemplatedUI() {
         const gridFrag = nodes['tpl-grid'].cloneNode(true);
         const main = gridFrag.querySelector('main');
         const inputAddMatch = gridFrag.querySelector('footer input[data-input=key][data-name=add]');
-        inputAddMatch.placeholder = l('placeholder.match.' + type);
+        inputAddMatch.placeholder = l('placeholder_match_' + type);
 
         for(const pref in valid.schema) {
             const schema = valid.schema[pref];

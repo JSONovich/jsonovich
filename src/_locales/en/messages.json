@@ -7,15 +7,15 @@
         "message": "JSONovich pretty-prints JSON content of various types directly in a browser tab. It uses the browser's native JSON parser and a custom-built formatter to produce its output.\n\nNormally, the browser would either prompt to download or display as plain text any JSON sent with the correct application/json mime-type. JSONovich makes working with and debugging output from web services easier by formatting JSON nicely inside the browser.",
         "description": "Detailed description of the extension."
     },
-    "section.format.label": {
+    "section_format_label": {
         "message": "Override Default Handling",
         "description": "Label for the format section."
     },
-    "section.format.text": {
+    "section_format_text": {
         "message": "Format documents as JSON by matching a MIME type or file extension.\n\nWildcards aren't supported yet, only exact matches. Also there's no difference between formats yet.",
         "description": "Description for the format section."
     },
-    "section.accept.label": {
+    "section_accept_label": {
         "message": "Override HTTP $HEADER$ Header",
         "description": "Label for the accept section.",
         "placeholders": {
@@ -24,7 +24,7 @@
             }
         }
     },
-    "section.accept.text": {
+    "section_accept_text": {
         "message": "Modify the default HTTP $HEADER$ header by matching a URL pattern. The value given is a set of MIME type / q-value pairs and will be merged with the browser's default $HEADER$ header.\n\nTo set something other than the default, please export your configuration, edit it manually and re-import for now (UI suggestions welcome).",
         "description": "Description for the accept section.",
         "placeholders": {
@@ -33,19 +33,19 @@
             }
         }
     },
-    "pref.debug.label": {
+    "pref_debug_label": {
         "message": "Debug mode",
         "description": "Label for the debug preference."
     },
-    "pref.debug.text": {
+    "pref_debug_text": {
         "message": "More console messages to help diagnose problems with the addon.",
         "description": "Description for the debug preference."
     },
-    "column.mimetype.label": {
+    "column_mimetype_label": {
         "message": "MIME type",
         "description": "Label for the mimetype column. Contains MIME type strings."
     },
-    "column.mimetype.text": {
+    "column_mimetype_text": {
         "message": "Matches the `$HEADER$` HTTP response header.",
         "description": "Description for the mimetype column.",
         "placeholders": {
@@ -54,35 +54,35 @@
             }
         }
     },
-    "column.extension.label": {
+    "column_extension_label": {
         "message": "File extension",
         "description": "Label for the extension column. Contains file extensions."
     },
-    "column.extension.text": {
+    "column_extension_text": {
         "message": "Matches the part of the filename after the last dot.",
         "description": "Description for the extension column."
     },
-    "column.pattern.label": {
+    "column_pattern_label": {
         "message": "URL match pattern",
         "description": "Label for the pattern column. Contains URL match patterns as described at https://developer.mozilla.org/Add-ons/WebExtensions/Match_patterns ."
     },
-    "column.pattern.text": {
+    "column_pattern_text": {
         "message": "Matches URLs as described at the linked documentation page.",
         "description": "Description for the pattern column."
     },
-    "column.format.label": {
+    "column_format_label": {
         "message": "Format",
         "description": "Label for the format column. Shows how the matching entry will be formatted."
     },
-    "column.format.text": {
+    "column_format_text": {
         "message": "The type of formatting to perform. Currently this is ignored since the formatter only understands JSON.",
         "description": "Description for the format column. Currently this is ignored since the formatter only understands JSON."
     },
-    "column.accept.label": {
+    "column_accept_label": {
         "message": "Accept",
         "description": "Label for the accept column. Contains the list of modifications that will be made to the HTTP Accept header for the matching URL."
     },
-    "column.accept.text": {
+    "column_accept_text": {
         "message": "The modifications that will be made to the `$HEADER$` HTTP request header.",
         "description": "Description for the accept column.",
         "placeholders": {
@@ -91,39 +91,39 @@
             }
         }
     },
-    "placeholder.match.format": {
+    "placeholder_match_format": {
         "message": "MIME type or file extension",
         "description": "Placeholder for a text input expecting some sort of matcher expression for overriding the default browser handling behaviour."
     },
-    "placeholder.match.accept": {
+    "placeholder_match_accept": {
         "message": "URL match pattern",
         "description": "Placeholder for a text input expecting a URL match pattern for modifying the HTTP Accept header."
     },
-    "action.new.label": {
+    "action_new_label": {
         "message": "New:",
         "description": "Content for a new label."
     },
-    "action.new.text": {
+    "action_new_text": {
         "message": "An entry to be added to the list.",
         "description": "Description for a new label."
     },
-    "action.add.label": {
+    "action_add_label": {
         "message": "Add",
         "description": "Label for an add button. Result is immediate."
     },
-    "action.add.text": {
+    "action_add_text": {
         "message": "Insert this item.",
         "description": "Description for an add button."
     },
-    "action.edit.label": {
+    "action_edit_label": {
         "message": "Edit:",
         "description": "Content for an edit label."
     },
-    "action.edit.text": {
+    "action_edit_text": {
         "message": "Modify the value of the selected item(s).",
         "description": "Description for an edit label."
     },
-    "action.selection.label": {
+    "action_selection_label": {
         "message": "$NUMBER$ selected",
         "description": "Content for a selection label.",
         "placeholders": {
@@ -133,39 +133,39 @@
             }
         }
     },
-    "action.selection.text": {
+    "action_selection_text": {
         "message": "The number of entries selected in the list.",
         "description": "Description for a selection label."
     },
-    "action.remove.label": {
+    "action_remove_label": {
         "message": "Remove",
         "description": "Label for a remove button. Result is immediate."
     },
-    "action.remove.text": {
+    "action_remove_text": {
         "message": "Delete the selected item(s).",
         "description": "Description for a remove button."
     },
-    "action.export.label": {
+    "action_export_label": {
         "message": "Export...",
         "description": "Label for the export button. User will be prompted with a standard download dialog."
     },
-    "action.export.text": {
+    "action_export_text": {
         "message": "Save all preferences for this addon to a file.",
         "description": "Description for the export button."
     },
-    "action.import.label": {
+    "action_import_label": {
         "message": "Import...",
         "description": "Label for the import button. User will be prompted with a standard file selection dialog."
     },
-    "action.import.text": {
+    "action_import_text": {
         "message": "Select a file whose contents will replace all preferences for this addon.",
         "description": "Description for the import button."
     },
-    "action.reset.label": {
+    "action_reset_label": {
         "message": "Restore Defaults",
         "description": "Label for the reset button. Result is immediate."
     },
-    "action.reset.text": {
+    "action_reset_text": {
         "message": "Clear all preferences for this addon and restore the defaults, like a fresh install.",
         "description": "Description for the reset button."
     }
