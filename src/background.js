@@ -272,7 +272,7 @@ function ensureListeners() {
             };
             browser.webRequest.onBeforeRequest.addListener(listener, {
                 urls: [matcher],
-                types: ['main_frame']
+                types: ['main_frame', 'sub_frame']
             });
             listeners.accept.set(matcher, listener);
         }
@@ -280,7 +280,7 @@ function ensureListeners() {
         // perform Accept header modification
         browser.webRequest.onBeforeSendHeaders.addListener(listeners.webRequest.onBeforeSendHeaders, {
             urls: ['<all_urls>'],
-            types: ['main_frame']
+            types: ['main_frame', 'sub_frame']
         }, [
             'blocking',
             'requestHeaders'
@@ -309,7 +309,7 @@ function ensureListeners() {
         // handle http(s)
         browser.webRequest.onHeadersReceived.addListener(listeners.webRequest.onHeadersReceived, {
             urls: ['<all_urls>'],
-            types: ['main_frame']
+            types: ['main_frame', 'sub_frame']
         }, [
             'blocking',
             'responseHeaders'
@@ -325,7 +325,7 @@ function ensureListeners() {
     if(acceptMatchers.size || mimes.size || exts.size) { // cleanup
         browser.webRequest.onErrorOccurred.addListener(listeners.webRequest.onErrorOccurred, {
             urls: ['<all_urls>'],
-            types: ['main_frame']
+            types: ['main_frame', 'sub_frame']
         });
 
         browser.tabs.onRemoved.addListener(listeners.tabs.onRemoved);
