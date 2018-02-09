@@ -1,4 +1,4 @@
-# JSONovich [![Mozilla Add-on](https://img.shields.io/amo/v/jsonovich.svg)](https://addons.mozilla.org/firefox/addon/jsonovich/) [![GitHub tag](https://img.shields.io/github/tag/JSONovich/jsonovich.svg)](https://github.com/JSONovich/jsonovich/tags) [![Build Status](https://semaphoreci.com/api/v1/jsonovich/jsonovich/branches/master/shields_badge.svg)](https://semaphoreci.com/jsonovich/jsonovich)
+# JSONovich [![Mozilla Add-on](https://img.shields.io/amo/v/jsonovich.svg)](https://addons.mozilla.org/firefox/addon/jsonovich/) [![GitHub tag](https://img.shields.io/github/tag/JSONovich/jsonovich.svg)](https://github.com/JSONovich/jsonovich/tags) [![Build Status](https://semaphoreci.com/api/v1/jsonovich/jsonovich/branches/master/shields_badge.svg)](https://semaphoreci.com/jsonovich/jsonovich) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/512b266cbc374cf68de9b28c68b42fd2)](https://app.codacy.com/app/JSONovich/jsonovich/dashboard)
 A webextension for Firefox. Pretty-prints JSON content in the browser for easy, unobtrusive viewing.
 
 ## Installing
@@ -23,6 +23,7 @@ npm test                # runs linter
 npm build               # produces an unsigned .xpi
 npm version <semver>    # bumps version and releases to AMO [requires valid API keys]
 ```
+Alternatively, [![Donate](https://www.paypalobjects.com/en_GB/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=JJHRJFCKNYE34)
 
 ## FAQ
 - What's with the weird name?
