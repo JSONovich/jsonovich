@@ -61,7 +61,7 @@
             resolve();
         else
             document.addEventListener('readystatechange', resolve, {capture: true, once: true, passive: true});
-    }).then(() => JSON.parse(document.body.textContent)).then(json => {
+    }).then(() => JSON.parse(document.querySelector('pre').textContent)).then(json => {
         document.body.innerHTML = JSON2HTML.formatJSON(json);
         folder();
     }).catch(error => {
