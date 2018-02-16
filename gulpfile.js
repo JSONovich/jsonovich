@@ -9,57 +9,25 @@
 const path = require('path');
 
 const gulp = require('gulp');
+const importLazy = require('import-lazy')(require);
+
+const addonsLinter = importLazy('addons-linter');
+const {default: signAddon} = importLazy('sign-addon');
+
 const plugin = {
-    get addonsLinter() {
-      delete this.addonsLinter;
-      return this.addonsLinter = require('addons-linter');
-    },
-    get eslint() {
-      delete this.eslint;
-      return this.eslint = require('gulp-eslint');
-    },
-    get if() {
-      delete this.if;
-      return this.if = require('gulp-if');
-    },
-    get jsonModify() {
-      delete this.jsonModify;
-      return this.jsonModify = require('gulp-json-modify');
-    },
-    get jsonValidate() {
-      delete this.jsonValidate;
-      return this.jsonValidate = require('gulp-json-validator');
-    },
-    get newer() {
-      delete this.newer;
-      return this.newer = require('gulp-newer');
-    },
-    get signAddon() {
-      delete this.signAddon;
-      return this.signAddon = require('sign-addon').default;
-    },
-    get stylelint() {
-      delete this.stylelint;
-      return this.stylelint = require('gulp-stylelint');
-    },
-    get zip() {
-      delete this.zip;
-      return this.zip = require('gulp-vinyl-zip');
-    },
+    eslint: importLazy('gulp-eslint'),
+    if: importLazy('gulp-if'),
+    jsonModify: importLazy('gulp-json-modify'),
+    jsonValidate: importLazy('gulp-json-validator'),
+    newer: importLazy('gulp-newer'),
+    stylelint: importLazy('gulp-stylelint'),
+    zip: importLazy('gulp-vinyl-zip')
 };
+
 const data = {
-    get manifest() {
-        delete this.manifest;
-        return this.manifest = require('./src/manifest.json');
-    },
-    get package() {
-        delete this.package;
-        return this.package = require('./package.json');
-    },
-    get secret() {
-        delete this.secret;
-        return this.secret = require('./secret.json');
-    }
+    manifest: importLazy('./src/manifest.json'),
+    package: importLazy('./package.json'),
+    secret: importLazy('./secret.json')
 };
 
 /**
@@ -120,7 +88,7 @@ function lintJS(fix) {
  * Check for addon-specific coding issues with addons-linter.
  */
 function lintAddon() {
-    return plugin.addonsLinter.createInstance({
+    return addonsLinter.createInstance({
         config: {
             _: [path.resolve('src')],
             logLevel: process.env.VERBOSE ? 'debug' : 'fatal',
@@ -146,7 +114,7 @@ function buildXPI() {
  * Upload an unsigned .xpi to AMO for signing/review.
  */
 function uploadXPI() {
-    return plugin.signAddon({
+    return signAddon({
         xpiPath: path.resolve('build/jsonovich.xpi'),
         id: data.manifest.applications.gecko.id, // docs say optional and "will have no effect!", but server disagrees
         version: data.manifest.version,

@@ -40,6 +40,7 @@
     "gulp-newer": "^1.4.0",
     "gulp-stylelint": "^6.0.0",
     "gulp-vinyl-zip": "^2.1.0",
+    "import-lazy": "^3.1.0",
     "sign-addon": "^0.2.2",
     "stylelint": "^8.4.0",
     "stylelint-config-standard": "^18.0.0"
