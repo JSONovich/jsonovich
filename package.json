@@ -22,6 +22,9 @@
     "url": "https://github.com/JSONovich/jsonovich/issues"
   },
   "private": true,
+  "engines": {
+    "npm": ">=5"
+  },
   "scripts": {
     "build": "gulp",
     "install": "npm ls --parseable --global gulp-cli >/dev/null || npm install --global gulp-cli",
