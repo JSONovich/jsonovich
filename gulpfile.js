@@ -39,7 +39,7 @@ function version() {
         .pipe(plugin.newer({dest: '.', extra: 'package.json'}))
         .pipe(plugin.jsonModify({
             key: 'version',
-            value: data.package.version.replace(/-([^.0-9]+)\./, '$1').replace(/(\d)-(\d)/, '$1pre$2')
+            value: data.package.version.replace(/-([^.0-9]+)\.?/, '$1').replace(/(\d)-(\d)/, '$1pre$2')
         }))
         .pipe(gulp.dest('.'));
 }
@@ -118,6 +118,7 @@ function uploadXPI() {
         xpiPath: path.resolve('build/jsonovich.xpi'),
         id: data.manifest.applications.gecko.id, // docs say optional and "will have no effect!", but server disagrees
         version: data.manifest.version,
+        channel: /[^0-9.]/.test(data.manifest.version) ? 'unlisted' : 'listed',
         apiKey: data.secret.jwtIssuer,
         apiSecret: data.secret.jwtSecret,
         downloadDir: path.resolve('build') // doesn't seem to be used for a listed addon

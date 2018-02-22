@@ -1,6 +1,6 @@
 {
   "name": "jsonovich",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "description": "A webextension for Firefox. Pretty-prints JSON content in the browser for easy, unobtrusive viewing.",
   "keywords": [
     "json",
@@ -44,7 +44,7 @@
     "gulp-stylelint": "^6.0.0",
     "gulp-vinyl-zip": "^2.1.0",
     "import-lazy": "^3.1.0",
-    "sign-addon": "^0.2.2",
+    "sign-addon": "^0.3.0",
     "stylelint": "^9.1.1",
     "stylelint-config-standard": "^18.1.0"
   }
