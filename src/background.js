@@ -103,6 +103,42 @@ function handleUrl(url) {
     return ext > -1 && redirect == -1 ? exts.get(url.pathname.slice(ext + 1)) : undefined;
 }
 
+/**
+ * Mark the given request to be handled as the given mode.
+ *
+ * @param details Object Details from the webRequest/webNavigation event.
+ * @param String The mode for the formatter to use.
+ */
+function handleAsMode(details, mode) {
+    log('handleAsMode', details, mode);
+    const frames = tabs.get(details.tabId) || tabs.set(details.tabId, new Map()).get(details.tabId);
+    frames.set(details.frameId, mode);
+}
+
+/**
+ * Inject our content script as needed.
+ *
+ * @param event String Name of the webNavigation event for logging.
+ * @param details Object Details from the webNavigation event.
+ */
+function injectFormatter(event, details) {
+    log(event, details, log === logger.disabled ? undefined : {tabs: Array.from(tabs), reqs: Array.from(reqs)});
+    const frames = tabs.get(details.tabId);
+    if(!frames || !frames.has(details.frameId))
+        return;
+    frames.delete(details.frameId);
+    if(!frames.size)
+        tabs.delete(details.tabId);
+
+    browser.tabs.executeScript(details.tabId, {
+        frameId: details.frameId,
+        file: '/content.js',
+        runAt: 'document_start'
+    }).catch(error => {
+        log('Failed to load content script!', error + '\n' + error.stack);
+    });
+}
+
 const listeners = {
     accept: new Map(),
     storage: {
@@ -190,8 +226,7 @@ const listeners = {
             let mode;
             if((!mime || !(mode = mimes.get(mime.value.split(rParamSep, 2)[0])))/* && !(mode = handleUrl(details.url))*/)
                 return; // no matching mimetype or extension
-            tabs.set(details.tabId, mode);
-            log(`Handling tab ${details.tabId} as ${mode}.`);
+            handleAsMode(details, mode);
 
             let override = 'text/plain';
             if(mode === 'json') {
@@ -230,29 +265,22 @@ const listeners = {
             let mode = handleUrl(details.url);
             if(!mode)
                 return; // no matching extension
-            tabs.set(details.tabId, mode);
-            log(`Handling tab ${details.tabId} as ${mode}.`);
+            handleAsMode(details, mode);
         },
 
         /**
-         * Inject our content script.
+         * Inject our content script early if possible. Sometimes this event is too early.
          *
          * @param details Object Details of the navigation.
          */
-        onCommitted(details) {
-            log('onCommitted', details, log === logger.disabled ? undefined : {tabs: Array.from(tabs), reqs: Array.from(reqs)});
-            if(!tabs.has(details.tabId))
-                return;
+        onCommitted: injectFormatter.bind(null, 'onCommitted'),
 
-            browser.tabs.executeScript(details.tabId, {
-                file: '/content.js',
-                runAt: 'document_start'
-            }).catch(error => {
-                log('Failed to load content script!', error + '\n' + error.stack);
-            }).then((/*result*/) => {
-                tabs.delete(details.tabId);
-            });
-        }
+        /**
+         * Inject our content script later if it wasn't already.
+         *
+         * @param details Object Details of the navigation.
+         */
+        onDOMContentLoaded: injectFormatter.bind(null, 'onDOMContentLoaded')
     }
 };
 
@@ -317,9 +345,11 @@ function ensureListeners() {
 
         // inject content script
         browser.webNavigation.onCommitted.addListener(listeners.webNavigation.onCommitted);
+        browser.webNavigation.onDOMContentLoaded.addListener(listeners.webNavigation.onDOMContentLoaded);
     } else {
         browser.webRequest.onHeadersReceived.removeListener(listeners.webRequest.onHeadersReceived);
         browser.webNavigation.onCommitted.removeListener(listeners.webNavigation.onCommitted);
+        browser.webNavigation.onDOMContentLoaded.removeListener(listeners.webNavigation.onDOMContentLoaded);
     }
 
     if(acceptMatchers.size || mimes.size || exts.size) { // cleanup
