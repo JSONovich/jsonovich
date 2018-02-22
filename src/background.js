@@ -95,8 +95,8 @@ function acceptOverride(current, overrides) {
  * @param url String The URL to be matched.
  * @return String The mode to use, or undefined.
  */
-function handleUrl(url) {
-    log('handleUrl', url);
+function getModeFromUrl(url) {
+    log('getModeFromUrl', url);
     url = new URL(url);
     const ext = url.pathname.lastIndexOf('.');
     const redirect = url.pathname.lastIndexOf('%3A//');
@@ -124,7 +124,10 @@ function handleAsMode(details, mode) {
 function injectFormatter(event, details) {
     log(event, details, log === logger.disabled ? undefined : {tabs: Array.from(tabs), reqs: Array.from(reqs)});
     const frames = tabs.get(details.tabId);
-    if(!frames || !frames.has(details.frameId))
+    if(!frames)
+        return;
+    const mode = frames.get(details.frameId);
+    if(!mode)
         return;
     frames.delete(details.frameId);
     if(!frames.size)
@@ -132,7 +135,7 @@ function injectFormatter(event, details) {
 
     browser.tabs.executeScript(details.tabId, {
         frameId: details.frameId,
-        file: '/content.js',
+        file: '/content.js?mode=' + mode,
         runAt: 'document_start'
     }).catch(error => {
         log('Failed to load content script!', error + '\n' + error.stack);
@@ -224,7 +227,7 @@ const listeners = {
 
             const mime = details.responseHeaders.find(header => header.value && rContentType.test(header.name));
             let mode;
-            if((!mime || !(mode = mimes.get(mime.value.split(rParamSep, 2)[0])))/* && !(mode = handleUrl(details.url))*/)
+            if((!mime || !(mode = mimes.get(mime.value.split(rParamSep, 2)[0])))/* && !(mode = getModeFromUrl(details.url))*/)
                 return; // no matching mimetype or extension
             handleAsMode(details, mode);
 
@@ -262,7 +265,7 @@ const listeners = {
             if(details.tabId == -1)
                 return; // internal request
 
-            let mode = handleUrl(details.url);
+            let mode = getModeFromUrl(details.url);
             if(!mode)
                 return; // no matching extension
             handleAsMode(details, mode);
@@ -296,7 +299,8 @@ function ensureListeners() {
                 continue;
             const listener = details => {
                 log('onBeforeRequest', details, matcher, q);
-                reqs.set(details.requestId, Object.assign({}, reqs.get(details.requestId), q));
+                const req = reqs.get(details.requestId) || reqs.set(details.requestId, {}).get(details.requestId);
+                Object.assign(req, q);
             };
             browser.webRequest.onBeforeRequest.addListener(listener, {
                 urls: [matcher],
